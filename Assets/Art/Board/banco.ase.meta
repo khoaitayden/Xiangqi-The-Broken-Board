@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 73a51082b33b8d1659b5b310ac8e004f
+guid: 5c087dbbcd9fdce13b3d707f9735307d
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -102,7 +102,7 @@ ScriptedImporter:
     generateIndividualEvents: 1
     generateSpriteAtlas: 1
   importFileNodeState: 1
-  platformSettingsDirtyTick: 639083338919149140
+  platformSettingsDirtyTick: 639083368789207710
   textureAssetName: 
   singleSpriteImportData:
   - name: 
@@ -127,7 +127,7 @@ ScriptedImporter:
     tessellationDetail: 0
     uvTransform: {x: 0, y: 0}
   animatedSpriteImportData:
-  - name: general
+  - name: banco
     originalName: 
     pivot: {x: 0.5, y: 0.5}
     alignment: 0
@@ -137,9 +137,9 @@ ScriptedImporter:
       serializedVersion: 2
       x: 4
       y: 4
-      width: 52
-      height: 58
-    spriteID: 2a07de415bfe711e38157fda6d657669
+      width: 648
+      height: 640
+    spriteID: a55a41c1e6e0e80a498645b34b481599
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -153,25 +153,25 @@ ScriptedImporter:
   asepriteLayers:
   - layerIndex: 0
     uuid:
-      value0: 950580070
+      value0: 3322341865
       value1: 0
       value2: 0
       value3: 0
     guid: 0
-    name: general
+    name: banco
     layerFlags: 0
     layerType: 0
     blendMode: 0
     cells:
-    - name: general
+    - name: banco
       frameIndex: 0
       additiveSortOrder: 0
       cellRect:
-        x: 7
-        y: 2
-        width: 52
-        height: 58
-      spriteId: 2a07de415bfe711e38157fda6d657669
+        x: 0
+        y: 0
+        width: 648
+        height: 640
+      spriteId: a55a41c1e6e0e80a498645b34b481599
     linkedCells: []
     tileCells: []
     tileSetIndex: 0
@@ -217,5 +217,5 @@ ScriptedImporter:
   generatePhysicsShape: 0
   secondarySpriteTextures: []
   spritePackingTag: 
-  canvasSize: {x: 64, y: 64}
-  previousTextureSize: {x: 64, y: 128}
+  canvasSize: {x: 640, y: 640}
+  previousTextureSize: {x: 1024, y: 1024}

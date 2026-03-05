@@ -6,16 +6,25 @@ public abstract class Piece : MonoBehaviour
     public int currentY;
     public bool isPlayer;
 
-    // This method physically moves the piece to the new node
     public virtual void MoveTo(BoardNode targetNode)
     {
+        // If there is a piece on the target node, and it's an enemy (Player being captured)
+        if (targetNode.currentPiece != null && targetNode.currentPiece != this)
+        {
+            targetNode.currentPiece.Capture();
+        }
+
         currentX = targetNode.x;
         currentY = targetNode.y;
         
-        // FIX: Snap exactly to the visual node's position, ensuring no offset
         transform.position = targetNode.nodeGameObject.transform.position; 
     }
 
-    // Every piece will have different movement rules
+    public virtual void Capture()
+    {
+        // For now, simply destroy the GameObject
+        Destroy(gameObject);
+    }
+
     public abstract bool IsValidMove(BoardNode targetNode, BoardNode[,] grid);
 }

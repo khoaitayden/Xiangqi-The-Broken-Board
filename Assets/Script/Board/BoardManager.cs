@@ -1,8 +1,15 @@
 using UnityEngine;
-using UnityEngine.InputSystem; // Required for the new Input System
+using UnityEngine.InputSystem;
+using System.Collections;
+using System.Collections.Generic;
 
 public class BoardManager : MonoBehaviour
 {
+    public enum TurnState { PlayerTurn, EnemyTurn, GameOver }
+    
+    [Header("Game State")]
+    public TurnState currentTurn = TurnState.PlayerTurn;
+
     [Header("Board Settings")]
     public int width = 9;  
     public int height = 10; 
@@ -11,36 +18,36 @@ public class BoardManager : MonoBehaviour
     [Header("Prefabs")]
     public GameObject nodePrefab; 
     public GameObject playerGeneralPrefab;
+    public GameObject enemyPawnPrefab; 
 
     public BoardNode[,] grid;
     private PlayerGeneral activePlayer; 
+    public List<EnemyPawn> enemyPieces = new List<EnemyPawn>(); 
 
-    // NEW: Reference to our generated Input Action Map
     private PlayerControls controls;
+
+    // A small helper class to store potential AI moves
+    private class AIMove
+    {
+        public EnemyPawn piece;
+        public BoardNode targetNode;
+    }
 
     private void Awake()
     {
-        // Initialize the input controls
         controls = new PlayerControls();
-
-        // Subscribe to the Click action. When performed, call OnClick()
         controls.Board.Click.performed += context => OnClick();
     }
 
-    private void OnEnable()
-    {
-        controls.Enable();
-    }
-
-    private void OnDisable()
-    {
-        controls.Disable();
-    }
+    private void OnEnable() { controls.Enable(); }
+    private void OnDisable() { controls.Disable(); }
 
     void Start()
     {
         GenerateBoard();
         SpawnPlayer(); 
+        SpawnEnemyPawn(4, 8); 
+        SpawnEnemyPawn(2, 6); 
     }
 
     void GenerateBoard()
@@ -72,23 +79,32 @@ public class BoardManager : MonoBehaviour
     void SpawnPlayer()
     {
         BoardNode startNode = grid[4, 0];
-        
-        // Spawn exactly at the visual node's position to prevent offset
         GameObject playerObj = Instantiate(playerGeneralPrefab, startNode.nodeGameObject.transform.position, Quaternion.identity);
         activePlayer = playerObj.GetComponent<PlayerGeneral>();
-        
         activePlayer.currentX = startNode.x;
         activePlayer.currentY = startNode.y;
         startNode.currentPiece = activePlayer;
     }
 
-    // NEW: Handle the click using the Action Map
+    void SpawnEnemyPawn(int startX, int startY)
+    {
+        BoardNode startNode = grid[startX, startY];
+        GameObject enemyObj = Instantiate(enemyPawnPrefab, startNode.nodeGameObject.transform.position, Quaternion.identity);
+        EnemyPawn pawn = enemyObj.GetComponent<EnemyPawn>();
+        
+        pawn.currentX = startNode.x;
+        pawn.currentY = startNode.y;
+        startNode.currentPiece = pawn;
+        
+        enemyPieces.Add(pawn);
+    }
+
     private void OnClick()
     {
-        // Read the mouse position from the PointerPosition action
+        if (currentTurn != TurnState.PlayerTurn) return;
+
         Vector2 screenPosition = controls.Board.PointerPosition.ReadValue<Vector2>();
         Vector2 worldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
-
         BoardNode clickedNode = GetNodeAtPosition(worldPosition);
 
         if (clickedNode != null)
@@ -103,7 +119,6 @@ public class BoardManager : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                // Use the visual node's actual transform position for accuracy
                 if (Vector2.Distance(grid[x, y].nodeGameObject.transform.position, pos) < 0.5f) 
                 {
                     return grid[x, y];
@@ -121,11 +136,73 @@ public class BoardManager : MonoBehaviour
             activePlayer.MoveTo(targetNode);
             targetNode.currentPiece = activePlayer;
             
-            Debug.Log($"Player moved to {targetNode.x}, {targetNode.y}");
+            currentTurn = TurnState.EnemyTurn;
+            StartCoroutine(EnemyPhaseCoroutine());
         }
-        else
+    }
+
+    // UPDATED: Only ONE enemy moves per turn
+    IEnumerator EnemyPhaseCoroutine()
+    {
+        yield return new WaitForSeconds(0.2f); // Tiny delay for board game feel
+
+        List<AIMove> possibleMoves = new List<AIMove>();
+        AIMove winningMove = null;
+
+        // 1. Gather all possible moves for all surviving enemies
+        foreach (EnemyPawn enemy in enemyPieces)
         {
-            Debug.Log("Invalid Move!");
+            if (enemy == null) continue; // Skip dead pieces
+
+            BoardNode targetNode = enemy.GetAIMove(grid);
+
+            if (targetNode != null)
+            {
+                AIMove move = new AIMove { piece = enemy, targetNode = targetNode };
+                possibleMoves.Add(move);
+
+                // If this move captures the player, save it as the winning move!
+                if (targetNode.currentPiece == activePlayer)
+                {
+                    winningMove = move;
+                }
+            }
+        }
+
+        // 2. Decide which move to take
+        AIMove chosenMove = null;
+
+        if (winningMove != null)
+        {
+            // Always take the kill if it's available
+            chosenMove = winningMove;
+        }
+        else if (possibleMoves.Count > 0)
+        {
+            // Otherwise, pick a random valid move from the list
+            int randomIndex = Random.Range(0, possibleMoves.Count);
+            chosenMove = possibleMoves[randomIndex];
+        }
+
+        // 3. Execute the chosen move
+        if (chosenMove != null)
+        {
+            if (chosenMove.targetNode.currentPiece == activePlayer)
+            {
+                Debug.Log("GAME OVER! Player was captured!");
+                currentTurn = TurnState.GameOver;
+            }
+
+            // Move the chosen piece physically and in the data grid
+            grid[chosenMove.piece.currentX, chosenMove.piece.currentY].currentPiece = null;
+            chosenMove.piece.MoveTo(chosenMove.targetNode);
+            chosenMove.targetNode.currentPiece = chosenMove.piece;
+        }
+
+        // 4. Pass turn back to player
+        if (currentTurn != TurnState.GameOver)
+        {
+            currentTurn = TurnState.PlayerTurn;
         }
     }
 
