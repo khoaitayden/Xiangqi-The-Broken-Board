@@ -46,7 +46,7 @@ public abstract class Piece : MonoBehaviour
         if (!isPlayer && currentCooldown <= 1)
         {
             // Create a fast left-to-right sine wave
-            float offsetX = Mathf.Sin(Time.time * 25f) * 0.08f;
+            float offsetX = Mathf.Sin(Time.time * 10f) * 0.03f;
             transform.position = targetPosition + new Vector3(offsetX, 0, 0);
         }
         else
