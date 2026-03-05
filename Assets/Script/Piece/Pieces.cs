@@ -6,6 +6,13 @@ public abstract class Piece : MonoBehaviour
     public int currentY;
     public bool isPlayer;
 
+    [Header("Cooldown Settings")]
+    public int maxCooldown;
+    public int currentCooldown;
+
+    // We use this to remember where the piece should be, so we can jiggle it without losing its real position
+    public Vector3 targetPosition;
+
     public virtual void MoveTo(BoardNode targetNode)
     {
         if (targetNode.currentPiece != null && targetNode.currentPiece != this)
@@ -16,7 +23,8 @@ public abstract class Piece : MonoBehaviour
         currentX = targetNode.x;
         currentY = targetNode.y;
         
-        transform.position = targetNode.nodeGameObject.transform.position; 
+        // Update the visual target position
+        targetPosition = targetNode.nodeGameObject.transform.position; 
     }
 
     public virtual void Capture()
@@ -26,9 +34,28 @@ public abstract class Piece : MonoBehaviour
 
     public abstract bool IsValidMove(BoardNode targetNode, BoardNode[,] grid);
 
-    // NEW: Allow BoardManager to ask ANY piece for its AI move
     public virtual BoardNode GetAIMove(BoardNode[,] grid)
     {
         return null;
+    }
+
+    // NEW: The Jiggle Animation Logic!
+    protected virtual void Update()
+    {
+        // Only enemies jiggle, and only if their cooldown is 1 (next turn) or 0 (ready but was blocked)
+        if (!isPlayer && currentCooldown <= 1)
+        {
+            // Create a fast left-to-right sine wave
+            float offsetX = Mathf.Sin(Time.time * 25f) * 0.08f;
+            transform.position = targetPosition + new Vector3(offsetX, 0, 0);
+        }
+        else
+        {
+            // Lock safely to the exact node position
+            if (targetPosition != Vector3.zero)
+            {
+                transform.position = targetPosition;
+            }
+        }
     }
 }

@@ -2,11 +2,8 @@ using UnityEngine;
 
 public class EnemyPawn : Piece
 {
-    void Start()
-    {
-        isPlayer = false;
-    }
-
+    void Awake() { isPlayer = false; maxCooldown = 3; }
+    void Start() { isPlayer = false; maxCooldown = 3; currentCooldown = maxCooldown; }
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {
         // Enemy pawns move DOWN the board (Y decreases)

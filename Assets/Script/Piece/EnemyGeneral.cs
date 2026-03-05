@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 public class EnemyGeneral : Piece
 {
-    void Start() { isPlayer = false; }
-
-    public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
+    void Awake() { isPlayer = false; maxCooldown = 2; }
+    void Start() { isPlayer = false; maxCooldown = 2; currentCooldown = maxCooldown; }
+        public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {
         if (!targetNode.isEnemyPalace) return false; // Palace Rule
 

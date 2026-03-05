@@ -3,11 +3,8 @@ using System.Collections.Generic;
 
 public class EnemyHorse : Piece
 {
-    void Start()
-    {
-        isPlayer = false;
-    }
-
+    void Awake() { isPlayer = false; maxCooldown = 1; }
+    void Start() { isPlayer = false; maxCooldown = 1; currentCooldown = maxCooldown; }
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {
         int dirX = targetNode.x - currentX;

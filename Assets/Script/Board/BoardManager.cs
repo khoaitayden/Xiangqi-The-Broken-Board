@@ -54,27 +54,32 @@ public class BoardManager : MonoBehaviour
         GenerateBoard();
         SpawnPlayer(); 
         
-        // Spawn a full traditional Enemy backline!
-        SpawnEnemy(enemyChariotPrefab, 0, 9);
-        SpawnEnemy(enemyHorsePrefab, 1, 9);
-        SpawnEnemy(enemyElephantPrefab, 2, 9);
-        SpawnEnemy(enemyAdvisorPrefab, 3, 9);
-        SpawnEnemy(enemyGeneralPrefab, 4, 9);
-        SpawnEnemy(enemyAdvisorPrefab, 5, 9);
-        SpawnEnemy(enemyElephantPrefab, 6, 9);
-        SpawnEnemy(enemyHorsePrefab, 7, 9);
-        SpawnEnemy(enemyChariotPrefab, 8, 9);
+        // SpawnEnemy(prefab, X, Y, StartingCooldown)
+        // Let's stagger them so they attack in waves!
 
-        // Spawn Cannons
-        SpawnEnemy(enemyCannonPrefab, 1, 7);
-        SpawnEnemy(enemyCannonPrefab, 7, 7);
+        // WAVE 1: Pawns start at 1 (They will move on the very first turn)
+        SpawnEnemy(enemyPawnPrefab, 0, 6, 1);
+        SpawnEnemy(enemyPawnPrefab, 2, 6, 1);
+        SpawnEnemy(enemyPawnPrefab, 4, 6, 1);
+        SpawnEnemy(enemyPawnPrefab, 6, 6, 1);
+        SpawnEnemy(enemyPawnPrefab, 8, 6, 1);
 
-        // Spawn Pawns
-        SpawnEnemy(enemyPawnPrefab, 0, 6);
-        SpawnEnemy(enemyPawnPrefab, 2, 6);
-        SpawnEnemy(enemyPawnPrefab, 4, 6);
-        SpawnEnemy(enemyPawnPrefab, 6, 6);
-        SpawnEnemy(enemyPawnPrefab, 8, 6);
+        // WAVE 2: Horses and Cannons start at 2
+        SpawnEnemy(enemyHorsePrefab, 1, 9, 2);
+        SpawnEnemy(enemyHorsePrefab, 7, 9, 2);
+        SpawnEnemy(enemyCannonPrefab, 1, 7, 2);
+        SpawnEnemy(enemyCannonPrefab, 7, 7, 2);
+
+        // WAVE 3: Chariots and Elephants start at 3
+        SpawnEnemy(enemyChariotPrefab, 0, 9, 3);
+        SpawnEnemy(enemyChariotPrefab, 8, 9, 3);
+        SpawnEnemy(enemyElephantPrefab, 2, 9, 3);
+        SpawnEnemy(enemyElephantPrefab, 6, 9, 3);
+
+        // BOSS GUARDS: General and Advisors wait until turn 4
+        SpawnEnemy(enemyAdvisorPrefab, 3, 9, 4);
+        SpawnEnemy(enemyGeneralPrefab, 4, 9, 4);
+        SpawnEnemy(enemyAdvisorPrefab, 5, 9, 4);
     }
 
     void GenerateBoard()
@@ -110,10 +115,11 @@ public class BoardManager : MonoBehaviour
         activePlayer = playerObj.GetComponent<PlayerGeneral>();
         activePlayer.currentX = startNode.x;
         activePlayer.currentY = startNode.y;
+        activePlayer.targetPosition = startNode.nodeGameObject.transform.position; // NEW
         startNode.currentPiece = activePlayer;
     }
 
-    void SpawnEnemy(GameObject prefab, int startX, int startY)
+    void SpawnEnemy(GameObject prefab, int startX, int startY, int startingCooldown)
     {
         BoardNode startNode = grid[startX, startY];
         GameObject enemyObj = Instantiate(prefab, startNode.nodeGameObject.transform.position, Quaternion.identity);
@@ -121,6 +127,11 @@ public class BoardManager : MonoBehaviour
         
         enemyPiece.currentX = startX;
         enemyPiece.currentY = startY;
+        enemyPiece.targetPosition = startNode.nodeGameObject.transform.position; 
+        
+        // NEW: Assign the custom starting cooldown!
+        enemyPiece.currentCooldown = startingCooldown; 
+        
         startNode.currentPiece = enemyPiece;
         
         enemyPieces.Add(enemyPiece);
@@ -168,71 +179,64 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    // UPDATED: Only ONE enemy moves per turn
     IEnumerator EnemyPhaseCoroutine()
     {
-        yield return new WaitForSeconds(0.2f); // Tiny delay for board game feel
+        yield return new WaitForSeconds(0.2f); // Tiny delay
 
-        List<AIMove> possibleMoves = new List<AIMove>();
-        AIMove winningMove = null;
+        // Make a copy in case pieces capture/destroy each other
+        List<Piece> enemiesToMove = new List<Piece>(enemyPieces);
 
-        // 1. Gather all possible moves for all surviving enemies
-        foreach (Piece enemy in enemyPieces)
+        foreach (Piece enemy in enemiesToMove)
         {
             if (enemy == null) continue; // Skip dead pieces
 
-            BoardNode targetNode = enemy.GetAIMove(grid);
-
-            if (targetNode != null)
+            // 1. Decrease Cooldown
+            if (enemy.currentCooldown > 0)
             {
-                AIMove move = new AIMove { piece = enemy, targetNode = targetNode };
-                possibleMoves.Add(move);
+                enemy.currentCooldown--;
+            }
 
-                // If this move captures the player, save it as the winning move!
-                if (targetNode.currentPiece == activePlayer)
+            // 2. If Cooldown is 0, it strikes!
+            if (enemy.currentCooldown == 0)
+            {
+                BoardNode targetNode = enemy.GetAIMove(grid);
+
+                if (targetNode != null)
                 {
-                    winningMove = move;
+                    // Check for Player Kill
+                    if (targetNode.currentPiece == activePlayer)
+                    {
+                        Debug.Log("GAME OVER! Player was captured!");
+                        currentTurn = TurnState.GameOver;
+                        grid[enemy.currentX, enemy.currentY].currentPiece = null;
+                        enemy.MoveTo(targetNode);
+                        targetNode.currentPiece = enemy;
+                        yield break; // End game immediately
+                    }
+
+                    // Normal Move
+                    grid[enemy.currentX, enemy.currentY].currentPiece = null;
+                    enemy.MoveTo(targetNode);
+                    targetNode.currentPiece = enemy;
+
+                    // 3. Reset Cooldown because it successfully moved!
+                    enemy.currentCooldown = enemy.maxCooldown;
+                }
+                else 
+                {
+                    // If it wants to move but is completely blocked by its own team,
+                    // its cooldown stays at 0. It will continue jiggling and try again next turn!
+                    enemy.currentCooldown = 0;
                 }
             }
         }
 
-        // 2. Decide which move to take
-        AIMove chosenMove = null;
-
-        if (winningMove != null)
-        {
-            // Always take the kill if it's available
-            chosenMove = winningMove;
-        }
-        else if (possibleMoves.Count > 0)
-        {
-            // Otherwise, pick a random valid move from the list
-            int randomIndex = Random.Range(0, possibleMoves.Count);
-            chosenMove = possibleMoves[randomIndex];
-        }
-
-        // 3. Execute the chosen move
-        if (chosenMove != null)
-        {
-            if (chosenMove.targetNode.currentPiece == activePlayer)
-            {
-                Debug.Log("GAME OVER! Player was captured!");
-                currentTurn = TurnState.GameOver;
-            }
-
-            // Move the chosen piece physically and in the data grid
-            grid[chosenMove.piece.currentX, chosenMove.piece.currentY].currentPiece = null;
-            chosenMove.piece.MoveTo(chosenMove.targetNode);
-            chosenMove.targetNode.currentPiece = chosenMove.piece;
-        }
-
-        // 4. Pass turn back to player
+        // Pass the turn back to the player
         if (currentTurn != TurnState.GameOver)
         {
             currentTurn = TurnState.PlayerTurn;
         }
     }
-
     private void OnDrawGizmos()
     {
         if (!Application.isPlaying && grid == null) return;

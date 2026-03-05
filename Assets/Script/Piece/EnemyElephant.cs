@@ -3,7 +3,8 @@ using System.Collections.Generic;
 
 public class EnemyElephant : Piece
 {
-    void Start() { isPlayer = false; }
+    void Start() { isPlayer = false; maxCooldown = 3; currentCooldown = maxCooldown; }
+    void Awake() { isPlayer = false; maxCooldown = 3; }
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {
