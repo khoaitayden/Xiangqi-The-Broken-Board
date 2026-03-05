@@ -376,6 +376,7 @@ MonoBehaviour:
   nodePrefab: {fileID: 8865605849380458659, guid: b070d2c52883c055494e50089216ebaa, type: 3}
   playerGeneralPrefab: {fileID: 6743041626700125741, guid: 0148560b41f6c245da49f72dac1359bc, type: 3}
   enemyPawnPrefab: {fileID: 1580892474334285542, guid: 7a30d2e33da5f845d873a0d02499b740, type: 3}
+  enemyHorsePrefab: {fileID: 7154912479103889726, guid: 3a8a939e19030508581170680f915876, type: 3}
   enemyPieces: []
 --- !u!4 &1678224790
 Transform:

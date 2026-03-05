@@ -19,17 +19,18 @@ public class BoardManager : MonoBehaviour
     public GameObject nodePrefab; 
     public GameObject playerGeneralPrefab;
     public GameObject enemyPawnPrefab; 
+    public GameObject enemyHorsePrefab;
 
     public BoardNode[,] grid;
     private PlayerGeneral activePlayer; 
-    public List<EnemyPawn> enemyPieces = new List<EnemyPawn>(); 
+    public List<Piece> enemyPieces = new List<Piece>();
 
     private PlayerControls controls;
 
     // A small helper class to store potential AI moves
     private class AIMove
     {
-        public EnemyPawn piece;
+        public Piece piece; // Changed from EnemyPawn
         public BoardNode targetNode;
     }
 
@@ -48,6 +49,7 @@ public class BoardManager : MonoBehaviour
         SpawnPlayer(); 
         SpawnEnemyPawn(4, 8); 
         SpawnEnemyPawn(2, 6); 
+        SpawnEnemyHorse(6, 9); // NEW: Spawn a Horse near the top right!
     }
 
     void GenerateBoard()
@@ -97,6 +99,18 @@ public class BoardManager : MonoBehaviour
         startNode.currentPiece = pawn;
         
         enemyPieces.Add(pawn);
+    }
+    void SpawnEnemyHorse(int startX, int startY)
+    {
+        BoardNode startNode = grid[startX, startY];
+        GameObject enemyObj = Instantiate(enemyHorsePrefab, startNode.nodeGameObject.transform.position, Quaternion.identity);
+        EnemyHorse horse = enemyObj.GetComponent<EnemyHorse>();
+        
+        horse.currentX = startNode.x;
+        horse.currentY = startNode.y;
+        startNode.currentPiece = horse;
+        
+        enemyPieces.Add(horse);
     }
 
     private void OnClick()
@@ -150,7 +164,7 @@ public class BoardManager : MonoBehaviour
         AIMove winningMove = null;
 
         // 1. Gather all possible moves for all surviving enemies
-        foreach (EnemyPawn enemy in enemyPieces)
+        foreach (Piece enemy in enemyPieces)
         {
             if (enemy == null) continue; // Skip dead pieces
 

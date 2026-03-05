@@ -8,7 +8,6 @@ public abstract class Piece : MonoBehaviour
 
     public virtual void MoveTo(BoardNode targetNode)
     {
-        // If there is a piece on the target node, and it's an enemy (Player being captured)
         if (targetNode.currentPiece != null && targetNode.currentPiece != this)
         {
             targetNode.currentPiece.Capture();
@@ -22,9 +21,14 @@ public abstract class Piece : MonoBehaviour
 
     public virtual void Capture()
     {
-        // For now, simply destroy the GameObject
         Destroy(gameObject);
     }
 
     public abstract bool IsValidMove(BoardNode targetNode, BoardNode[,] grid);
+
+    // NEW: Allow BoardManager to ask ANY piece for its AI move
+    public virtual BoardNode GetAIMove(BoardNode[,] grid)
+    {
+        return null;
+    }
 }

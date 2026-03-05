@@ -30,7 +30,7 @@ public class EnemyPawn : Piece
     }
 
     // --- SIMPLE AI FOR ENEMY TURN ---
-    public BoardNode GetAIMove(BoardNode[,] grid)
+    public override BoardNode GetAIMove(BoardNode[,] grid)
     {
         // 1. Try to move forward first
         if (currentY - 1 >= 0)
