@@ -377,6 +377,11 @@ MonoBehaviour:
   playerGeneralPrefab: {fileID: 6743041626700125741, guid: 0148560b41f6c245da49f72dac1359bc, type: 3}
   enemyPawnPrefab: {fileID: 1580892474334285542, guid: 7a30d2e33da5f845d873a0d02499b740, type: 3}
   enemyHorsePrefab: {fileID: 7154912479103889726, guid: 3a8a939e19030508581170680f915876, type: 3}
+  enemyAdvisorPrefab: {fileID: 4936687418414120909, guid: 35a6d4a837ea163abb24452f65eddd59, type: 3}
+  enemyElephantPrefab: {fileID: 6997222559792102729, guid: 0efec9c9d9c5d7ebc9bb052596e83776, type: 3}
+  enemyGeneralPrefab: {fileID: 6112029043887068032, guid: 5a50e02e22d2244c9a95c6164480089e, type: 3}
+  enemyChariotPrefab: {fileID: 5679512859298181273, guid: ae74957bea0a45165ab66c1ba889737d, type: 3}
+  enemyCannonPrefab: {fileID: 8705496967708080377, guid: 924fb542ed7910955828ffd34df157c7, type: 3}
   enemyPieces: []
 --- !u!4 &1678224790
 Transform:

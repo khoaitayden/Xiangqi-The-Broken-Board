@@ -21,6 +21,12 @@ public class BoardManager : MonoBehaviour
     public GameObject enemyPawnPrefab; 
     public GameObject enemyHorsePrefab;
 
+    public GameObject enemyAdvisorPrefab;
+    public GameObject enemyElephantPrefab;
+    public GameObject enemyGeneralPrefab;
+    public GameObject enemyChariotPrefab;
+    public GameObject enemyCannonPrefab;
+
     public BoardNode[,] grid;
     private PlayerGeneral activePlayer; 
     public List<Piece> enemyPieces = new List<Piece>();
@@ -47,9 +53,28 @@ public class BoardManager : MonoBehaviour
     {
         GenerateBoard();
         SpawnPlayer(); 
-        SpawnEnemyPawn(4, 8); 
-        SpawnEnemyPawn(2, 6); 
-        SpawnEnemyHorse(6, 9); // NEW: Spawn a Horse near the top right!
+        
+        // Spawn a full traditional Enemy backline!
+        SpawnEnemy(enemyChariotPrefab, 0, 9);
+        SpawnEnemy(enemyHorsePrefab, 1, 9);
+        SpawnEnemy(enemyElephantPrefab, 2, 9);
+        SpawnEnemy(enemyAdvisorPrefab, 3, 9);
+        SpawnEnemy(enemyGeneralPrefab, 4, 9);
+        SpawnEnemy(enemyAdvisorPrefab, 5, 9);
+        SpawnEnemy(enemyElephantPrefab, 6, 9);
+        SpawnEnemy(enemyHorsePrefab, 7, 9);
+        SpawnEnemy(enemyChariotPrefab, 8, 9);
+
+        // Spawn Cannons
+        SpawnEnemy(enemyCannonPrefab, 1, 7);
+        SpawnEnemy(enemyCannonPrefab, 7, 7);
+
+        // Spawn Pawns
+        SpawnEnemy(enemyPawnPrefab, 0, 6);
+        SpawnEnemy(enemyPawnPrefab, 2, 6);
+        SpawnEnemy(enemyPawnPrefab, 4, 6);
+        SpawnEnemy(enemyPawnPrefab, 6, 6);
+        SpawnEnemy(enemyPawnPrefab, 8, 6);
     }
 
     void GenerateBoard()
@@ -88,29 +113,17 @@ public class BoardManager : MonoBehaviour
         startNode.currentPiece = activePlayer;
     }
 
-    void SpawnEnemyPawn(int startX, int startY)
+    void SpawnEnemy(GameObject prefab, int startX, int startY)
     {
         BoardNode startNode = grid[startX, startY];
-        GameObject enemyObj = Instantiate(enemyPawnPrefab, startNode.nodeGameObject.transform.position, Quaternion.identity);
-        EnemyPawn pawn = enemyObj.GetComponent<EnemyPawn>();
+        GameObject enemyObj = Instantiate(prefab, startNode.nodeGameObject.transform.position, Quaternion.identity);
+        Piece enemyPiece = enemyObj.GetComponent<Piece>();
         
-        pawn.currentX = startNode.x;
-        pawn.currentY = startNode.y;
-        startNode.currentPiece = pawn;
+        enemyPiece.currentX = startX;
+        enemyPiece.currentY = startY;
+        startNode.currentPiece = enemyPiece;
         
-        enemyPieces.Add(pawn);
-    }
-    void SpawnEnemyHorse(int startX, int startY)
-    {
-        BoardNode startNode = grid[startX, startY];
-        GameObject enemyObj = Instantiate(enemyHorsePrefab, startNode.nodeGameObject.transform.position, Quaternion.identity);
-        EnemyHorse horse = enemyObj.GetComponent<EnemyHorse>();
-        
-        horse.currentX = startNode.x;
-        horse.currentY = startNode.y;
-        startNode.currentPiece = horse;
-        
-        enemyPieces.Add(horse);
+        enemyPieces.Add(enemyPiece);
     }
 
     private void OnClick()
