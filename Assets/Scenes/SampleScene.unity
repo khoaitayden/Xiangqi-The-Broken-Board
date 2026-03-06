@@ -370,6 +370,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoardManager
   currentTurn: 0
+  currentLevel: {fileID: 11400000, guid: a9c3f7ff48f6d54fe925ab73c6351fae, type: 2}
   width: 9
   height: 10
   spacing: 1

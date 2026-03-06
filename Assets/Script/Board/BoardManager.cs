@@ -9,6 +9,8 @@ public class BoardManager : MonoBehaviour
     
     [Header("Game State")]
     public TurnState currentTurn = TurnState.PlayerTurn;
+    [Header("Level Data")]
+    public BoardLayoutSO currentLevel;
 
     [Header("Board Settings")]
     public int width = 9;  
@@ -52,34 +54,15 @@ public class BoardManager : MonoBehaviour
     void Start()
     {
         GenerateBoard();
-        SpawnPlayer(); 
         
-        // SpawnEnemy(prefab, X, Y, StartingCooldown)
-        // Let's stagger them so they attack in waves!
-
-        // WAVE 1: Pawns start at 1 (They will move on the very first turn)
-        SpawnEnemy(enemyPawnPrefab, 0, 6, 1);
-        SpawnEnemy(enemyPawnPrefab, 2, 6, 1);
-        SpawnEnemy(enemyPawnPrefab, 4, 6, 1);
-        SpawnEnemy(enemyPawnPrefab, 6, 6, 1);
-        SpawnEnemy(enemyPawnPrefab, 8, 6, 1);
-
-        // WAVE 2: Horses and Cannons start at 2
-        SpawnEnemy(enemyHorsePrefab, 1, 9, 2);
-        SpawnEnemy(enemyHorsePrefab, 7, 9, 2);
-        SpawnEnemy(enemyCannonPrefab, 1, 7, 2);
-        SpawnEnemy(enemyCannonPrefab, 7, 7, 2);
-
-        // WAVE 3: Chariots and Elephants start at 3
-        SpawnEnemy(enemyChariotPrefab, 0, 9, 3);
-        SpawnEnemy(enemyChariotPrefab, 8, 9, 3);
-        SpawnEnemy(enemyElephantPrefab, 2, 9, 3);
-        SpawnEnemy(enemyElephantPrefab, 6, 9, 3);
-
-        // BOSS GUARDS: General and Advisors wait until turn 4
-        SpawnEnemy(enemyAdvisorPrefab, 3, 9, 4);
-        SpawnEnemy(enemyGeneralPrefab, 4, 9, 4);
-        SpawnEnemy(enemyAdvisorPrefab, 5, 9, 4);
+        if (currentLevel != null)
+        {
+            LoadLevel(currentLevel);
+        }
+        else
+        {
+            Debug.LogError("No Level Data assigned to BoardManager!");
+        }
     }
 
     void GenerateBoard()
@@ -108,14 +91,30 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    void SpawnPlayer()
+    void LoadLevel(BoardLayoutSO levelData)
     {
-        BoardNode startNode = grid[4, 0];
+        // 1. Spawn Player
+        SpawnPlayer(levelData.playerSpawnPosition.x, levelData.playerSpawnPosition.y);
+
+        // 2. Spawn Enemies
+        foreach (PieceSpawnData spawnData in levelData.enemySpawns)
+        {
+            GameObject prefabToSpawn = GetPrefabForType(spawnData.pieceType);
+            
+            if (prefabToSpawn != null)
+            {
+                SpawnEnemy(prefabToSpawn, spawnData.position.x, spawnData.position.y, spawnData.startingCooldown);
+            }
+        }
+    }
+    void SpawnPlayer(int startX, int startY) 
+    {
+        BoardNode startNode = grid[startX, startY];
         GameObject playerObj = Instantiate(playerGeneralPrefab, startNode.nodeGameObject.transform.position, Quaternion.identity);
         activePlayer = playerObj.GetComponent<PlayerGeneral>();
         activePlayer.currentX = startNode.x;
         activePlayer.currentY = startNode.y;
-        activePlayer.targetPosition = startNode.nodeGameObject.transform.position; // NEW
+        activePlayer.targetPosition = startNode.nodeGameObject.transform.position; 
         startNode.currentPiece = activePlayer;
     }
 
@@ -235,6 +234,21 @@ public class BoardManager : MonoBehaviour
         if (currentTurn != TurnState.GameOver)
         {
             currentTurn = TurnState.PlayerTurn;
+        }
+    }
+
+    GameObject GetPrefabForType(PieceType type)
+    {
+        switch (type)
+        {
+            case PieceType.Pawn: return enemyPawnPrefab;
+            case PieceType.Horse: return enemyHorsePrefab;
+            case PieceType.Chariot: return enemyChariotPrefab;
+            case PieceType.Elephant: return enemyElephantPrefab;
+            case PieceType.Advisor: return enemyAdvisorPrefab;
+            case PieceType.Cannon: return enemyCannonPrefab;
+            case PieceType.EnemyGeneral: return enemyGeneralPrefab;
+            default: return null;
         }
     }
     private void OnDrawGizmos()
