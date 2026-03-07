@@ -5,26 +5,66 @@ public abstract class Piece : MonoBehaviour
     public int currentX;
     public int currentY;
     public bool isPlayer;
+    public BoardNode currentNode;
+
+    [Header("Stats")]
+    public int maxHp = 1; 
+    public int currentHp;
 
     [Header("Cooldown Settings")]
     public int maxCooldown;
     public int currentCooldown;
-
-    // We use this to remember where the piece should be, so we can jiggle it without losing its real position
     public Vector3 targetPosition;
 
+
+    protected SpriteRenderer spriteRenderer;
+    protected Color originalColor;
+
+    protected virtual void Awake()
+    {
+        currentHp = maxHp;
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null) originalColor = spriteRenderer.color;
+    }
     public virtual void MoveTo(BoardNode targetNode)
     {
+        if (currentNode != null) currentNode.currentPiece = null; // Clear old node
+        
+        // Capture logic for enemies walking onto the player
         if (targetNode.currentPiece != null && targetNode.currentPiece != this)
         {
-            targetNode.currentPiece.Capture();
+            Destroy(targetNode.currentPiece.gameObject); // Instant kill (Player capture)
         }
 
         currentX = targetNode.x;
         currentY = targetNode.y;
+        currentNode = targetNode; // Update current node
+        targetNode.currentPiece = this;
         
-        // Update the visual target position
         targetPosition = targetNode.nodeGameObject.transform.position; 
+    }
+
+    public virtual void TakeDamage(int damage)
+    {
+        currentHp -= damage;
+        if (currentHp <= 0)
+        {
+            Die();
+        }
+    }
+
+    protected virtual void Die()
+    {
+        if (currentNode != null) currentNode.currentPiece = null;
+        Destroy(gameObject);
+    }
+
+    public void SetTargeted(bool isTargeted)
+    {
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = isTargeted ? Color.yellow : originalColor;
+        }
     }
 
     public virtual void Capture()

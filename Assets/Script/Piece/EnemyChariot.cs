@@ -3,7 +3,12 @@ using System.Collections.Generic;
 
 public class EnemyChariot : Piece
 {
-    void Awake() { isPlayer = false; maxCooldown = 3; }
+    protected override void Awake()
+    {
+        base.Awake(); 
+        isPlayer = false; 
+        maxCooldown = 3; 
+    }
     void Start() { isPlayer = false; maxCooldown = 3; currentCooldown = maxCooldown; }
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)

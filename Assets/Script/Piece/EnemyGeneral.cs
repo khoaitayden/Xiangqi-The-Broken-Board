@@ -3,7 +3,12 @@ using System.Collections.Generic;
 
 public class EnemyGeneral : Piece
 {
-    void Awake() { isPlayer = false; maxCooldown = 2; }
+        protected override void Awake()
+    {
+        base.Awake(); 
+        isPlayer = false; 
+        maxCooldown = 2; 
+    }
     void Start() { isPlayer = false; maxCooldown = 2; currentCooldown = maxCooldown; }
         public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {

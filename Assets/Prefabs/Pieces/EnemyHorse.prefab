@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5123638982506622715}
   - component: {fileID: 2054630993478230127}
   - component: {fileID: 4600561121913067905}
+  - component: {fileID: -1355390446243871063}
   m_Layer: 0
   m_Name: EnemyHorse
   m_TagString: Untagged
@@ -107,3 +108,53 @@ MonoBehaviour:
   currentX: 0
   currentY: 0
   isPlayer: 0
+  currentNode:
+    x: 0
+    y: 0
+    worldPosition: {x: 0, y: 0}
+    isPlayerPalace: 0
+    isEnemyPalace: 0
+    isRiver: 0
+    nodeGameObject: {fileID: 0}
+    currentPiece: {fileID: 0}
+  maxHp: 1
+  currentHp: 0
+  maxCooldown: 0
+  currentCooldown: 0
+  targetPosition: {x: 0, y: 0, z: 0}
+--- !u!58 &-1355390446243871063
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7154912479103889726}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Radius: 0.90625

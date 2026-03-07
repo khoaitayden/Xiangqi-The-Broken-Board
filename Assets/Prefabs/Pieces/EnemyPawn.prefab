@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4968406074238002358}
   - component: {fileID: 2600245411087579318}
   - component: {fileID: 7386985253023703873}
+  - component: {fileID: -3427445191087998848}
   m_Layer: 0
   m_Name: EnemyPawn
   m_TagString: Untagged
@@ -107,3 +108,53 @@ MonoBehaviour:
   currentX: 0
   currentY: 0
   isPlayer: 0
+  currentNode:
+    x: 0
+    y: 0
+    worldPosition: {x: 0, y: 0}
+    isPlayerPalace: 0
+    isEnemyPalace: 0
+    isRiver: 0
+    nodeGameObject: {fileID: 0}
+    currentPiece: {fileID: 0}
+  maxHp: 1
+  currentHp: 0
+  maxCooldown: 0
+  currentCooldown: 0
+  targetPosition: {x: 0, y: 0, z: 0}
+--- !u!58 &-3427445191087998848
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1580892474334285542}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Radius: 0.90625

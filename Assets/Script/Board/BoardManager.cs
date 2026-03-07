@@ -1,8 +1,8 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 using System.Collections;
 using System.Collections.Generic;
 
+[RequireComponent(typeof(InputHandler))] // Automatically adds InputHandler to this GameObject
 public class BoardManager : MonoBehaviour
 {
     public enum TurnState { PlayerTurn, EnemyTurn, GameOver }
@@ -22,34 +22,33 @@ public class BoardManager : MonoBehaviour
     public GameObject playerGeneralPrefab;
     public GameObject enemyPawnPrefab; 
     public GameObject enemyHorsePrefab;
-
     public GameObject enemyAdvisorPrefab;
     public GameObject enemyElephantPrefab;
     public GameObject enemyGeneralPrefab;
     public GameObject enemyChariotPrefab;
     public GameObject enemyCannonPrefab;
-
+    
     public BoardNode[,] grid;
+
+    [Header("Aiming & Shooting")]
+    public GameObject projectilePrefab; 
+    public Transform playerVisualGhost; 
+    
+    // State Tracking
+    private bool isAimingMode = false;
+    private Vector2 currentAimDirection;
+    private bool isExecutingAction = false; 
+    
     private PlayerGeneral activePlayer; 
     public List<Piece> enemyPieces = new List<Piece>();
 
-    private PlayerControls controls;
-
-    // A small helper class to store potential AI moves
-    private class AIMove
-    {
-        public Piece piece; // Changed from EnemyPawn
-        public BoardNode targetNode;
-    }
+    // Input
+    private InputHandler input;
 
     private void Awake()
     {
-        controls = new PlayerControls();
-        controls.Board.Click.performed += context => OnClick();
+        input = GetComponent<InputHandler>();
     }
-
-    private void OnEnable() { controls.Enable(); }
-    private void OnDisable() { controls.Disable(); }
 
     void Start()
     {
@@ -63,6 +62,139 @@ public class BoardManager : MonoBehaviour
         {
             Debug.LogError("No Level Data assigned to BoardManager!");
         }
+    }
+
+    void Update()
+    {
+        if (currentTurn != TurnState.PlayerTurn || isExecutingAction || activePlayer == null) return;
+
+        // 1. Read Mouse Position directly from our new InputHandler
+        Vector2 worldPosition = input.MouseWorldPosition;
+        BoardNode hoveredNode = GetNodeAtPosition(worldPosition);
+
+        // 2. Determine Context (Move vs Aim)
+        DetermineInputContext(worldPosition, hoveredNode);
+
+        // 3. Render Aiming Visuals
+        if (isAimingMode)
+        {
+            DrawAimConeAndHighlightEnemies();
+        }
+
+        // 4. Listen for Click Execution from the InputHandler
+        if (input.IsClickTriggered) 
+        {
+            if (!isAimingMode && hoveredNode != null)
+            {
+                ExecuteMove(hoveredNode);
+            }
+            else if (isAimingMode && activePlayer.loadedAmmo > 0)
+            {
+                StartCoroutine(ExecuteShootCoroutine());
+            }
+            else if (isAimingMode && activePlayer.loadedAmmo <= 0)
+            {
+                Debug.Log("Out of Ammo! Move to Reload!");
+            }
+        }
+    }
+
+    void DetermineInputContext(Vector2 mouseWorldPos, BoardNode hoveredNode)
+    {
+        if (hoveredNode != null && activePlayer.IsValidMove(hoveredNode, grid))
+        {
+            isAimingMode = false;
+            
+            foreach (Piece enemy in enemyPieces) { if(enemy != null) enemy.SetTargeted(false); }
+        }
+        else
+        {
+            isAimingMode = true;
+            
+            Vector2 playerPos = activePlayer.transform.position;
+            currentAimDirection = (mouseWorldPos - playerPos).normalized;
+            if (currentAimDirection == Vector2.zero) currentAimDirection = Vector2.up; 
+        }
+    }
+
+    void DrawAimConeAndHighlightEnemies()
+    {
+        // FIX: Explicitly cast to Vector3 to resolve ambiguity errors (CS9342)
+        Vector3 playerPos = activePlayer.transform.position;
+        float aimAngle = Mathf.Atan2(currentAimDirection.y, currentAimDirection.x) * Mathf.Rad2Deg;
+
+        float halfArc = activePlayer.fireArc / 2f;
+        Vector3 edge1 = Quaternion.Euler(0, 0, aimAngle - halfArc) * Vector3.right;
+        Vector3 edge2 = Quaternion.Euler(0, 0, aimAngle + halfArc) * Vector3.right;
+
+        Debug.DrawRay(playerPos, edge1 * activePlayer.rangeX, Color.red);
+        Debug.DrawRay(playerPos, edge2 * activePlayer.rangeX, Color.red);
+        
+        Debug.DrawRay(playerPos + edge1 * activePlayer.rangeX, edge1 * (activePlayer.rangeY - activePlayer.rangeX), Color.yellow);
+        Debug.DrawRay(playerPos + edge2 * activePlayer.rangeX, edge2 * (activePlayer.rangeY - activePlayer.rangeX), Color.yellow);
+
+        foreach (Piece enemy in enemyPieces)
+        {
+            if (enemy == null) continue;
+            
+            // FIX: Using Vector3 for consistency
+            Vector3 toEnemy = enemy.transform.position - playerPos;
+            float distance = toEnemy.magnitude;
+            float angleToEnemy = Vector2.Angle(currentAimDirection, toEnemy);
+
+            if (angleToEnemy <= halfArc && distance <= activePlayer.rangeY)
+            {
+                enemy.SetTargeted(true);
+            }
+            else
+            {
+                enemy.SetTargeted(false);
+            }
+        }
+    }
+
+    void ExecuteMove(BoardNode targetNode)
+    {
+        activePlayer.MoveTo(targetNode);
+        
+        if (activePlayer.loadedAmmo < activePlayer.maxAmmo) activePlayer.loadedAmmo++;
+        
+        StartCoroutine(PassTurnToEnemies());
+    }
+
+    IEnumerator ExecuteShootCoroutine()
+    {
+        isExecutingAction = true;
+        activePlayer.loadedAmmo--; 
+        
+        foreach (Piece enemy in enemyPieces) { if(enemy != null) enemy.SetTargeted(false); }
+
+        float aimAngle = Mathf.Atan2(currentAimDirection.y, currentAimDirection.x) * Mathf.Rad2Deg;
+        float halfArc = activePlayer.fireArc / 2f;
+
+        for (int i = 0; i < activePlayer.firepower; i++)
+        {
+            float randomAngle = Random.Range(aimAngle - halfArc, aimAngle + halfArc);
+            Quaternion bulletRotation = Quaternion.Euler(0, 0, randomAngle);
+
+            GameObject bulletObj = Instantiate(projectilePrefab, activePlayer.transform.position, bulletRotation);
+            Projectile p = bulletObj.GetComponent<Projectile>();
+            p.rangeX = activePlayer.rangeX;
+            p.rangeY = activePlayer.rangeY;
+        }
+
+        // FIX: Upgraded to FindObjectsByType to resolve obsolete warning (CS0618)
+        yield return new WaitUntil(() => FindObjectsByType<Projectile>(FindObjectsSortMode.None).Length == 0);
+
+        StartCoroutine(PassTurnToEnemies());
+    }
+
+    IEnumerator PassTurnToEnemies()
+    {
+        enemyPieces.RemoveAll(e => e == null);
+        currentTurn = TurnState.EnemyTurn;
+        yield return StartCoroutine(EnemyPhaseCoroutine()); 
+        isExecutingAction = false;
     }
 
     void GenerateBoard()
@@ -93,10 +225,8 @@ public class BoardManager : MonoBehaviour
 
     void LoadLevel(BoardLayoutSO levelData)
     {
-        // 1. Spawn Player
         SpawnPlayer(levelData.playerSpawnPosition.x, levelData.playerSpawnPosition.y);
 
-        // 2. Spawn Enemies
         foreach (PieceSpawnData spawnData in levelData.enemySpawns)
         {
             GameObject prefabToSpawn = GetPrefabForType(spawnData.pieceType);
@@ -107,6 +237,7 @@ public class BoardManager : MonoBehaviour
             }
         }
     }
+
     void SpawnPlayer(int startX, int startY) 
     {
         BoardNode startNode = grid[startX, startY];
@@ -128,26 +259,9 @@ public class BoardManager : MonoBehaviour
         enemyPiece.currentY = startY;
         enemyPiece.targetPosition = startNode.nodeGameObject.transform.position; 
         
-        // NEW: Assign the custom starting cooldown!
         enemyPiece.currentCooldown = startingCooldown; 
-        
         startNode.currentPiece = enemyPiece;
-        
         enemyPieces.Add(enemyPiece);
-    }
-
-    private void OnClick()
-    {
-        if (currentTurn != TurnState.PlayerTurn) return;
-
-        Vector2 screenPosition = controls.Board.PointerPosition.ReadValue<Vector2>();
-        Vector2 worldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
-        BoardNode clickedNode = GetNodeAtPosition(worldPosition);
-
-        if (clickedNode != null)
-        {
-            TryMovePlayer(clickedNode);
-        }
     }
 
     BoardNode GetNodeAtPosition(Vector2 pos)
@@ -180,29 +294,25 @@ public class BoardManager : MonoBehaviour
 
     IEnumerator EnemyPhaseCoroutine()
     {
-        yield return new WaitForSeconds(0.2f); // Tiny delay
+        yield return new WaitForSeconds(0.2f); 
 
-        // Make a copy in case pieces capture/destroy each other
         List<Piece> enemiesToMove = new List<Piece>(enemyPieces);
 
         foreach (Piece enemy in enemiesToMove)
         {
-            if (enemy == null) continue; // Skip dead pieces
+            if (enemy == null) continue; 
 
-            // 1. Decrease Cooldown
             if (enemy.currentCooldown > 0)
             {
                 enemy.currentCooldown--;
             }
 
-            // 2. If Cooldown is 0, it strikes!
             if (enemy.currentCooldown == 0)
             {
                 BoardNode targetNode = enemy.GetAIMove(grid);
 
                 if (targetNode != null)
                 {
-                    // Check for Player Kill
                     if (targetNode.currentPiece == activePlayer)
                     {
                         Debug.Log("GAME OVER! Player was captured!");
@@ -210,27 +320,22 @@ public class BoardManager : MonoBehaviour
                         grid[enemy.currentX, enemy.currentY].currentPiece = null;
                         enemy.MoveTo(targetNode);
                         targetNode.currentPiece = enemy;
-                        yield break; // End game immediately
+                        yield break; 
                     }
 
-                    // Normal Move
                     grid[enemy.currentX, enemy.currentY].currentPiece = null;
                     enemy.MoveTo(targetNode);
                     targetNode.currentPiece = enemy;
 
-                    // 3. Reset Cooldown because it successfully moved!
                     enemy.currentCooldown = enemy.maxCooldown;
                 }
                 else 
                 {
-                    // If it wants to move but is completely blocked by its own team,
-                    // its cooldown stays at 0. It will continue jiggling and try again next turn!
                     enemy.currentCooldown = 0;
                 }
             }
         }
 
-        // Pass the turn back to the player
         if (currentTurn != TurnState.GameOver)
         {
             currentTurn = TurnState.PlayerTurn;
@@ -251,6 +356,7 @@ public class BoardManager : MonoBehaviour
             default: return null;
         }
     }
+
     private void OnDrawGizmos()
     {
         if (!Application.isPlaying && grid == null) return;
