@@ -84,7 +84,7 @@ public abstract class Piece : MonoBehaviour
         if (currentNode != null) currentNode.currentCorpse = corpse;
         TurnManager.Instance.activeCorpses.Add(corpse);
 
-        Destroy(this); 
+        gameObject.SetActive(false);  
     }
 
     public void SetTargeted(bool isTargeted)

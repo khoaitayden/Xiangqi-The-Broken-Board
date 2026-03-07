@@ -91,6 +91,7 @@ public class PlayerActionController : MonoBehaviour
 
     void ExecuteMove(BoardNode targetNode, TurnManager turnMan)
     {
+        turnMan.SaveState();
         PlayerGeneral player = turnMan.activePlayer;
         GridManager.Instance.grid[player.currentX, player.currentY].currentPiece = null;
         
@@ -104,6 +105,7 @@ public class PlayerActionController : MonoBehaviour
 
     IEnumerator ExecuteShootCoroutine(TurnManager turnMan)
     {
+        turnMan.SaveState();
         isExecutingAction = true;
         PlayerGeneral player = turnMan.activePlayer;
         player.loadedAmmo--; 

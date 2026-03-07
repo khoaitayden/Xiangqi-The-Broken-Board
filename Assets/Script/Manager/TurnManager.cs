@@ -10,6 +10,7 @@ public class TurnManager : MonoBehaviour
     
     [Header("Game State")]
     public TurnState currentTurn = TurnState.PlayerTurn;
+    private BoardState previousTurnState;
     
     public PlayerGeneral activePlayer; 
     public List<Piece> enemyPieces = new List<Piece>();
@@ -47,11 +48,7 @@ public class TurnManager : MonoBehaviour
                 {
                     if (targetNode.currentPiece == activePlayer)
                     {
-                        Debug.Log("GAME OVER! Player was captured!");
-                        currentTurn = TurnState.GameOver;
-                        GridManager.Instance.grid[enemy.currentX, enemy.currentY].currentPiece = null;
-                        enemy.MoveTo(targetNode);
-                        targetNode.currentPiece = enemy;
+                        TriggerArmorRewind();   
                         yield break; 
                     }
 
@@ -80,5 +77,57 @@ public class TurnManager : MonoBehaviour
         }
 
         if (currentTurn != TurnState.GameOver) currentTurn = TurnState.PlayerTurn;
+    }
+    public void SaveState()
+    {
+        previousTurnState = new BoardState(activePlayer, enemyPieces);
+    }
+    public void TriggerArmorRewind()
+    {
+        if (activePlayer.currentArmor > 0)
+        {
+            activePlayer.currentArmor--;
+            Debug.Log($"ARMOR BROKEN! Rewinding Turn... ({activePlayer.currentArmor} Left)");
+
+            // 1. Restore Player
+            BoardNode oldPlayerNode = GridManager.Instance.grid[previousTurnState.playerX, previousTurnState.playerY];
+            // Clear current pos
+            GridManager.Instance.grid[activePlayer.currentX, activePlayer.currentY].currentPiece = null;
+            // Move back
+            activePlayer.MoveTo(oldPlayerNode); 
+            activePlayer.loadedAmmo = previousTurnState.playerAmmo;
+
+            // 2. Restore Enemies
+            foreach (var data in previousTurnState.savedPieces)
+            {
+                Piece p = data.pieceReference;
+                
+                // If the piece is somehow null (destroyed completely), we can't restore it easily without respawning.
+                // ideally, we disable pieces instead of destroying them until the turn is fully over.
+                if (p != null)
+                {
+                    // Clear current pos
+                    GridManager.Instance.grid[p.currentX, p.currentY].currentPiece = null;
+                    
+                    // Restore Stats
+                    p.currentHp = data.hp;
+                    p.currentCooldown = data.cooldown;
+                    
+                    // Move Back
+                    BoardNode oldNode = GridManager.Instance.grid[data.x, data.y];
+                    p.MoveTo(oldNode);
+                }
+            }
+
+            // 3. Reset Turn to Player
+            currentTurn = TurnState.PlayerTurn;
+            
+            // TODO: Play Screen Shake / Shatter Sound Effect here!
+        }
+        else
+        {
+            Debug.Log("GAME OVER! No Armor Left!");
+            currentTurn = TurnState.GameOver;
+        }
     }
 }
