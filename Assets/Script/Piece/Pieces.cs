@@ -12,12 +12,19 @@ public abstract class Piece : MonoBehaviour
     public int currentHp;
 
     [Header("Visuals")]
-    public Sprite deadSprite; // NEW: Drag the dead version here in Inspector!
+    public Sprite deadSprite;
+    
+    [Header("Movement Settings")]
+    public float moveDuration = 0.25f; // How long the hop takes (in seconds)
+    public float jumpHeight = 0.5f;    // How high the piece arcs visually
+    private float moveTimer;
+    private bool isMoving;
+    private Vector3 startMovePosition;
 
     [Header("Cooldown Settings")]
     public int maxCooldown;
     public int currentCooldown;
-    public Vector3 targetPosition;
+    public Vector3 targetPosition; 
 
     protected SpriteRenderer spriteRenderer;
     protected Color originalColor;
@@ -31,66 +38,55 @@ public abstract class Piece : MonoBehaviour
 
     public virtual void MoveTo(BoardNode targetNode)
     {
+        // 1. Clear old node logic
         if (currentNode != null) currentNode.currentPiece = null; 
         
+        // 2. Kill whatever is on the target node
         if (targetNode.currentPiece != null && targetNode.currentPiece != this)
         {
-            Destroy(targetNode.currentPiece.gameObject); 
+            Piece targetPiece = targetNode.currentPiece.GetComponent<Piece>();
+            if (targetPiece != null) targetPiece.TakeDamage(999); 
+            else Destroy(targetNode.currentPiece.gameObject);
         }
 
+        // 3. Update Logical Coordinates
         currentX = targetNode.x;
         currentY = targetNode.y;
         currentNode = targetNode; 
         targetNode.currentPiece = this;
         
-        targetPosition = targetNode.nodeGameObject.transform.position; 
+        // 4. SETUP MOVEMENT ANIMATION
+        targetPosition = targetNode.nodeGameObject.transform.position;
+        startMovePosition = transform.position; // Remember where we started
+        moveTimer = 0f;                         // Reset timer
+        isMoving = true;                        // Start animation loop
     }
 
     public virtual void TakeDamage(int damage)
     {
         currentHp -= damage;
-        if (currentHp <= 0)
-        {
-            Die();
-        }
+        if (currentHp <= 0) Die();
     }
 
     protected virtual void Die()
     {
-        // 1. Clear the "Alive Piece" data from the board
-        if (currentNode != null)
-        {
-            currentNode.currentPiece = null; 
-        }
+        if (currentNode != null) currentNode.currentPiece = null; 
+        if (!isPlayer) TurnManager.Instance.enemyPieces.Remove(this);
 
-        // 2. Remove from Enemy List (so it stops moving/thinking)
-        if (!isPlayer)
-        {
-            TurnManager.Instance.enemyPieces.Remove(this);
-        }
-
-        // 3. TRANSFORM INTO CORPSE
-        // Change Sprite
         if (spriteRenderer != null && deadSprite != null)
         {
             spriteRenderer.sprite = deadSprite;
-            // Tint it Grey and slightly transparent
-            spriteRenderer.color = new Color(0.8f, 0.8f, 0.8f, 0.95f); 
+            spriteRenderer.color = new Color(0.6f, 0.6f, 0.6f, 0.8f); 
         }
 
-        // Add Corpse Component
         Corpse corpse = gameObject.AddComponent<Corpse>();
         corpse.Init(currentNode);
-
-        // Register Corpse to Board and Manager
         if (currentNode != null) currentNode.currentCorpse = corpse;
         TurnManager.Instance.activeCorpses.Add(corpse);
 
-        // 4. Destroy this Script (Piece/EnemyPawn), but keep the GameObject & Collider!
         Destroy(this); 
     }
 
-    // ... Keep visual feedback and movement logic ...
     public void SetTargeted(bool isTargeted)
     {
         if (spriteRenderer != null)
@@ -102,16 +98,56 @@ public abstract class Piece : MonoBehaviour
     public abstract bool IsValidMove(BoardNode targetNode, BoardNode[,] grid);
     public virtual BoardNode GetAIMove(BoardNode[,] grid) { return null; }
     
+    // --- UPDATED ANIMATION LOGIC ---
     protected virtual void Update()
     {
-        if (!isPlayer && currentCooldown <= 1)
+        // 1. HANDLE MOVEMENT (Bezier Curve)
+        if (isMoving)
         {
-            float offsetY = Mathf.Sin(Time.time * 5f) * 0.05f;
-            transform.position = targetPosition + new Vector3(0, offsetY, 0);
+            moveTimer += Time.deltaTime;
+            
+            // 't' is the percentage of the move completed (0 to 1)
+            float t = moveTimer / moveDuration;
+
+            if (t >= 1f)
+            {
+                // Animation Finished
+                transform.position = targetPosition;
+                isMoving = false;
+            }
+            else
+            {
+                // Quadratic Bezier Curve Calculation
+                // P0 = Start, P2 = End, P1 = Control Point (Midpoint + Height)
+                Vector3 p0 = startMovePosition;
+                Vector3 p2 = targetPosition;
+                
+                // Calculate "Control Point" (The peak of the jump)
+                Vector3 midPoint = (p0 + p2) * 0.5f;
+                Vector3 p1 = midPoint + new Vector3(0, jumpHeight, 0);
+
+                // The Magic Formula
+                // (1-t)^2 * P0 + 2(1-t)t * P1 + t^2 * P2
+                Vector3 position = 
+                    (1 - t) * (1 - t) * p0 + 
+                    2 * (1 - t) * t * p1 + 
+                    t * t * p2;
+
+                transform.position = position;
+            }
         }
-        else if (targetPosition != Vector3.zero)
+        // 2. HANDLE IDLE JIGGLE (Only when not moving)
+        else
         {
-            transform.position = targetPosition;
+            // Ensure we are snapped to the grid
+            if (targetPosition != Vector3.zero) transform.position = targetPosition;
+
+            // Jiggle if cooldown is ready
+            if (!isPlayer && currentCooldown <= 1)
+            {
+                float offsetY = Mathf.Sin(Time.time * 10f) * 0.05f;
+                transform.position = targetPosition + new Vector3(0, offsetY, 0);
+            }
         }
     }
 }
