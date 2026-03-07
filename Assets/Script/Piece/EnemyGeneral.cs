@@ -3,24 +3,25 @@ using System.Collections.Generic;
 
 public class EnemyGeneral : Piece
 {
-        protected override void Awake()
+    protected override void Awake()
     {
-        base.Awake(); 
+        base.Awake();
         isPlayer = false; 
         maxCooldown = 2; 
     }
-    void Start() { isPlayer = false; maxCooldown = 2; currentCooldown = maxCooldown; }
-        public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
+    // REMOVED Start() so it doesn't overwrite your level data!
+
+    public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {
-        if (!targetNode.isEnemyPalace) return false; // Palace Rule
+        if (!targetNode.isEnemyPalace) return false; 
 
         int absX = Mathf.Abs(targetNode.x - currentX);
         int absY = Mathf.Abs(targetNode.y - currentY);
 
-        // Exactly 1 step orthogonally (X is 1 and Y is 0, OR X is 0 and Y is 1)
         if ((absX == 1 && absY == 0) || (absX == 0 && absY == 1))
         {
-            if (targetNode.currentPiece == null || targetNode.currentPiece.isPlayer) return true;
+            // SAFE CHECK: Empty OR (Not Null AND Is Player)
+            if (targetNode.IsEmpty() || (targetNode.currentPiece != null && targetNode.currentPiece.isPlayer)) return true;
         }
         return false;
     }
@@ -36,11 +37,12 @@ public class EnemyGeneral : Piece
             int tX = currentX + dx[i];
             int tY = currentY + dy[i];
 
-            if (tX >= 3 && tX <= 5 && tY >= 7 && tY <= 9)
+            if (tX >= 3 && tX <= 5 && tY >= 7 && tY <= 9) 
             {
                 BoardNode testNode = grid[tX, tY];
                 if (IsValidMove(testNode, grid))
                 {
+                    // SAFE CHECK
                     if (testNode.currentPiece != null && testNode.currentPiece.isPlayer) return testNode;
                     validMoves.Add(testNode);
                 }

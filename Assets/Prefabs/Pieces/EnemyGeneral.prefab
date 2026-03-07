@@ -81,7 +81,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2934322880498546107, guid: 83dd35ca9fd6dd6e5b2f059ef962f418, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -117,11 +117,13 @@ MonoBehaviour:
     isRiver: 0
     nodeGameObject: {fileID: 0}
     currentPiece: {fileID: 0}
+    currentCorpse: {fileID: 0}
   maxHp: 1
   currentHp: 0
   maxCooldown: 0
   currentCooldown: 0
   targetPosition: {x: 0, y: 0, z: 0}
+  corpsePrefab: {fileID: 2886752667788108647, guid: cc87eb5ecedb0d046a136ae88403888d, type: 3}
 --- !u!58 &7161145993351700865
 CircleCollider2D:
   m_ObjectHideFlags: 0

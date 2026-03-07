@@ -13,7 +13,7 @@ public class TurnManager : MonoBehaviour
     
     public PlayerGeneral activePlayer; 
     public List<Piece> enemyPieces = new List<Piece>();
-
+    public List<Corpse> activeCorpses = new List<Corpse>();
     private void Awake()
     {
         if (Instance != null && Instance != this) Destroy(this);
@@ -63,6 +63,18 @@ public class TurnManager : MonoBehaviour
                 else 
                 {
                     enemy.currentCooldown = 0;
+                }
+            }
+        }
+
+        for (int i = activeCorpses.Count - 1; i >= 0; i--)
+        {
+            if (activeCorpses[i] != null)
+            {
+                activeCorpses[i].Decay();
+                if (activeCorpses[i] == null) // It was destroyed by Decay()
+                {
+                    activeCorpses.RemoveAt(i);
                 }
             }
         }

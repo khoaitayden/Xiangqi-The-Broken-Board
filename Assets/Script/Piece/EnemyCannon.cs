@@ -9,7 +9,7 @@ public class EnemyCannon : Piece
         isPlayer = false; 
         maxCooldown = 2; 
     }
-    void Start() { isPlayer = false; maxCooldown = 2; currentCooldown = maxCooldown; }
+    // REMOVED Start()
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid) { return false; }
 
@@ -30,28 +30,17 @@ public class EnemyCannon : Piece
 
                 if (!hasJumped)
                 {
-                    if (testNode.currentPiece == null)
-                    {
-                        validMoves.Add(testNode); // Move normally if haven't jumped
-                    }
-                    else
-                    {
-                        hasJumped = true; // We hit the "Screen/Mount". Now we look for a target.
-                    }
+                    if (testNode.IsEmpty()) validMoves.Add(testNode); 
+                    else hasJumped = true; // Hit a piece OR a corpse! Mount created!
                 }
                 else
                 {
-                    // If we have jumped, we ignore empty spaces and look for a piece
-                    if (testNode.currentPiece != null)
+                    if (!testNode.IsEmpty()) // Hit second object
                     {
-                        if (testNode.currentPiece.isPlayer)
-                        {
-                            return testNode; // Instantly return the killing move!
-                        }
-                        break; // Hit a second piece, cannon cannot jump twice. Stop sliding.
+                        if (testNode.currentPiece != null && testNode.currentPiece.isPlayer) return testNode; 
+                        break; 
                     }
                 }
-
                 checkX += dir.x;
                 checkY += dir.y;
             }

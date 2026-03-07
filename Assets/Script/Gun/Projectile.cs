@@ -37,15 +37,26 @@ public class Projectile : MonoBehaviour
         }
     }
 
-    // Triggered when hitting an enemy
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        // 1. Check if we hit an Alive Piece
         Piece hitPiece = collision.GetComponent<Piece>();
-        if (hitPiece != null && !hitPiece.isPlayer) // Don't shoot yourself!
+        if (hitPiece != null)
         {
-            hitPiece.TakeDamage(damage);
-            // Optionally: Add knockback logic here later!
-            Destroy(gameObject); // Bullet is destroyed on impact
+            if (!hitPiece.isPlayer) // Don't shoot yourself
+            {
+                hitPiece.TakeDamage(damage);
+                Destroy(gameObject); // Bullet destroyed on impact
+            }
+            return;
+        }
+
+        // 2. Check if we hit a Corpse (Cover)
+        Corpse hitCorpse = collision.GetComponent<Corpse>();
+        if (hitCorpse != null)
+        {
+            // Bullet hits the dead body and stops
+            Destroy(gameObject); 
         }
     }
 }

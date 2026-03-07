@@ -9,7 +9,7 @@ public class EnemyElephant : Piece
         isPlayer = false; 
         maxCooldown = 3; 
     }
-    void Start() { isPlayer = false; maxCooldown = 3; currentCooldown = maxCooldown; }
+    // REMOVED Start()
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {
@@ -26,10 +26,11 @@ public class EnemyElephant : Piece
             int eyeX = currentX + (dirX / 2);
             int eyeY = currentY + (dirY / 2);
 
-            // If there is ANY piece in the middle, it cannot move
-            if (grid[eyeX, eyeY].currentPiece != null) return false;
+            // FIX: If there is ANY piece OR Corpse in the middle, it cannot move
+            if (!grid[eyeX, eyeY].IsEmpty()) return false;
 
-            if (targetNode.currentPiece == null || targetNode.currentPiece.isPlayer) return true;
+            // FIX: Safe check! Empty OR (Not Null and Player)
+            if (targetNode.IsEmpty() || (targetNode.currentPiece != null && targetNode.currentPiece.isPlayer)) return true;
         }
         return false;
     }
@@ -50,6 +51,7 @@ public class EnemyElephant : Piece
                 BoardNode testNode = grid[tX, tY];
                 if (IsValidMove(testNode, grid))
                 {
+                    // FIX: Safe check! We only care if it's the player here.
                     if (testNode.currentPiece != null && testNode.currentPiece.isPlayer) return testNode;
                     validMoves.Add(testNode);
                 }

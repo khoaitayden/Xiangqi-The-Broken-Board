@@ -9,7 +9,6 @@ public class EnemyChariot : Piece
         isPlayer = false; 
         maxCooldown = 3; 
     }
-    void Start() { isPlayer = false; maxCooldown = 3; currentCooldown = maxCooldown; }
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {
@@ -32,17 +31,17 @@ public class EnemyChariot : Piece
             {
                 BoardNode testNode = grid[checkX, checkY];
 
-                if (testNode.currentPiece == null)
+                if (testNode.IsEmpty()) 
                 {
-                    validMoves.Add(testNode); // Empty space is a valid move
+                    validMoves.Add(testNode); 
                 }
-                else
+                else // Hit a piece OR a corpse
                 {
-                    if (testNode.currentPiece.isPlayer)
+                    if (testNode.currentPiece != null && testNode.currentPiece.isPlayer)
                     {
-                        return testNode; // Instantly return the killing move!
+                        return testNode; // Hit player
                     }
-                    break; // Blocked by another piece, stop sliding in this direction
+                    break; // Stop sliding, hit a wall/corpse/teammate
                 }
 
                 checkX += dir.x;

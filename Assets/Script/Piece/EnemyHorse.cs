@@ -3,13 +3,12 @@ using System.Collections.Generic;
 
 public class EnemyHorse : Piece
 {
-        protected override void Awake()
+    protected override void Awake()
     {
         base.Awake(); 
         isPlayer = false; 
         maxCooldown = 1; 
     }
-    void Start() { isPlayer = false; maxCooldown = 1; currentCooldown = maxCooldown; }
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {
         int dirX = targetNode.x - currentX;
@@ -32,13 +31,13 @@ public class EnemyHorse : Piece
             else blockY += (int)Mathf.Sign(dirY);
 
             // If the blocking node has ANY piece on it, the move is illegal!
-            if (grid[blockX, blockY].currentPiece != null)
+            if (grid[blockX, blockY].currentPiece != null || grid[blockX, blockY].currentCorpse != null)
             {
-                return false; // HOBBLED!
+                return false; // HOBBLED BY PIECE OR CORPSE!
             }
 
             // If not hobbled, check if target node is empty or has the player
-            if (targetNode.currentPiece == null || targetNode.currentPiece.isPlayer)
+            if (targetNode.IsEmpty() || (targetNode.currentPiece != null && targetNode.currentPiece.isPlayer))
             {
                 return true;
             }

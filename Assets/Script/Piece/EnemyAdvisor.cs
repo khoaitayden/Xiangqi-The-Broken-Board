@@ -9,19 +9,19 @@ public class EnemyAdvisor : Piece
         isPlayer = false; 
         maxCooldown = 2; 
     }
-    void Start() { isPlayer = false; maxCooldown = 2; currentCooldown = maxCooldown; }
+    // REMOVED Start()
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {
-        if (!targetNode.isEnemyPalace) return false; // Palace Rule
+        if (!targetNode.isEnemyPalace) return false; 
 
         int absX = Mathf.Abs(targetNode.x - currentX);
         int absY = Mathf.Abs(targetNode.y - currentY);
 
-        // Exactly 1 step diagonally
         if (absX == 1 && absY == 1)
         {
-            if (targetNode.currentPiece == null || targetNode.currentPiece.isPlayer) return true;
+            // SAFE CHECK
+            if (targetNode.IsEmpty() || (targetNode.currentPiece != null && targetNode.currentPiece.isPlayer)) return true;
         }
         return false;
     }
@@ -37,11 +37,12 @@ public class EnemyAdvisor : Piece
             int tX = currentX + dx[i];
             int tY = currentY + dy[i];
 
-            if (tX >= 3 && tX <= 5 && tY >= 7 && tY <= 9) // Palace bounds
+            if (tX >= 3 && tX <= 5 && tY >= 7 && tY <= 9) 
             {
                 BoardNode testNode = grid[tX, tY];
                 if (IsValidMove(testNode, grid))
                 {
+                    // SAFE CHECK
                     if (testNode.currentPiece != null && testNode.currentPiece.isPlayer) return testNode;
                     validMoves.Add(testNode);
                 }

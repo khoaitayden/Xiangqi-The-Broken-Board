@@ -340,67 +340,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &698569778
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 698569780}
-  - component: {fileID: 698569781}
-  m_Layer: 0
-  m_Name: BoardManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &698569780
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 698569778}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.10771, y: -0.04611, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &698569781
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 698569778}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3adfaee9f1757f334babeff72b2f5d83, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BoardManager
-  currentTurn: 0
-  currentLevel: {fileID: 11400000, guid: a9c3f7ff48f6d54fe925ab73c6351fae, type: 2}
-  width: 9
-  height: 10
-  spacing: 1
-  nodePrefab: {fileID: 8865605849380458659, guid: b070d2c52883c055494e50089216ebaa, type: 3}
-  playerGeneralPrefab: {fileID: 6743041626700125741, guid: 0148560b41f6c245da49f72dac1359bc, type: 3}
-  enemyPawnPrefab: {fileID: 1580892474334285542, guid: 7a30d2e33da5f845d873a0d02499b740, type: 3}
-  enemyHorsePrefab: {fileID: 7154912479103889726, guid: 3a8a939e19030508581170680f915876, type: 3}
-  enemyAdvisorPrefab: {fileID: 4936687418414120909, guid: 35a6d4a837ea163abb24452f65eddd59, type: 3}
-  enemyElephantPrefab: {fileID: 6997222559792102729, guid: 0efec9c9d9c5d7ebc9bb052596e83776, type: 3}
-  enemyGeneralPrefab: {fileID: 6112029043887068032, guid: 5a50e02e22d2244c9a95c6164480089e, type: 3}
-  enemyChariotPrefab: {fileID: 5679512859298181273, guid: ae74957bea0a45165ab66c1ba889737d, type: 3}
-  enemyCannonPrefab: {fileID: 8705496967708080377, guid: 924fb542ed7910955828ffd34df157c7, type: 3}
-  projectilePrefab: {fileID: 4775168002477434243, guid: 5ac1acac85778ea9f8eecb008ee37aa4, type: 3}
-  playerVisualGhost: {fileID: 0}
-  enemyPieces: []
 --- !u!1 &772335223
 GameObject:
   m_ObjectHideFlags: 0
@@ -456,7 +395,7 @@ GameObject:
   - component: {fileID: 1685127238}
   - component: {fileID: 1685127237}
   m_Layer: 0
-  m_Name: banco
+  m_Name: Board
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -605,6 +544,7 @@ MonoBehaviour:
   currentTurn: 0
   activePlayer: {fileID: 0}
   enemyPieces: []
+  activeCorpses: []
 --- !u!114 &2027478627
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -643,6 +583,5 @@ SceneRoots:
   - {fileID: 519420032}
   - {fileID: 619394802}
   - {fileID: 1685127238}
-  - {fileID: 698569780}
   - {fileID: 772335225}
   - {fileID: 2027478628}

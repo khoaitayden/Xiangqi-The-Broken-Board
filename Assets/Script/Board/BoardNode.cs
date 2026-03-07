@@ -12,9 +12,16 @@ public class BoardNode
     public bool isRiver; 
 
     public GameObject nodeGameObject;
-    
-    // NEW: The piece currently occupying this intersection
     public Piece currentPiece; 
+    
+    // NEW: Track if a corpse is blocking this intersection
+    public Corpse currentCorpse; 
+
+    // Helper function so we don't have to write "currentPiece == null && currentCorpse == null" everywhere
+    public bool IsEmpty()
+    {
+        return currentPiece == null && currentCorpse == null;
+    }
 
     public BoardNode(int x, int y, Vector2 worldPosition)
     {
