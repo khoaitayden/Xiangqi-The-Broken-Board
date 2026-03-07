@@ -105,27 +105,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdfc981afd0003735a14845a7839e753, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyCannon
-  currentX: 0
-  currentY: 0
-  isPlayer: 0
-  currentNode:
-    x: 0
-    y: 0
-    worldPosition: {x: 0, y: 0}
-    isPlayerPalace: 0
-    isEnemyPalace: 0
-    isRiver: 0
-    nodeGameObject: {fileID: 0}
-    currentPiece: {fileID: 0}
-    currentCorpse: {fileID: 0}
-  maxHp: 1
-  currentHp: 0
-  deadSprite: {fileID: -3666990231466448275, guid: f164d599af005e471b8a8a347bb22d63, type: 3}
-  moveDuration: 0.25
-  jumpHeight: 1
-  maxCooldown: 0
-  currentCooldown: 0
-  targetPosition: {x: 0, y: 0, z: 0}
+  _x: 0
+  _y: 0
+  _isPlayer: 0
+  _maxHp: 2
+  _currentHp: 0
+  _deadSprite: {fileID: -3666990231466448275, guid: f164d599af005e471b8a8a347bb22d63, type: 3}
+  _moveSpeed: 20
+  _jumpHeight: 0.5
+  _moveDuration: 0.25
+  _maxCooldown: 2
+  _currentCooldown: 0
+  TargetPosition: {x: 0, y: 0, z: 0}
 --- !u!58 &-4450096560260840900
 CircleCollider2D:
   m_ObjectHideFlags: 0

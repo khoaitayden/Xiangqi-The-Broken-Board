@@ -5,32 +5,27 @@ public class EnemyElephant : Piece
 {
     protected override void Awake()
     {
-        base.Awake(); 
-        isPlayer = false; 
-        maxCooldown = 3; 
+        base.Awake();  
+        MaxCooldown = 3; 
     }
     // REMOVED Start()
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {
-        // River Rule: Enemy Elephant must stay on top half (Y from 5 to 9)
         if (targetNode.y < 5) return false; 
 
-        int dirX = targetNode.x - currentX;
-        int dirY = targetNode.y - currentY;
+        int dirX = targetNode.x - X;
+        int dirY = targetNode.y - Y;
 
         // Exactly 2 steps diagonally
         if (Mathf.Abs(dirX) == 2 && Mathf.Abs(dirY) == 2)
         {
-            // The "Blocking the Eye" Rule (Chặn mắt tượng)
-            int eyeX = currentX + (dirX / 2);
-            int eyeY = currentY + (dirY / 2);
+            int eyeX = X + (dirX / 2);
+            int eyeY = Y + (dirY / 2);
 
-            // FIX: If there is ANY piece OR Corpse in the middle, it cannot move
             if (!grid[eyeX, eyeY].IsEmpty()) return false;
 
-            // FIX: Safe check! Empty OR (Not Null and Player)
-            if (targetNode.IsEmpty() || (targetNode.currentPiece != null && targetNode.currentPiece.isPlayer)) return true;
+            if (targetNode.IsEmpty() || (targetNode.currentPiece != null && targetNode.currentPiece.IsPlayer)) return true;
         }
         return false;
     }
@@ -43,16 +38,16 @@ public class EnemyElephant : Piece
 
         for (int i = 0; i < 4; i++)
         {
-            int tX = currentX + dx[i];
-            int tY = currentY + dy[i];
+            int tX = X + dx[i];
+            int tY = Y + dy[i];
 
-            if (tX >= 0 && tX <= 8 && tY >= 5 && tY <= 9) // River bounds check
+            if (tX >= 0 && tX <= 8 && tY >= 5 && tY <= 9)
             {
                 BoardNode testNode = grid[tX, tY];
                 if (IsValidMove(testNode, grid))
                 {
                     // FIX: Safe check! We only care if it's the player here.
-                    if (testNode.currentPiece != null && testNode.currentPiece.isPlayer) return testNode;
+                    if (testNode.currentPiece != null && testNode.currentPiece.IsPlayer) return testNode;
                     validMoves.Add(testNode);
                 }
             }

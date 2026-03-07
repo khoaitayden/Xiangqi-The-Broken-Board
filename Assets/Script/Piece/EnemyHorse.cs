@@ -6,13 +6,12 @@ public class EnemyHorse : Piece
     protected override void Awake()
     {
         base.Awake(); 
-        isPlayer = false; 
-        maxCooldown = 1; 
+        MaxCooldown = 1; 
     }
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {
-        int dirX = targetNode.x - currentX;
-        int dirY = targetNode.y - currentY;
+        int dirX = targetNode.x - X;
+        int dirY = targetNode.y - Y;
         
         int absX = Mathf.Abs(dirX);
         int absY = Mathf.Abs(dirY);
@@ -20,24 +19,19 @@ public class EnemyHorse : Piece
         // Check if it's an "L" shape (2 steps one way, 1 step the other)
         if ((absX == 1 && absY == 2) || (absX == 2 && absY == 1))
         {
-            // --- THE HOBBLING RULE (Cản Mã) ---
-            // Find the immediate adjacent node the horse is trying to move THROUGH
-            int blockX = currentX;
-            int blockY = currentY;
+            // --- THE HOBBLING RULE ---
+            int blockX = X;
+            int blockY = Y;
 
-            // If it's moving 2 steps horizontally, the block is 1 step horizontally
             if (absX == 2) blockX += (int)Mathf.Sign(dirX);
-            // If it's moving 2 steps vertically, the block is 1 step vertically
             else blockY += (int)Mathf.Sign(dirY);
 
-            // If the blocking node has ANY piece on it, the move is illegal!
             if (grid[blockX, blockY].currentPiece != null || grid[blockX, blockY].currentCorpse != null)
             {
-                return false; // HOBBLED BY PIECE OR CORPSE!
+                return false;
             }
 
-            // If not hobbled, check if target node is empty or has the player
-            if (targetNode.IsEmpty() || (targetNode.currentPiece != null && targetNode.currentPiece.isPlayer))
+            if (targetNode.IsEmpty() || (targetNode.currentPiece != null && targetNode.currentPiece.IsPlayer))
             {
                 return true;
             }
@@ -57,19 +51,16 @@ public class EnemyHorse : Piece
 
         for (int i = 0; i < 8; i++)
         {
-            int targetX = currentX + dx[i];
-            int targetY = currentY + dy[i];
+            int targetX = X + dx[i];
+            int targetY = Y + dy[i];
 
-            // Make sure the target is inside the 9x10 board
             if (targetX >= 0 && targetX <= 8 && targetY >= 0 && targetY <= 9)
             {
                 BoardNode testNode = grid[targetX, targetY];
                 
-                // If it's a valid move (which includes the Hobbling check)
                 if (IsValidMove(testNode, grid))
                 {
-                    // If it kills the player, DO IT IMMEDIATELY
-                    if (testNode.currentPiece != null && testNode.currentPiece.isPlayer)
+                    if (testNode.currentPiece != null && testNode.currentPiece.IsPlayer)
                     {
                         return testNode;
                     }
@@ -78,13 +69,12 @@ public class EnemyHorse : Piece
             }
         }
 
-        // Pick a random valid jump
         if (validMoves.Count > 0)
         {
             int randomIndex = Random.Range(0, validMoves.Count);
             return validMoves[randomIndex];
         }
 
-        return null; // Completely trapped, cannot move
+        return null; 
     }
 }

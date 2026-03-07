@@ -3,31 +3,43 @@ using UnityEngine;
 public class PlayerGeneral : Piece
 {
     [Header("Weapon: Fire Lance")]
-    public int loadedAmmo = 2;
-    public int maxAmmo = 2;
-    public int firepower = 5;       
-    public float fireArc = 40f;     
-    public float rangeX = 3f;       
-    public float rangeY = 6f;   
+    [SerializeField] private int _loadedAmmo = 2;
+    [SerializeField] private int _maxAmmo = 2;
+    [SerializeField] private int _firepower = 5;
+    [SerializeField] private float _fireArc = 40f;
+    [SerializeField] private float _rangeX = 3f;
+    [SerializeField] private float _rangeY = 6f;
+
+    // Public Properties for accessing stats
+    public int LoadedAmmo { get { return _loadedAmmo; } set { _loadedAmmo = value; } }
+    public int MaxAmmo => _maxAmmo;
+    public int Firepower => _firepower;
+    public float FireArc => _fireArc;
+    public float RangeX => _rangeX;
+    public float RangeY => _rangeY;
+
     [Header("Defense")]
-    public int maxArmor = 2;
-    public int currentArmor;    
+    [SerializeField] private int _maxArmor = 2;
+    [SerializeField] private int _currentArmor;
+    public int CurrentArmor { get { return _currentArmor; } set { _currentArmor = value; } }
+    public int MaxArmor => _maxArmor;
 
     protected override void Awake()
     {
         base.Awake();
-        isPlayer = true;
-        currentArmor = maxArmor;
+        
+        CurrentArmor = _maxArmor;
     }
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {
-        int distanceX = Mathf.Abs(targetNode.x - currentX);
-        int distanceY = Mathf.Abs(targetNode.y - currentY);
+        // Use property X and Y instead of currentX
+        int distanceX = Mathf.Abs(targetNode.x - X);
+        int distanceY = Mathf.Abs(targetNode.y - Y);
+
         if (distanceX <= 1 && distanceY <= 1 && !(distanceX == 0 && distanceY == 0))
         {
-            // Player cannot step on alive enemies OR corpses
-            if (targetNode.IsEmpty()) return true; 
+            if (targetNode.IsEmpty()) return true;
         }
         return false;
     }

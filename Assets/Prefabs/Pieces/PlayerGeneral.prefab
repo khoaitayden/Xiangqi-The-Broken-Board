@@ -105,35 +105,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d52133ed4b3310dd79d51c97b8d6bf9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerGeneral
-  currentX: 0
-  currentY: 0
-  isPlayer: 0
-  currentNode:
-    x: 0
-    y: 0
-    worldPosition: {x: 0, y: 0}
-    isPlayerPalace: 0
-    isEnemyPalace: 0
-    isRiver: 0
-    nodeGameObject: {fileID: 0}
-    currentPiece: {fileID: 0}
-    currentCorpse: {fileID: 0}
-  maxHp: 1
-  currentHp: 0
-  deadSprite: {fileID: -2030643272353036554, guid: 2b75f275788aeb675bb08bc2519cab04, type: 3}
-  moveDuration: 0.25
-  jumpHeight: 0.5
-  maxCooldown: 0
-  currentCooldown: 0
-  targetPosition: {x: 0, y: 0, z: 0}
-  loadedAmmo: 2
-  maxAmmo: 2
-  firepower: 5
-  fireArc: 40
-  rangeX: 3
-  rangeY: 6
-  maxArmor: 2
-  currentArmor: 0
+  _x: 0
+  _y: 0
+  _isPlayer: 1
+  _maxHp: 1
+  _currentHp: 0
+  _deadSprite: {fileID: -2030643272353036554, guid: 2b75f275788aeb675bb08bc2519cab04, type: 3}
+  _jumpHeight: 0.5
+  _moveDuration: 0.25
+  _maxCooldown: 0
+  _currentCooldown: 0
+  TargetPosition: {x: 0, y: 0, z: 0}
+  _loadedAmmo: 2
+  _maxAmmo: 2
+  _firepower: 5
+  _fireArc: 40
+  _rangeX: 3
+  _rangeY: 6
+  _maxArmor: 2
+  _currentArmor: 0
 --- !u!58 &-609644035593423078
 CircleCollider2D:
   m_ObjectHideFlags: 0

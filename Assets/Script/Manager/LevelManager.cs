@@ -43,12 +43,9 @@ public class LevelManager : MonoBehaviour
         GameObject playerObj = Instantiate(playerGeneralPrefab, startNode.nodeGameObject.transform.position, Quaternion.identity);
         PlayerGeneral player = playerObj.GetComponent<PlayerGeneral>();
         
-        player.currentX = startNode.x;
-        player.currentY = startNode.y;
-        player.targetPosition = startNode.nodeGameObject.transform.position; 
-        startNode.currentPiece = player;
+        player.InitPosition(startX, startY, startNode);
         
-        TurnManager.Instance.activePlayer = player; // Give to TurnManager
+        TurnManager.Instance.activePlayer = player; 
     }
 
     void SpawnEnemy(GameObject prefab, int startX, int startY, int startingCooldown)
@@ -57,13 +54,11 @@ public class LevelManager : MonoBehaviour
         GameObject enemyObj = Instantiate(prefab, startNode.nodeGameObject.transform.position, Quaternion.identity);
         Piece enemyPiece = enemyObj.GetComponent<Piece>();
         
-        enemyPiece.currentX = startX;
-        enemyPiece.currentY = startY;
-        enemyPiece.targetPosition = startNode.nodeGameObject.transform.position; 
-        enemyPiece.currentCooldown = startingCooldown; 
-        startNode.currentPiece = enemyPiece;
+        enemyPiece.InitPosition(startX, startY, startNode);
         
-        TurnManager.Instance.enemyPieces.Add(enemyPiece); // Give to TurnManager
+        enemyPiece.CurrentCooldown = startingCooldown; 
+        
+        TurnManager.Instance.enemyPieces.Add(enemyPiece); 
     }
 
     GameObject GetPrefabForType(PieceType type)

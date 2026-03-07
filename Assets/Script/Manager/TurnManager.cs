@@ -38,9 +38,9 @@ public class TurnManager : MonoBehaviour
         {
             if (enemy == null) continue; 
 
-            if (enemy.currentCooldown > 0) enemy.currentCooldown--;
+            if (enemy.CurrentCooldown > 0) enemy.CurrentCooldown--;
 
-            if (enemy.currentCooldown == 0)
+            if (enemy.CurrentCooldown == 0)
             {
                 BoardNode targetNode = enemy.GetAIMove(GridManager.Instance.grid);
 
@@ -52,14 +52,14 @@ public class TurnManager : MonoBehaviour
                         yield break; 
                     }
 
-                    GridManager.Instance.grid[enemy.currentX, enemy.currentY].currentPiece = null;
+                    GridManager.Instance.grid[enemy.X, enemy.Y].currentPiece = null;
                     enemy.MoveTo(targetNode);
                     targetNode.currentPiece = enemy;
-                    enemy.currentCooldown = enemy.maxCooldown;
+                    enemy.CurrentCooldown = enemy.MaxCooldown;
                 }
                 else 
                 {
-                    enemy.currentCooldown = 0;
+                    enemy.CurrentCooldown = 0;
                 }
             }
         }
@@ -82,36 +82,36 @@ public class TurnManager : MonoBehaviour
     {
         previousTurnState = new BoardState(activePlayer, enemyPieces);
     }
-    public void TriggerArmorRewind()
+public void TriggerArmorRewind()
     {
-        if (activePlayer.currentArmor > 0)
+        if (activePlayer.CurrentArmor > 0)
         {
-            activePlayer.currentArmor--;
-            Debug.Log($"ARMOR BROKEN! Rewinding Turn... ({activePlayer.currentArmor} Left)");
+            activePlayer.CurrentArmor--;
+            Debug.Log($"ARMOR BROKEN! Rewinding... ({activePlayer.CurrentArmor} Left)");
 
             // 1. Restore Player
             BoardNode oldPlayerNode = GridManager.Instance.grid[previousTurnState.playerX, previousTurnState.playerY];
-            // Clear current pos
-            GridManager.Instance.grid[activePlayer.currentX, activePlayer.currentY].currentPiece = null;
-            // Move back
+            GridManager.Instance.grid[activePlayer.X, activePlayer.Y].currentPiece = null;
+            
+            // MoveTo handles X/Y assignment internally, so this is fine!
             activePlayer.MoveTo(oldPlayerNode); 
-            activePlayer.loadedAmmo = previousTurnState.playerAmmo;
+            activePlayer.LoadedAmmo = previousTurnState.playerAmmo;
 
             // 2. Restore Enemies
             foreach (var data in previousTurnState.savedPieces)
             {
                 Piece p = data.pieceReference;
                 
-                // If the piece is somehow null (destroyed completely), we can't restore it easily without respawning.
-                // ideally, we disable pieces instead of destroying them until the turn is fully over.
                 if (p != null)
                 {
-                    // Clear current pos
-                    GridManager.Instance.grid[p.currentX, p.currentY].currentPiece = null;
+                    // Ensure the piece is active (in case it died this turn)
+                    p.gameObject.SetActive(true);
+
+                    // Clear current pos on grid
+                    GridManager.Instance.grid[p.X, p.Y].currentPiece = null;
                     
-                    // Restore Stats
-                    p.currentHp = data.hp;
-                    p.currentCooldown = data.cooldown;
+                    // FIX: Use ForceSetStats instead of p.CurrentHp = ...
+                    p.ForceSetStats(data.hp, data.cooldown);
                     
                     // Move Back
                     BoardNode oldNode = GridManager.Instance.grid[data.x, data.y];
@@ -119,10 +119,7 @@ public class TurnManager : MonoBehaviour
                 }
             }
 
-            // 3. Reset Turn to Player
             currentTurn = TurnState.PlayerTurn;
-            
-            // TODO: Play Screen Shake / Shatter Sound Effect here!
         }
         else
         {

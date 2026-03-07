@@ -6,13 +6,11 @@ public class EnemyChariot : Piece
     protected override void Awake()
     {
         base.Awake(); 
-        isPlayer = false; 
-        maxCooldown = 3; 
+        MaxCooldown = 3; 
     }
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {
-        // Handled directly inside GetAIMove for sliding pieces for better performance
         return false; 
     }
 
@@ -23,10 +21,9 @@ public class EnemyChariot : Piece
 
         foreach (var dir in directions)
         {
-            int checkX = currentX + dir.x;
-            int checkY = currentY + dir.y;
+            int checkX = X + dir.x;
+            int checkY = Y + dir.y;
 
-            // Slide until we hit the edge of the board
             while (checkX >= 0 && checkX <= 8 && checkY >= 0 && checkY <= 9)
             {
                 BoardNode testNode = grid[checkX, checkY];
@@ -37,11 +34,11 @@ public class EnemyChariot : Piece
                 }
                 else // Hit a piece OR a corpse
                 {
-                    if (testNode.currentPiece != null && testNode.currentPiece.isPlayer)
+                    if (testNode.currentPiece != null && testNode.currentPiece.IsPlayer)
                     {
                         return testNode; // Hit player
                     }
-                    break; // Stop sliding, hit a wall/corpse/teammate
+                    break; 
                 }
 
                 checkX += dir.x;

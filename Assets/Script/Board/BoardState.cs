@@ -24,9 +24,9 @@ public class BoardState
     public BoardState(PlayerGeneral player, List<Piece> enemies)
     {
         // Save Player
-        playerAmmo = player.loadedAmmo;
-        playerX = player.currentX;
-        playerY = player.currentY;
+        playerAmmo = player.LoadedAmmo;
+        playerX = player.X;
+        playerY = player.Y;
 
         // Save Enemies
         foreach (Piece p in enemies)
@@ -36,10 +36,10 @@ public class BoardState
                 PieceData data = new PieceData
                 {
                     pieceReference = p,
-                    x = p.currentX,
-                    y = p.currentY,
-                    hp = p.currentHp,
-                    cooldown = p.currentCooldown,
+                    x = p.X,
+                    y = p.Y,
+                    hp = p.CurrentHp,
+                    cooldown = p.CurrentCooldown,
                     isDead = false
                 };
                 savedPieces.Add(data);

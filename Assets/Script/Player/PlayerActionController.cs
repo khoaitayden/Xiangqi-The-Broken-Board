@@ -33,11 +33,11 @@ public class PlayerActionController : MonoBehaviour
             {
                 ExecuteMove(hoveredNode, turnMan);
             }
-            else if (isAimingMode && turnMan.activePlayer.loadedAmmo > 0)
+            else if (isAimingMode && turnMan.activePlayer.LoadedAmmo > 0)
             {
                 StartCoroutine(ExecuteShootCoroutine(turnMan));
             }
-            else if (isAimingMode && turnMan.activePlayer.loadedAmmo <= 0)
+            else if (isAimingMode && turnMan.activePlayer.LoadedAmmo <= 0)
             {
                 Debug.Log("Out of Ammo! Move to Reload!");
             }
@@ -66,15 +66,15 @@ public class PlayerActionController : MonoBehaviour
         Vector3 playerPos = player.transform.position;
         float aimAngle = Mathf.Atan2(currentAimDirection.y, currentAimDirection.x) * Mathf.Rad2Deg;
 
-        float halfArc = player.fireArc / 2f;
+        float halfArc = player.FireArc / 2f;
         Vector3 edge1 = Quaternion.Euler(0, 0, aimAngle - halfArc) * Vector3.right;
         Vector3 edge2 = Quaternion.Euler(0, 0, aimAngle + halfArc) * Vector3.right;
 
-        Debug.DrawRay(playerPos, edge1 * player.rangeX, Color.red);
-        Debug.DrawRay(playerPos, edge2 * player.rangeX, Color.red);
+        Debug.DrawRay(playerPos, edge1 * player.RangeX, Color.red);
+        Debug.DrawRay(playerPos, edge2 * player.RangeX, Color.red);
         
-        Debug.DrawRay(playerPos + edge1 * player.rangeX, edge1 * (player.rangeY - player.rangeX), Color.yellow);
-        Debug.DrawRay(playerPos + edge2 * player.rangeX, edge2 * (player.rangeY - player.rangeX), Color.yellow);
+        Debug.DrawRay(playerPos + edge1 * player.RangeX, edge1 * (player.RangeY - player.RangeX), Color.yellow);
+        Debug.DrawRay(playerPos + edge2 * player.RangeX, edge2 * (player.RangeY - player.RangeX), Color.yellow);
 
         foreach (Piece enemy in turnMan.enemyPieces)
         {
@@ -84,7 +84,7 @@ public class PlayerActionController : MonoBehaviour
             float distance = toEnemy.magnitude;
             float angleToEnemy = Vector2.Angle(currentAimDirection, toEnemy);
 
-            if (angleToEnemy <= halfArc && distance <= player.rangeY) enemy.SetTargeted(true);
+            if (angleToEnemy <= halfArc && distance <= player.RangeY) enemy.SetTargeted(true);
             else enemy.SetTargeted(false);
         }
     }
@@ -93,12 +93,12 @@ public class PlayerActionController : MonoBehaviour
     {
         turnMan.SaveState();
         PlayerGeneral player = turnMan.activePlayer;
-        GridManager.Instance.grid[player.currentX, player.currentY].currentPiece = null;
+        GridManager.Instance.grid[player.X, player.Y].currentPiece = null;
         
         player.MoveTo(targetNode);
         
-        if (player.loadedAmmo < player.maxAmmo) player.loadedAmmo++;
-        Debug.Log("Current Ammo: "+player.loadedAmmo);
+        if (player.LoadedAmmo < player.MaxAmmo) player.LoadedAmmo++;
+        Debug.Log("Current Ammo: "+player.LoadedAmmo);
         
         turnMan.StartEnemyPhase();
     }
@@ -108,24 +108,24 @@ public class PlayerActionController : MonoBehaviour
         turnMan.SaveState();
         isExecutingAction = true;
         PlayerGeneral player = turnMan.activePlayer;
-        player.loadedAmmo--; 
-        Debug.Log("Current Ammo: "+player.loadedAmmo);
+        player.LoadedAmmo--; 
+        Debug.Log("Current Ammo: "+player.LoadedAmmo);
 
         
         foreach (Piece enemy in turnMan.enemyPieces) { if(enemy != null) enemy.SetTargeted(false); }
 
         float aimAngle = Mathf.Atan2(currentAimDirection.y, currentAimDirection.x) * Mathf.Rad2Deg;
-        float halfArc = player.fireArc / 2f;
+        float halfArc = player.FireArc / 2f;
 
-        for (int i = 0; i < player.firepower; i++)
+        for (int i = 0; i < player.Firepower; i++)
         {
             float randomAngle = Random.Range(aimAngle - halfArc, aimAngle + halfArc);
             Quaternion bulletRotation = Quaternion.Euler(0, 0, randomAngle);
 
             GameObject bulletObj = Instantiate(projectilePrefab, player.transform.position, bulletRotation);
             Projectile p = bulletObj.GetComponent<Projectile>();
-            p.rangeX = player.rangeX;
-            p.rangeY = player.rangeY;
+            p.rangeX = player.RangeX;
+            p.rangeY = player.RangeY;
         }
 
         yield return new WaitUntil(() => FindObjectsByType<Projectile>(FindObjectsSortMode.None).Length == 0);

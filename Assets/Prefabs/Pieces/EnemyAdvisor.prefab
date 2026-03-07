@@ -105,27 +105,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0abb9e933f29d1599843f8cca57afce0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAdvisor
-  currentX: 0
-  currentY: 0
-  isPlayer: 0
-  currentNode:
-    x: 0
-    y: 0
-    worldPosition: {x: 0, y: 0}
-    isPlayerPalace: 0
-    isEnemyPalace: 0
-    isRiver: 0
-    nodeGameObject: {fileID: 0}
-    currentPiece: {fileID: 0}
-    currentCorpse: {fileID: 0}
-  maxHp: 1
-  currentHp: 0
-  deadSprite: {fileID: 7661141335020852357, guid: b10fd6ecbd527a591935e7dda2db160b, type: 3}
-  moveDuration: 0.25
-  jumpHeight: 0.2
-  maxCooldown: 0
-  currentCooldown: 0
-  targetPosition: {x: 0, y: 0, z: 0}
+  _x: 0
+  _y: 0
+  _isPlayer: 0
+  _maxHp: 2
+  _currentHp: 0
+  _deadSprite: {fileID: 7661141335020852357, guid: b10fd6ecbd527a591935e7dda2db160b, type: 3}
+  _moveSpeed: 20
+  _jumpHeight: 0.1
+  _moveDuration: 0.25
+  _maxCooldown: 2
+  _currentCooldown: 0
+  TargetPosition: {x: 0, y: 0, z: 0}
 --- !u!58 &-4861779392469418954
 CircleCollider2D:
   m_ObjectHideFlags: 0

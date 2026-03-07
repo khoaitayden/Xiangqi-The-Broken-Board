@@ -6,10 +6,8 @@ public class EnemyCannon : Piece
     protected override void Awake()
     {
         base.Awake(); 
-        isPlayer = false; 
-        maxCooldown = 2; 
+        MaxCooldown = 2; 
     }
-    // REMOVED Start()
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid) { return false; }
 
@@ -20,8 +18,8 @@ public class EnemyCannon : Piece
 
         foreach (var dir in directions)
         {
-            int checkX = currentX + dir.x;
-            int checkY = currentY + dir.y;
+            int checkX = X + dir.x;
+            int checkY = Y + dir.y;
             bool hasJumped = false;
 
             while (checkX >= 0 && checkX <= 8 && checkY >= 0 && checkY <= 9)
@@ -37,7 +35,7 @@ public class EnemyCannon : Piece
                 {
                     if (!testNode.IsEmpty()) // Hit second object
                     {
-                        if (testNode.currentPiece != null && testNode.currentPiece.isPlayer) return testNode; 
+                        if (testNode.currentPiece != null && testNode.currentPiece.IsPlayer) return testNode; 
                         break; 
                     }
                 }
