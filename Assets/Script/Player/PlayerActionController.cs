@@ -97,6 +97,7 @@ public class PlayerActionController : MonoBehaviour
         player.MoveTo(targetNode);
         
         if (player.loadedAmmo < player.maxAmmo) player.loadedAmmo++;
+        Debug.Log("Current Ammo: "+player.loadedAmmo);
         
         turnMan.StartEnemyPhase();
     }
@@ -106,6 +107,8 @@ public class PlayerActionController : MonoBehaviour
         isExecutingAction = true;
         PlayerGeneral player = turnMan.activePlayer;
         player.loadedAmmo--; 
+        Debug.Log("Current Ammo: "+player.loadedAmmo);
+
         
         foreach (Piece enemy in turnMan.enemyPieces) { if(enemy != null) enemy.SetTargeted(false); }
 
