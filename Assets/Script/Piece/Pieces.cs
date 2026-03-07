@@ -28,6 +28,7 @@ public abstract class Piece : MonoBehaviour
 
     protected SpriteRenderer spriteRenderer;
     protected Color originalColor;
+    protected bool isDead = false; 
 
     protected virtual void Awake()
     {
@@ -64,29 +65,55 @@ public abstract class Piece : MonoBehaviour
 
     public virtual void TakeDamage(int damage)
     {
+        // 1. If we are already dead, ignore further damage!
+        if (isDead) return;
+
         currentHp -= damage;
-        if (currentHp <= 0) Die();
+        
+        if (currentHp <= 0)
+        {
+            Die();
+        }
     }
 
     protected virtual void Die()
     {
+        if (isDead) return;
+        isDead = true;
+        // 1. Clear the "Alive Piece" data from the board
         if (currentNode != null) currentNode.currentPiece = null; 
+        
+        // 2. Remove from Enemy List
         if (!isPlayer) TurnManager.Instance.enemyPieces.Remove(this);
 
-        if (spriteRenderer != null && deadSprite != null)
+        // 3. SPAWN THE CORPSE CLONE
+        GameObject corpseObj = Instantiate(gameObject, transform.position, Quaternion.identity);
+        corpseObj.name = gameObject.name + "_Corpse";
+
+        // Remove the Piece script from the clone
+        Destroy(corpseObj.GetComponent<Piece>());
+
+        // 4. SETUP VISUALS (Start Solid)
+        SpriteRenderer corpseSr = corpseObj.GetComponent<SpriteRenderer>();
+        if (corpseSr != null)
         {
-            spriteRenderer.sprite = deadSprite;
-            spriteRenderer.color = new Color(0.6f, 0.6f, 0.6f, 0.8f); 
+            if (deadSprite != null) corpseSr.sprite = deadSprite;
+            
+            // GREY but SOLID (Alpha = 1.0f)
+            corpseSr.color = new Color(0.6f, 0.6f, 0.6f, 1.0f); 
         }
 
-        Corpse corpse = gameObject.AddComponent<Corpse>();
-        corpse.Init(currentNode);
-        if (currentNode != null) currentNode.currentCorpse = corpse;
-        TurnManager.Instance.activeCorpses.Add(corpse);
+        // 5. ADD CORPSE LOGIC
+        Corpse corpseScript = corpseObj.AddComponent<Corpse>();
+        corpseScript.Init(currentNode);
 
+        // 6. REGISTER CORPSE
+        if (currentNode != null) currentNode.currentCorpse = corpseScript;
+        TurnManager.Instance.activeCorpses.Add(corpseScript);
+
+        // 7. HIDE ORIGINAL
         gameObject.SetActive(false);  
     }
-
     public void SetTargeted(bool isTargeted)
     {
         if (spriteRenderer != null)

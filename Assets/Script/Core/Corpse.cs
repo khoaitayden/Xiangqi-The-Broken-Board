@@ -2,10 +2,9 @@ using UnityEngine;
 
 public class Corpse : MonoBehaviour
 {
-    public int turnsRemaining = 2; 
+    public int turnsRemaining=3; 
     private BoardNode currentNode;
 
-    // We call this when the Piece dies
     public void Init(BoardNode node)
     {
         this.currentNode = node;
@@ -15,12 +14,18 @@ public class Corpse : MonoBehaviour
     {
         turnsRemaining--;
         
-        // Visual Feedback: Fade out as it rots
         SpriteRenderer sr = GetComponent<SpriteRenderer>();
         if (sr != null)
         {
             Color c = sr.color;
-            c.a = (turnsRemaining > 0) ? 0.5f : 0f; // 50% opacity, then 0
+
+            if (turnsRemaining == 1)
+            {
+                // Halfway through decay: Become Ghostly (50% Alpha)
+                c.a = 0.6f; 
+            }
+            // (If turnsRemaining is 2, it stays at 1.0f from Piece.cs)
+            
             sr.color = c;
         }
 
@@ -30,7 +35,7 @@ public class Corpse : MonoBehaviour
             {
                 currentNode.currentCorpse = null; // Clear the grid
             }
-            Destroy(gameObject); // Finally destroy the GameObject
+            Destroy(gameObject); // Destroy the visual clone
         }
     }
 }

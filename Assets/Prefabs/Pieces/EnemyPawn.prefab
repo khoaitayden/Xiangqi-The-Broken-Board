@@ -120,7 +120,7 @@ MonoBehaviour:
     currentCorpse: {fileID: 0}
   maxHp: 1
   currentHp: 0
-  deadSprite: {fileID: 0}
+  deadSprite: {fileID: 7345372570162224314, guid: d0dde5fc59decd6c49156d8eed950ae6, type: 3}
   moveDuration: 0.25
   jumpHeight: 0.1
   maxCooldown: 0

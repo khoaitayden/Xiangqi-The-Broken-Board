@@ -120,10 +120,12 @@ MonoBehaviour:
     currentCorpse: {fileID: 0}
   maxHp: 1
   currentHp: 0
+  deadSprite: {fileID: -5293485520703074781, guid: 62dffbc61da2dd0ea9050ac257d4b9c5, type: 3}
+  moveDuration: 0.25
+  jumpHeight: 0.5
   maxCooldown: 0
   currentCooldown: 0
   targetPosition: {x: 0, y: 0, z: 0}
-  corpsePrefab: {fileID: 2886752667788108647, guid: cc87eb5ecedb0d046a136ae88403888d, type: 3}
 --- !u!58 &-1355390446243871063
 CircleCollider2D:
   m_ObjectHideFlags: 0
