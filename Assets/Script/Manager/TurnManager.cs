@@ -80,42 +80,58 @@ public class TurnManager : MonoBehaviour
     }
     public void SaveState()
     {
-        previousTurnState = new BoardState(activePlayer, enemyPieces);
+        previousTurnState = new BoardState(activePlayer, enemyPieces, activeCorpses);
     }
-public void TriggerArmorRewind()
+    public void TriggerArmorRewind()
     {
         if (activePlayer.CurrentArmor > 0)
         {
             activePlayer.CurrentArmor--;
             Debug.Log($"ARMOR BROKEN! Rewinding... ({activePlayer.CurrentArmor} Left)");
 
-            // 1. Restore Player
+            // --- 1. CLEANUP "FUTURE" CORPSES ---
+            for (int i = activeCorpses.Count - 1; i >= 0; i--)
+            {
+                Corpse c = activeCorpses[i];
+                // If this corpse wasn't in our save file, it was created THIS turn. Erase it!
+                if (c != null && !previousTurnState.savedCorpses.Contains(c))
+                {
+                    BoardNode node = GridManager.Instance.GetNodeAtPosition(c.transform.position);
+                    if (node != null && node.currentCorpse == c) node.currentCorpse = null; // Free the grid space
+                    
+                    Destroy(c.gameObject); // Destroy the clone
+                }
+            }
+            // Reset the active corpse list to exactly what it was
+            activeCorpses = new List<Corpse>(previousTurnState.savedCorpses);
+
+            // --- 2. CLEAR ENTIRE BOARD OF ALIVE PIECES ---
+            // This prevents duplicate pieces from getting stuck on nodes
+            foreach (var node in GridManager.Instance.grid)
+            {
+                node.currentPiece = null;
+            }
+
+            // --- 3. RESTORE PLAYER ---
             BoardNode oldPlayerNode = GridManager.Instance.grid[previousTurnState.playerX, previousTurnState.playerY];
-            GridManager.Instance.grid[activePlayer.X, activePlayer.Y].currentPiece = null;
-            
-            // MoveTo handles X/Y assignment internally, so this is fine!
             activePlayer.MoveTo(oldPlayerNode); 
             activePlayer.LoadedAmmo = previousTurnState.playerAmmo;
 
-            // 2. Restore Enemies
+            // --- 4. RESTORE ENEMIES ---
+            enemyPieces.Clear(); // Empty the current list
             foreach (var data in previousTurnState.savedPieces)
             {
                 Piece p = data.pieceReference;
                 
                 if (p != null)
                 {
-                    // Ensure the piece is active (in case it died this turn)
-                    p.gameObject.SetActive(true);
+                    enemyPieces.Add(p); // Put the enemy BACK into the turn order list
 
-                    // Clear current pos on grid
-                    GridManager.Instance.grid[p.X, p.Y].currentPiece = null;
+                    p.gameObject.SetActive(true); // Unhide if it died
+                    p.ForceSetStats(data.hp, data.cooldown); // Revive stats
                     
-                    // FIX: Use ForceSetStats instead of p.CurrentHp = ...
-                    p.ForceSetStats(data.hp, data.cooldown);
-                    
-                    // Move Back
                     BoardNode oldNode = GridManager.Instance.grid[data.x, data.y];
-                    p.MoveTo(oldNode);
+                    p.MoveTo(oldNode); // Move back to original spot
                 }
             }
 

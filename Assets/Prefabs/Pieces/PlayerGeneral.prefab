@@ -117,7 +117,7 @@ MonoBehaviour:
   _currentCooldown: 0
   TargetPosition: {x: 0, y: 0, z: 0}
   _loadedAmmo: 2
-  _maxAmmo: 2
+  _maxAmmo: 3
   _firepower: 5
   _fireArc: 40
   _rangeX: 3

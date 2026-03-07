@@ -70,12 +70,11 @@ public abstract class Piece : MonoBehaviour
     }
     public void ForceSetStats(int hp, int cooldown)
     {
-        _currentHp = hp;
+        CurrentHp = hp;
         CurrentCooldown = cooldown; 
         _isDead = false; 
         gameObject.SetActive(true); 
     }
-
     public virtual void MoveTo(BoardNode targetNode)
     {
         // 1. Clear old node logic

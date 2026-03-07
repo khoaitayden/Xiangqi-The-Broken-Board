@@ -4,31 +4,28 @@ using UnityEngine;
 [System.Serializable]
 public class BoardState
 {
-    // We save the position, health, and cooldown of every piece
     public struct PieceData
     {
-        public Piece pieceReference; // Which object is this?
+        public Piece pieceReference; 
         public int x;
         public int y;
         public int hp;
         public int cooldown;
-        public bool isDead; // Did it die this turn?
     }
 
     public List<PieceData> savedPieces = new List<PieceData>();
+    public List<Corpse> savedCorpses = new List<Corpse>(); // NEW: Track Corpses
     public int playerAmmo;
     public int playerX;
     public int playerY;
 
-    // Capture the current state of the board
-    public BoardState(PlayerGeneral player, List<Piece> enemies)
+    // Updated constructor to accept the corpse list
+    public BoardState(PlayerGeneral player, List<Piece> enemies, List<Corpse> corpses)
     {
-        // Save Player
-        playerAmmo = player.LoadedAmmo;
+        playerAmmo = player.LoadedAmmo; 
         playerX = player.X;
         playerY = player.Y;
 
-        // Save Enemies
         foreach (Piece p in enemies)
         {
             if (p != null)
@@ -39,11 +36,13 @@ public class BoardState
                     x = p.X,
                     y = p.Y,
                     hp = p.CurrentHp,
-                    cooldown = p.CurrentCooldown,
-                    isDead = false
+                    cooldown = p.CurrentCooldown
                 };
                 savedPieces.Add(data);
             }
         }
+
+        // Save a snapshot of exactly which corpses exist right now
+        savedCorpses.AddRange(corpses);
     }
 }
