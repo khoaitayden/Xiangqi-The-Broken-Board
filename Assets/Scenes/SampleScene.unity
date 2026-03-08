@@ -792,8 +792,8 @@ MonoBehaviour:
   pair1YinText: {fileID: 834691999}
   pair1YangText: {fileID: 1716321786}
   selectPair1Button: {fileID: 1572718094}
-  pair2YinText: {fileID: 501532105}
-  pair2YangText: {fileID: 1783079824}
+  pair2YinText: {fileID: 1783079824}
+  pair2YangText: {fileID: 501532105}
   selectPair2Button: {fileID: 2109193792}
 --- !u!4 &802523512
 Transform:
