@@ -28,7 +28,17 @@ public class PlayerGeneral : Piece
     {
         base.Awake();
         
-        CurrentArmor = _maxArmor;
+        // Add RunManager Modifiers!
+        if (RunManager.Instance != null)
+        {
+            LoadedAmmo = MaxAmmo + RunManager.Instance.BonusMaxAmmo;
+            CurrentArmor = MaxArmor + RunManager.Instance.BonusArmorPerFloor;
+        }
+        else
+        {
+            LoadedAmmo = MaxAmmo;
+            CurrentArmor = MaxArmor;
+        }
     }
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)

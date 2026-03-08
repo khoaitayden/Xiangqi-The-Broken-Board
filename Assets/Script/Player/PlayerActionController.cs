@@ -15,7 +15,7 @@ public class PlayerActionController : MonoBehaviour
         TurnManager turnMan = TurnManager.Instance;
         GridManager gridMan = GridManager.Instance;
 
-        if (turnMan.currentTurn != TurnManager.TurnState.PlayerTurn || isExecutingAction || turnMan.activePlayer == null) return;
+        if (turnMan.CurrentTurn != TurnManager.TurnState.PlayerTurn || isExecutingAction || turnMan.activePlayer == null) return;
 
         Vector2 worldPosition = InputHandler.Instance.MouseWorldPosition;
         BoardNode hoveredNode = gridMan.GetNodeAtPosition(worldPosition);

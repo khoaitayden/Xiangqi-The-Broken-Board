@@ -6,10 +6,15 @@ public class TurnManager : MonoBehaviour
 {
     public static TurnManager Instance { get; private set; }
 
-    public enum TurnState { PlayerTurn, EnemyTurn, GameOver }
+     public enum TurnState { PlayerTurn, EnemyTurn, GameOver, Drafting }
     
     [Header("Game State")]
-    public TurnState currentTurn = TurnState.PlayerTurn;
+    [SerializeField] private TurnState _currentTurn = TurnState.PlayerTurn;
+    public TurnState CurrentTurn 
+    { 
+        get { return _currentTurn; } 
+        set { _currentTurn = value; } 
+    }
     private BoardState previousTurnState;
     
     public PlayerGeneral activePlayer; 
@@ -23,8 +28,8 @@ public class TurnManager : MonoBehaviour
 
     public void StartEnemyPhase()
     {
-        enemyPieces.RemoveAll(e => e == null); // Cleanup dead enemies
-        currentTurn = TurnState.EnemyTurn;
+        enemyPieces.RemoveAll(e => e == null); 
+        _currentTurn = TurnState.EnemyTurn;
         StartCoroutine(EnemyPhaseCoroutine());
     }
 
@@ -69,14 +74,14 @@ public class TurnManager : MonoBehaviour
             if (activeCorpses[i] != null)
             {
                 activeCorpses[i].Decay();
-                if (activeCorpses[i] == null) // It was destroyed by Decay()
+                if (activeCorpses[i] == null) 
                 {
                     activeCorpses.RemoveAt(i);
                 }
             }
         }
 
-        if (currentTurn != TurnState.GameOver) currentTurn = TurnState.PlayerTurn;
+        if (_currentTurn != TurnState.GameOver) _currentTurn = TurnState.PlayerTurn;
     }
     public void SaveState()
     {
@@ -102,17 +107,13 @@ public class TurnManager : MonoBehaviour
                     Destroy(c.gameObject); // Destroy the clone
                 }
             }
-            // Reset the active corpse list to exactly what it was
             activeCorpses = new List<Corpse>(previousTurnState.savedCorpses);
 
-            // --- 2. CLEAR ENTIRE BOARD OF ALIVE PIECES ---
-            // This prevents duplicate pieces from getting stuck on nodes
             foreach (var node in GridManager.Instance.grid)
             {
                 node.currentPiece = null;
             }
 
-            // --- 3. RESTORE PLAYER ---
             BoardNode oldPlayerNode = GridManager.Instance.grid[previousTurnState.playerX, previousTurnState.playerY];
             activePlayer.MoveTo(oldPlayerNode); 
             activePlayer.LoadedAmmo = previousTurnState.playerAmmo;
@@ -125,22 +126,22 @@ public class TurnManager : MonoBehaviour
                 
                 if (p != null)
                 {
-                    enemyPieces.Add(p); // Put the enemy BACK into the turn order list
+                    enemyPieces.Add(p); 
 
-                    p.gameObject.SetActive(true); // Unhide if it died
-                    p.ForceSetStats(data.hp, data.cooldown); // Revive stats
+                    p.gameObject.SetActive(true);
+                    p.ForceSetStats(data.hp, data.cooldown);
                     
                     BoardNode oldNode = GridManager.Instance.grid[data.x, data.y];
-                    p.MoveTo(oldNode); // Move back to original spot
+                    p.MoveTo(oldNode);
                 }
             }
 
-            currentTurn = TurnState.PlayerTurn;
+            _currentTurn = TurnState.PlayerTurn;
         }
         else
         {
             Debug.Log("GAME OVER! No Armor Left!");
-            currentTurn = TurnState.GameOver;
+            _currentTurn = TurnState.GameOver;
         }
     }
 }

@@ -47,4 +47,14 @@ public class EnemyGeneral : Piece
         }
         return validMoves.Count > 0 ? validMoves[Random.Range(0, validMoves.Count)] : null;
     }
+
+    protected override void Die()
+    {
+        base.Die();
+        DraftManager draft = FindFirstObjectByType<DraftManager>();
+        if (draft != null)
+        {
+            draft.ShowDraftScreen();
+        }
+    }
 }
