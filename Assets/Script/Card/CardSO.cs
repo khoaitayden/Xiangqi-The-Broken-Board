@@ -1,12 +1,28 @@
 using UnityEngine;
 
 public enum CardAlignment { Yin, Yang } 
+
 public enum CardEffectID 
 { 
-    GunpowderGourd, // +1 Ammo
-    JadeTalisman,   // +1 Armor
-    Conscription,   // +2 Pawns
-    IronPlating     // +1 HP
+    // YIN (Black)
+    Conscription,
+    Desperation,
+    TheVanguard,
+    ArtilleryBackup,
+    ImperialMandate,
+    Drought,
+    BloodthirstyPawns,
+    HeavyArmor,
+
+    // YANG (White)
+    GunpowderGourd,
+    TheRedHare,
+    CloudStep,
+    PiercingDragon,
+    TheCrouchingTiger,
+    JadeTalisman,
+    MandateOfHeaven,
+    ArtOfWar
 }
 
 [CreateAssetMenu(fileName = "NewCard", menuName = "Xiangqi/Card")]
@@ -16,4 +32,7 @@ public class CardSO : ScriptableObject
     [TextArea] public string description;
     public CardAlignment alignment;
     public CardEffectID effectID;
+    
+    [Header("Balance")]
+    public int weight; // e.g. -4 for Yin, +3 for Yang
 }

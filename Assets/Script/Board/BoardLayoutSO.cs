@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-// 1. Define all the piece types we have
+// 1. Define all the piece types we have (REMOVED EnemyGeneral!)
 public enum PieceType 
 { 
     Pawn, 
@@ -9,8 +9,7 @@ public enum PieceType
     Chariot, 
     Elephant, 
     Advisor, 
-    Cannon, 
-    EnemyGeneral 
+    Cannon 
 }
 
 // 2. A tiny struct to hold the data for a single enemy spawn
@@ -32,6 +31,10 @@ public class BoardLayoutSO : ScriptableObject
     [Header("Player Settings")]
     public Vector2Int playerSpawnPosition = new Vector2Int(4, 0); // Default bottom center
 
-    [Header("Enemy Layout")]
+    [Header("Enemy Boss Settings")]
+    public Vector2Int enemyGeneralSpawnPosition = new Vector2Int(4, 9); // Default top center
+    public int enemyGeneralStartingCooldown = 2; // Default cooldown
+
+    [Header("Enemy Layout (Minions)")]
     public List<PieceSpawnData> enemySpawns = new List<PieceSpawnData>();
 }

@@ -93,12 +93,25 @@ public class PlayerActionController : MonoBehaviour
     {
         turnMan.SaveState();
         PlayerGeneral player = turnMan.activePlayer;
+
+        // Calculate if the move was diagonal before we actually move
+        bool isDiagonalMove = Mathf.Abs(targetNode.x - player.X) == 1 && Mathf.Abs(targetNode.y - player.Y) == 1;
+
         GridManager.Instance.grid[player.X, player.Y].currentPiece = null;
-        
         player.MoveTo(targetNode);
         
-        if (player.LoadedAmmo < player.MaxAmmo) player.LoadedAmmo++;
-        Debug.Log("Current Ammo: "+player.LoadedAmmo);
+        // --- RELOAD LOGIC (THE RED HARE) ---
+        int ammoToRecover = 1;
+
+        if (RunManager.Instance != null && RunManager.Instance.RedHareEnabled && isDiagonalMove)
+        {
+            ammoToRecover = 2; // Red Hare Bonus!
+        }
+
+        // Add ammo, clamping it so we don't go over Max Ammo
+        player.LoadedAmmo = Mathf.Min(player.LoadedAmmo + ammoToRecover, player.MaxAmmo);
+        
+        Debug.Log("Current Ammo: " + player.LoadedAmmo);
         
         turnMan.StartEnemyPhase();
     }

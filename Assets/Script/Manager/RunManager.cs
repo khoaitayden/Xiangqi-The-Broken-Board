@@ -19,9 +19,19 @@ public class RunManager : MonoBehaviour
     public PieceStatsSO cannonStats;
     public PieceStatsSO enemyGeneralStats;
 
-    [Header("Non-Stat Modifiers")]
+    [Header("Enemy Modifiers (YIN)")]
     [SerializeField] private int _bonusStartingPawns = 0;
     public int BonusStartingPawns => _bonusStartingPawns;
+
+    [SerializeField] private int _bonusStartingChariots = 0;
+    public int BonusStartingChariots => _bonusStartingChariots;
+
+    [SerializeField] private bool _bossLeavesPalace = false;
+    public bool BossLeavesPalace => _bossLeavesPalace;
+
+    [Header("Player Modifiers (YANG)")]
+    [SerializeField] private bool _redHareEnabled = false;
+    public bool RedHareEnabled => _redHareEnabled;
 
     private void Awake()
     {
@@ -36,13 +46,14 @@ public class RunManager : MonoBehaviour
         ResetEntireRun();
     }
 
-    // Called when a new run begins to wipe old upgrades
     public void ResetEntireRun()
     {
         _activeCards.Clear();
         _bonusStartingPawns = 0;
+        _bonusStartingChariots = 0;
+        _bossLeavesPalace = false;
+        _redHareEnabled = false;
 
-        // Reset all SOs to their base stats
         playerStats.ResetToDefault();
         pawnStats.ResetToDefault();
         horseStats.ResetToDefault();
@@ -59,22 +70,12 @@ public class RunManager : MonoBehaviour
 
         switch (card.effectID)
         {
-            case CardEffectID.GunpowderGourd: 
-                playerStats.runtimeMaxAmmo += 1; 
-                break;
-
-            case CardEffectID.JadeTalisman: 
-                playerStats.runtimeMaxArmor += 1; 
-                break;
-
-            case CardEffectID.Conscription: 
-                _bonusStartingPawns += 2; 
-                break;
-
-            case CardEffectID.IronPlating: 
-                elephantStats.runtimeMaxHp += 1; 
-                advisorStats.runtimeMaxHp += 1; 
-                break;
+            case CardEffectID.GunpowderGourd: playerStats.runtimeMaxAmmo += 1; break;
+            case CardEffectID.JadeTalisman: playerStats.runtimeMaxArmor += 1; break;
+            case CardEffectID.Conscription: _bonusStartingPawns += 2; break;
+            case CardEffectID.TheVanguard: _bonusStartingChariots += 1; break;
+            case CardEffectID.Desperation: _bossLeavesPalace = true; break;
+            case CardEffectID.TheRedHare: _redHareEnabled = true; break;
         }
         
         Debug.Log($"Applied Card: {card.cardName}");

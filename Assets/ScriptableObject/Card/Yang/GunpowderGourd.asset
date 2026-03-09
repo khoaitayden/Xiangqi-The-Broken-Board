@@ -10,9 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1cb76c98224a1f449bb5e3838f747476, type: 3}
-  m_Name: IronPlating
+  m_Name: GunpowderGourd
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
-  cardName: IronPlating
-  description: "(Gi\xE1p S\u1EAFt)\nAll Elephants and Advisors gain +1 Max HP."
-  alignment: 0
-  effectID: 3
+  cardName: GunpowderGourd
+  description: "(B\u1EA7u \u0110\u1EA1n Thu\u1ED1c S\xFAng)\n+1 Max Ammo. You start
+    each floor fully loaded.\n"
+  alignment: 1
+  effectID: 8
+  weight: 2

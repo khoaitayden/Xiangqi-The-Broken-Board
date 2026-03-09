@@ -4,6 +4,7 @@ using UnityEngine;
 public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance { get; private set; }
+    
     [Header("Campaign Data")]
     [SerializeField] private List<BoardLayoutSO> _campaignLevels;
     [SerializeField] private int _currentLevelIndex = 0;
@@ -85,8 +86,13 @@ public class LevelManager : MonoBehaviour
 
         BoardLayoutSO levelData = _campaignLevels[_currentLevelIndex];
 
+        // 1. SPAWN PLAYER
         SpawnPlayer(levelData.playerSpawnPosition.x, levelData.playerSpawnPosition.y);
 
+        // 2. SPAWN ENEMY BOSS (Using the new explicit data)
+        SpawnEnemy(enemyGeneralPrefab, levelData.enemyGeneralSpawnPosition.x, levelData.enemyGeneralSpawnPosition.y, levelData.enemyGeneralStartingCooldown);
+
+        // 3. SPAWN ENEMY MINIONS
         foreach (PieceSpawnData spawnData in levelData.enemySpawns)
         {
             GameObject prefabToSpawn = GetPrefabForType(spawnData.pieceType);
@@ -96,7 +102,7 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        // APPLY RUN MANAGER BUFFS (Conscription)
+        // 4. APPLY RUN MANAGER BUFFS (Conscription)
         if (RunManager.Instance != null && RunManager.Instance.BonusStartingPawns > 0)
         {
             for (int i = 0; i < RunManager.Instance.BonusStartingPawns; i++)
@@ -105,9 +111,39 @@ public class LevelManager : MonoBehaviour
             }
         }
 
+        // 5. APPLY RUN MANAGER BUFFS (The Vanguard)
+        if (RunManager.Instance != null && RunManager.Instance.BonusStartingChariots > 0)
+        {
+            for (int i = 0; i < RunManager.Instance.BonusStartingChariots; i++)
+            {
+                SpawnRandomExtraChariot();
+            }
+        }
+
         // Reset Turn to Player
         TurnManager.Instance.CurrentTurn = TurnManager.TurnState.PlayerTurn;
         Debug.Log($"Loaded Level {_currentLevelIndex + 1}: {levelData.levelName}");
+    }
+
+    private void SpawnRandomExtraChariot()
+    {
+        List<BoardNode> emptyBackNodes = new List<BoardNode>();
+        for (int x = 0; x < GridManager.Instance.width; x++)
+        {
+            for (int y = 8; y <= 9; y++) 
+            {
+                if (GridManager.Instance.grid[x, y].IsEmpty())
+                {
+                    emptyBackNodes.Add(GridManager.Instance.grid[x, y]);
+                }
+            }
+        }
+
+        if (emptyBackNodes.Count > 0)
+        {
+            BoardNode randomNode = emptyBackNodes[Random.Range(0, emptyBackNodes.Count)];
+            SpawnEnemy(enemyChariotPrefab, randomNode.x, randomNode.y, 3);
+        }
     }
 
     private void SpawnRandomExtraPawn()
@@ -115,7 +151,7 @@ public class LevelManager : MonoBehaviour
         List<BoardNode> emptyTopNodes = new List<BoardNode>();
         for (int x = 0; x < GridManager.Instance.width; x++)
         {
-            for (int y = 5; y < GridManager.Instance.height; y++) // Top half
+            for (int y = 5; y < GridManager.Instance.height; y++) 
             {
                 if (GridManager.Instance.grid[x, y].IsEmpty())
                 {
@@ -130,6 +166,7 @@ public class LevelManager : MonoBehaviour
             SpawnEnemy(enemyPawnPrefab, randomNode.x, randomNode.y, 3);
         }
     }
+
     void SpawnPlayer(int startX, int startY) 
     {
         BoardNode startNode = GridManager.Instance.grid[startX, startY];
@@ -164,7 +201,7 @@ public class LevelManager : MonoBehaviour
             case PieceType.Elephant: return enemyElephantPrefab;
             case PieceType.Advisor: return enemyAdvisorPrefab;
             case PieceType.Cannon: return enemyCannonPrefab;
-            case PieceType.EnemyGeneral: return enemyGeneralPrefab;
+            // Removed EnemyGeneral from here!
             default: return null;
         }
     }

@@ -10,10 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1cb76c98224a1f449bb5e3838f747476, type: 3}
-  m_Name: Conscription
+  m_Name: Piercing Dragon
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
-  cardName: Conscription
-  description: "(L\u1EC7nh B\u1EAFt L\xEDnh)\n+2 Pawns spawn at the start of every
-    floor."
-  alignment: 0
-  effectID: 2
+  cardName: Piercing Dragon
+  description: "(Xuy\xEAn T\xE2m Th\u01B0\u01A1ng)\nPoint-blank shots (Range 1) pierce
+    the first target and deal 1 Damage to the enemy immediately behind them.\n"
+  alignment: 1
+  effectID: 11
+  weight: 3

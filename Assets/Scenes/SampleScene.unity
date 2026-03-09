@@ -743,6 +743,9 @@ MonoBehaviour:
   cannonStats: {fileID: 11400000, guid: f95348fea097864edb1a64757c32e807, type: 2}
   enemyGeneralStats: {fileID: 11400000, guid: 1635fe272b4cd5c65a11ee96812a2169, type: 2}
   _bonusStartingPawns: 0
+  _bonusStartingChariots: 0
+  _bossLeavesPalace: 0
+  _redHareEnabled: 0
 --- !u!4 &779551307
 Transform:
   m_ObjectHideFlags: 0
@@ -788,11 +791,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DraftManager
   allYinCards:
-  - {fileID: 11400000, guid: 1cb4ae13f17261743ab443eeb9234f4c, type: 2}
-  - {fileID: 11400000, guid: 88a030aaad8b444419190ca5cf71e677, type: 2}
+  - {fileID: 11400000, guid: 25433ad7aa003373fb4c4aa8334187c2, type: 2}
+  - {fileID: 11400000, guid: b95653275457591bab346097fb875c8d, type: 2}
+  - {fileID: 11400000, guid: 1024ca9e84a92e0dd8340f2d5abae291, type: 2}
   allYangCards:
-  - {fileID: 11400000, guid: c5db2231ad7e14b4a91602f6b7bb4447, type: 2}
-  - {fileID: 11400000, guid: 36c5f259ff04433418feb3a07bf72d03, type: 2}
+  - {fileID: 11400000, guid: 980bee7aca7aac270b758f0400a2c666, type: 2}
+  - {fileID: 11400000, guid: bfb413798d1ae4dae9a5359560c966dd, type: 2}
+  - {fileID: 11400000, guid: 7278a937331d356ec9613d2aa2f74634, type: 2}
   draftUIPanel: {fileID: 498851287}
   pair1YinText: {fileID: 834691999}
   pair1YangText: {fileID: 1716321786}
