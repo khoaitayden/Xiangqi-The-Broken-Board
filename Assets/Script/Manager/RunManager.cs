@@ -5,23 +5,23 @@ public class RunManager : MonoBehaviour
 {
     public static RunManager Instance { get; private set; }
 
-    [Header("Active Cards")]
+    [Header("Drafting Data")]
     [SerializeField] private List<CardSO> _activeCards = new List<CardSO>();
     public IReadOnlyList<CardSO> ActiveCards => _activeCards;
 
-    [Header("Player Modifiers (YANG)")]
-    [SerializeField] private int _bonusMaxAmmo = 0;
-    public int BonusMaxAmmo => _bonusMaxAmmo;
+    [Header("All Piece Stats (To Reset on Start)")]
+    public PlayerStatsSO playerStats;
+    public PieceStatsSO pawnStats;
+    public PieceStatsSO horseStats;
+    public PieceStatsSO chariotStats;
+    public PieceStatsSO elephantStats;
+    public PieceStatsSO advisorStats;
+    public PieceStatsSO cannonStats;
+    public PieceStatsSO enemyGeneralStats;
 
-    [SerializeField] private int _bonusArmorPerFloor = 0;
-    public int BonusArmorPerFloor => _bonusArmorPerFloor;
-
-    [Header("Enemy Modifiers (YIN)")]
+    [Header("Non-Stat Modifiers")]
     [SerializeField] private int _bonusStartingPawns = 0;
     public int BonusStartingPawns => _bonusStartingPawns;
-
-    [SerializeField] private int _bonusElephantAdvisorHP = 0;
-    public int BonusElephantAdvisorHP => _bonusElephantAdvisorHP;
 
     private void Awake()
     {
@@ -32,6 +32,25 @@ public class RunManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(this.gameObject);
+
+        ResetEntireRun();
+    }
+
+    // Called when a new run begins to wipe old upgrades
+    public void ResetEntireRun()
+    {
+        _activeCards.Clear();
+        _bonusStartingPawns = 0;
+
+        // Reset all SOs to their base stats
+        playerStats.ResetToDefault();
+        pawnStats.ResetToDefault();
+        horseStats.ResetToDefault();
+        chariotStats.ResetToDefault();
+        elephantStats.ResetToDefault();
+        advisorStats.ResetToDefault();
+        cannonStats.ResetToDefault();
+        enemyGeneralStats.ResetToDefault();
     }
 
     public void ApplyCard(CardSO card)
@@ -40,10 +59,22 @@ public class RunManager : MonoBehaviour
 
         switch (card.effectID)
         {
-            case CardEffectID.GunpowderGourd: _bonusMaxAmmo += 1; break;
-            case CardEffectID.JadeTalisman: _bonusArmorPerFloor += 1; break;
-            case CardEffectID.Conscription: _bonusStartingPawns += 2; break;
-            case CardEffectID.IronPlating: _bonusElephantAdvisorHP += 1; break;
+            case CardEffectID.GunpowderGourd: 
+                playerStats.runtimeMaxAmmo += 1; 
+                break;
+
+            case CardEffectID.JadeTalisman: 
+                playerStats.runtimeMaxArmor += 1; 
+                break;
+
+            case CardEffectID.Conscription: 
+                _bonusStartingPawns += 2; 
+                break;
+
+            case CardEffectID.IronPlating: 
+                elephantStats.runtimeMaxHp += 1; 
+                advisorStats.runtimeMaxHp += 1; 
+                break;
         }
         
         Debug.Log($"Applied Card: {card.cardName}");

@@ -6,12 +6,6 @@ public class EnemyAdvisor : Piece
     protected override void Awake()
     {
         base.Awake(); 
-        MaxCooldown = 2; 
-        
-        if (RunManager.Instance != null)
-        {
-            CurrentHp += RunManager.Instance.BonusElephantAdvisorHP;
-        }
     }
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)

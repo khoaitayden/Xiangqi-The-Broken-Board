@@ -108,21 +108,15 @@ MonoBehaviour:
   _x: 0
   _y: 0
   _isPlayer: 1
-  _maxHp: 1
+  _stats: {fileID: 0}
   _currentHp: 0
+  _currentCooldown: 0
   _deadSprite: {fileID: -2030643272353036554, guid: 2b75f275788aeb675bb08bc2519cab04, type: 3}
   _jumpHeight: 0.5
   _moveDuration: 0.25
-  _maxCooldown: 0
-  _currentCooldown: 0
   TargetPosition: {x: 0, y: 0, z: 0}
+  _playerStats: {fileID: 11400000, guid: 07264a34ea7c636e5909855f17aed6da, type: 2}
   _loadedAmmo: 2
-  _maxAmmo: 3
-  _firepower: 5
-  _fireArc: 40
-  _rangeX: 3
-  _rangeY: 6
-  _maxArmor: 2
   _currentArmor: 0
 --- !u!58 &-609644035593423078
 CircleCollider2D:

@@ -28,10 +28,17 @@ public class TurnManager : MonoBehaviour
 
     public void StartEnemyPhase()
     {
-        enemyPieces.RemoveAll(e => e == null); 
-        _currentTurn = TurnState.EnemyTurn;
+        // 1. NEW SAFETY CHECK: If we are Drafting (Boss died) or GameOver, do not start the enemy phase!
+        if (CurrentTurn == TurnState.Drafting || CurrentTurn == TurnState.GameOver) 
+        {
+            return; 
+        }
+
+        enemyPieces.RemoveAll(e => e == null); // Cleanup dead enemies
+        CurrentTurn = TurnState.EnemyTurn;
         StartCoroutine(EnemyPhaseCoroutine());
     }
+
 
     private IEnumerator EnemyPhaseCoroutine()
     {
@@ -81,7 +88,12 @@ public class TurnManager : MonoBehaviour
             }
         }
 
-        if (_currentTurn != TurnState.GameOver) _currentTurn = TurnState.PlayerTurn;
+        // 2. NEW SAFETY CHECK: Only give the turn back to the player if the state is STILL EnemyTurn.
+        // This prevents the enemy phase from accidentally overwriting the Drafting state.
+        if (CurrentTurn == TurnState.EnemyTurn) 
+        {
+            CurrentTurn = TurnState.PlayerTurn;
+        }
     }
     public void SaveState()
     {

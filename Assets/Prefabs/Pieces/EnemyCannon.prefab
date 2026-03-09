@@ -108,14 +108,12 @@ MonoBehaviour:
   _x: 0
   _y: 0
   _isPlayer: 0
-  _maxHp: 2
+  _stats: {fileID: 11400000, guid: f95348fea097864edb1a64757c32e807, type: 2}
   _currentHp: 0
+  _currentCooldown: 0
   _deadSprite: {fileID: -3666990231466448275, guid: f164d599af005e471b8a8a347bb22d63, type: 3}
-  _moveSpeed: 20
   _jumpHeight: 0.5
   _moveDuration: 0.25
-  _maxCooldown: 2
-  _currentCooldown: 0
   TargetPosition: {x: 0, y: 0, z: 0}
 --- !u!58 &-4450096560260840900
 CircleCollider2D:

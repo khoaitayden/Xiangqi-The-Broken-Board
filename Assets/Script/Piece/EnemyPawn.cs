@@ -4,8 +4,7 @@ public class EnemyPawn : Piece
 {
     protected override void Awake()
     {
-        base.Awake(); 
-        MaxCooldown = 3;    
+        base.Awake();    
     }
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)

@@ -734,10 +734,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RunManager
   _activeCards: []
-  _bonusMaxAmmo: 0
-  _bonusArmorPerFloor: 0
+  playerStats: {fileID: 11400000, guid: 07264a34ea7c636e5909855f17aed6da, type: 2}
+  pawnStats: {fileID: 11400000, guid: 8f31957d0beeb7444be172bf6a03407c, type: 2}
+  horseStats: {fileID: 11400000, guid: d1a987a6560b5781390f525a46bc56ba, type: 2}
+  chariotStats: {fileID: 11400000, guid: 18c54a878becbe553aa98a7b398f7ecd, type: 2}
+  elephantStats: {fileID: 11400000, guid: 3669f0b48270ab7b8958cc46abe5b3ed, type: 2}
+  advisorStats: {fileID: 11400000, guid: 87303510174e9ba94934683cac26bb69, type: 2}
+  cannonStats: {fileID: 11400000, guid: f95348fea097864edb1a64757c32e807, type: 2}
+  enemyGeneralStats: {fileID: 11400000, guid: 1635fe272b4cd5c65a11ee96812a2169, type: 2}
   _bonusStartingPawns: 0
-  _bonusElephantAdvisorHP: 0
 --- !u!4 &779551307
 Transform:
   m_ObjectHideFlags: 0

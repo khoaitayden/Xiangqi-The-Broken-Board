@@ -6,7 +6,6 @@ public class EnemyChariot : Piece
     protected override void Awake()
     {
         base.Awake(); 
-        MaxCooldown = 3; 
     }
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)

@@ -6,7 +6,6 @@ public class EnemyHorse : Piece
     protected override void Awake()
     {
         base.Awake(); 
-        MaxCooldown = 1; 
     }
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {

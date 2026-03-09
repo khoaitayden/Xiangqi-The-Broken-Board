@@ -6,7 +6,6 @@ public class EnemyGeneral : Piece
     protected override void Awake()
     {
         base.Awake();
-        MaxCooldown = 2; 
     }
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)

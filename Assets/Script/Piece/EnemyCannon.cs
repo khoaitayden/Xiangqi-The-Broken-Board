@@ -5,8 +5,7 @@ public class EnemyCannon : Piece
 {
     protected override void Awake()
     {
-        base.Awake(); 
-        MaxCooldown = 2; 
+        base.Awake();  
     }
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid) { return false; }
