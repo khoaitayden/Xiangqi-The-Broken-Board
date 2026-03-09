@@ -218,13 +218,11 @@ public abstract class Piece : MonoBehaviour
         foreach (BoardNode testNode in validMoves)
         {
             // 0-STEP: INSTANT WIN
-            // If the move directly lands on the player, take it immediately!
             if (testNode == playerNode) return testNode; 
 
             int score = 0;
 
             // --- SIMULATE THE FUTURE ---
-            // We temporarily teleport this piece to the testNode to see what the board WOULD look like.
             int oldX = X;
             int oldY = Y;
             X = testNode.x;
@@ -234,14 +232,12 @@ public abstract class Piece : MonoBehaviour
             testNode.currentPiece = this;
 
             // 1-STEP LOOKAHEAD: "CHECK"
-            // If I stand here, can I attack the player directly next turn?
             if (IsValidMove(playerNode, grid))
             {
                 score += 100; 
             }
 
             // 2-STEP LOOKAHEAD: "CHECKMATE / AREA DENIAL"
-            // Let's look at the 8 squares around the player. If I stand here, how many of their escape routes do I cut off?
             int restrictedEscapeRoutes = 0;
             for (int dx = -1; dx <= 1; dx++)
             {
@@ -263,23 +259,19 @@ public abstract class Piece : MonoBehaviour
                     }
                 }
             }
-            // Major points for cutting off escape routes! This makes enemies spread out and surround you like a net.
             score += restrictedEscapeRoutes * 15;
 
-            // --- REVERT THE SIMULATION ---
             grid[oldX, oldY].currentPiece = this;
             testNode.currentPiece = null;
             X = oldX;
             Y = oldY;
 
             // 3. DISTANCE HEURISTIC
-            // We want enemies to naturally march towards you if they can't attack you yet.
             int distX = Mathf.Abs(testNode.x - player.X);
             int distY = Mathf.Abs(testNode.y - player.Y);
             int distanceToPlayer = distX + distY; 
-            score -= distanceToPlayer * 2; // Closer = higher score
+            score -= distanceToPlayer * 2; 
 
-            // Add a tiny bit of randomness to tie-breakers so AI isn't 100% predictable
             score += Random.Range(0, 3);
 
             // SAVE THE BEST SCORE
