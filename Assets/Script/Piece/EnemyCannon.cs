@@ -42,6 +42,6 @@ public class EnemyCannon : Piece
                 checkY += dir.y;
             }
         }
-        return validMoves.Count > 0 ? validMoves[Random.Range(0, validMoves.Count)] : null;
+        return EvaluateAndPickBestMove(validMoves, grid);
     }
 }

@@ -56,7 +56,7 @@ public class EnemyGeneral : Piece
                 }
             }
         }
-        return validMoves.Count > 0 ? validMoves[Random.Range(0, validMoves.Count)] : null;
+        return EvaluateAndPickBestMove(validMoves, grid);
     }
     protected override void Die()
     {

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class Piece : MonoBehaviour
@@ -201,5 +202,94 @@ public abstract class Piece : MonoBehaviour
             float offsetY = Mathf.Sin(Time.time * 10f) * 0.05f;
             transform.position = TargetPosition + new Vector3(0, offsetY, 0);
         }
+    }
+    protected BoardNode EvaluateAndPickBestMove(List<BoardNode> validMoves, BoardNode[,] grid)
+    {
+        if (validMoves.Count == 0) return null;
+
+        PlayerGeneral player = TurnManager.Instance.activePlayer;
+        if (player == null) return validMoves[Random.Range(0, validMoves.Count)];
+
+        BoardNode playerNode = grid[player.X, player.Y];
+        
+        BoardNode bestNode = null;
+        int bestScore = int.MinValue;
+
+        foreach (BoardNode testNode in validMoves)
+        {
+            // 0-STEP: INSTANT WIN
+            // If the move directly lands on the player, take it immediately!
+            if (testNode == playerNode) return testNode; 
+
+            int score = 0;
+
+            // --- SIMULATE THE FUTURE ---
+            // We temporarily teleport this piece to the testNode to see what the board WOULD look like.
+            int oldX = X;
+            int oldY = Y;
+            X = testNode.x;
+            Y = testNode.y;
+            
+            grid[oldX, oldY].currentPiece = null;
+            testNode.currentPiece = this;
+
+            // 1-STEP LOOKAHEAD: "CHECK"
+            // If I stand here, can I attack the player directly next turn?
+            if (IsValidMove(playerNode, grid))
+            {
+                score += 100; 
+            }
+
+            // 2-STEP LOOKAHEAD: "CHECKMATE / AREA DENIAL"
+            // Let's look at the 8 squares around the player. If I stand here, how many of their escape routes do I cut off?
+            int restrictedEscapeRoutes = 0;
+            for (int dx = -1; dx <= 1; dx++)
+            {
+                for (int dy = -1; dy <= 1; dy++)
+                {
+                    if (dx == 0 && dy == 0) continue; // Skip player's current tile
+                    
+                    int adjX = player.X + dx;
+                    int adjY = player.Y + dy;
+
+                    if (adjX >= 0 && adjX < GridManager.Instance.width && adjY >= 0 && adjY < GridManager.Instance.height)
+                    {
+                        BoardNode adjNode = grid[adjX, adjY];
+                        // If the escape route is empty AND I can attack it from my new simulated position
+                        if (adjNode.IsEmpty() && IsValidMove(adjNode, grid))
+                        {
+                            restrictedEscapeRoutes++;
+                        }
+                    }
+                }
+            }
+            // Major points for cutting off escape routes! This makes enemies spread out and surround you like a net.
+            score += restrictedEscapeRoutes * 15;
+
+            // --- REVERT THE SIMULATION ---
+            grid[oldX, oldY].currentPiece = this;
+            testNode.currentPiece = null;
+            X = oldX;
+            Y = oldY;
+
+            // 3. DISTANCE HEURISTIC
+            // We want enemies to naturally march towards you if they can't attack you yet.
+            int distX = Mathf.Abs(testNode.x - player.X);
+            int distY = Mathf.Abs(testNode.y - player.Y);
+            int distanceToPlayer = distX + distY; 
+            score -= distanceToPlayer * 2; // Closer = higher score
+
+            // Add a tiny bit of randomness to tie-breakers so AI isn't 100% predictable
+            score += Random.Range(0, 3);
+
+            // SAVE THE BEST SCORE
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestNode = testNode;
+            }
+        }
+
+        return bestNode;
     }
 }
