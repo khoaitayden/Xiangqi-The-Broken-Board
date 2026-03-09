@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyPawn : Piece
@@ -24,26 +25,32 @@ public class EnemyPawn : Piece
 
     public override BoardNode GetAIMove(BoardNode[,] grid)
     {
+        List<BoardNode> validMoves = new List<BoardNode>();
+
+        // 1. Try forward
         if (Y - 1 >= 0)
         {
             BoardNode forwardNode = grid[X, Y - 1];
             if (forwardNode.IsEmpty() || (forwardNode.currentPiece != null && forwardNode.currentPiece.IsPlayer))
-                return forwardNode;
+                validMoves.Add(forwardNode);
         }
 
+        // 2. Try sideways
         if (Y <= 4)
         {
             if (X - 1 >= 0)
             {
                 BoardNode leftNode = grid[X - 1, Y];
-                if (leftNode.IsEmpty() || (leftNode.currentPiece != null && leftNode.currentPiece.IsPlayer)) return leftNode;
+                if (leftNode.IsEmpty() || (leftNode.currentPiece != null && leftNode.currentPiece.IsPlayer)) validMoves.Add(leftNode);
             }
             if (X + 1 <= 8)
             {
                 BoardNode rightNode = grid[X + 1, Y];
-                if (rightNode.IsEmpty() || (rightNode.currentPiece != null && rightNode.currentPiece.IsPlayer)) return rightNode;
+                if (rightNode.IsEmpty() || (rightNode.currentPiece != null && rightNode.currentPiece.IsPlayer)) validMoves.Add(rightNode);
             }
         }
-        return null; 
+
+        // 3. Let the new AI brain pick the best option!
+        return EvaluateAndPickBestMove(validMoves, grid);
     }
 }

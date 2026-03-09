@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class Piece : MonoBehaviour
@@ -201,5 +202,86 @@ public abstract class Piece : MonoBehaviour
             float offsetY = Mathf.Sin(Time.time * 10f) * 0.05f;
             transform.position = TargetPosition + new Vector3(0, offsetY, 0);
         }
+    }
+    protected BoardNode EvaluateAndPickBestMove(List<BoardNode> validMoves, BoardNode[,] grid)
+    {
+        if (validMoves.Count == 0) return null;
+
+        PlayerGeneral player = TurnManager.Instance.activePlayer;
+        if (player == null) return validMoves[Random.Range(0, validMoves.Count)];
+
+        BoardNode playerNode = grid[player.X, player.Y];
+        
+        BoardNode bestNode = null;
+        int bestScore = int.MinValue;
+
+        foreach (BoardNode testNode in validMoves)
+        {
+            // 0-STEP: INSTANT WIN
+            if (testNode == playerNode) return testNode; 
+
+            int score = 0;
+
+            // --- SIMULATE THE FUTURE ---
+            int oldX = X;
+            int oldY = Y;
+            X = testNode.x;
+            Y = testNode.y;
+            
+            grid[oldX, oldY].currentPiece = null;
+            testNode.currentPiece = this;
+
+            // 1-STEP LOOKAHEAD: "CHECK"
+            if (IsValidMove(playerNode, grid))
+            {
+                score += 100; 
+            }
+
+            // 2-STEP LOOKAHEAD: "CHECKMATE / AREA DENIAL"
+            int restrictedEscapeRoutes = 0;
+            for (int dx = -1; dx <= 1; dx++)
+            {
+                for (int dy = -1; dy <= 1; dy++)
+                {
+                    if (dx == 0 && dy == 0) continue; // Skip player's current tile
+                    
+                    int adjX = player.X + dx;
+                    int adjY = player.Y + dy;
+
+                    if (adjX >= 0 && adjX < GridManager.Instance.width && adjY >= 0 && adjY < GridManager.Instance.height)
+                    {
+                        BoardNode adjNode = grid[adjX, adjY];
+                        // If the escape route is empty AND I can attack it from my new simulated position
+                        if (adjNode.IsEmpty() && IsValidMove(adjNode, grid))
+                        {
+                            restrictedEscapeRoutes++;
+                        }
+                    }
+                }
+            }
+            score += restrictedEscapeRoutes * 15;
+
+            grid[oldX, oldY].currentPiece = this;
+            testNode.currentPiece = null;
+            X = oldX;
+            Y = oldY;
+
+            // 3. DISTANCE HEURISTIC
+            int distX = Mathf.Abs(testNode.x - player.X);
+            int distY = Mathf.Abs(testNode.y - player.Y);
+            int distanceToPlayer = distX + distY; 
+            score -= distanceToPlayer * 2; 
+
+            score += Random.Range(0, 3);
+
+            // SAVE THE BEST SCORE
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestNode = testNode;
+            }
+        }
+
+        return bestNode;
     }
 }

@@ -7,6 +7,7 @@ public class EnemyHorse : Piece
     {
         base.Awake(); 
     }
+
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {
         int dirX = targetNode.x - X;
@@ -25,6 +26,7 @@ public class EnemyHorse : Piece
             if (absX == 2) blockX += (int)Mathf.Sign(dirX);
             else blockY += (int)Mathf.Sign(dirY);
 
+            // Check if blocked by piece or corpse
             if (grid[blockX, blockY].currentPiece != null || grid[blockX, blockY].currentCorpse != null)
             {
                 return false;
@@ -59,21 +61,13 @@ public class EnemyHorse : Piece
                 
                 if (IsValidMove(testNode, grid))
                 {
-                    if (testNode.currentPiece != null && testNode.currentPiece.IsPlayer)
-                    {
-                        return testNode;
-                    }
+                    // Just gather all valid moves. The Brain will figure out if it's a kill!
                     validMoves.Add(testNode);
                 }
             }
         }
 
-        if (validMoves.Count > 0)
-        {
-            int randomIndex = Random.Range(0, validMoves.Count);
-            return validMoves[randomIndex];
-        }
-
-        return null; 
+        // --- LET THE NEW AI BRAIN DECIDE ---
+        return EvaluateAndPickBestMove(validMoves, grid);
     }
 }

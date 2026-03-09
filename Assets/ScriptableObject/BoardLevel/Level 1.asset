@@ -14,12 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BoardLayoutSO
   levelName: Level 1
   playerSpawnPosition: {x: 4, y: 0}
+  enemyGeneralSpawnPosition: {x: 4, y: 9}
+  enemyGeneralStartingCooldown: 2
   enemySpawns:
   - pieceType: 0
     position: {x: 4, y: 6}
-    startingCooldown: 1
-  - pieceType: 6
-    position: {x: 4, y: 9}
     startingCooldown: 1
   - pieceType: 1
     position: {x: 8, y: 9}
