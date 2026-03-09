@@ -14,17 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStatsSO
   baseMaxHp: 1
   baseMaxCooldown: 3
-  runtimeMaxHp: 0
-  runtimeMaxCooldown: 0
+  runtimeMaxHp: 1
+  runtimeMaxCooldown: 3
   baseMaxAmmo: 2
-  baseFirepower: 5
+  baseFirepower: 2
   baseFireArc: 40
   baseRangeX: 3
   baseRangeY: 6
   baseMaxArmor: 2
-  runtimeMaxAmmo: 0
-  runtimeFirepower: 0
-  runtimeFireArc: 0
-  runtimeRangeX: 0
-  runtimeRangeY: 0
-  runtimeMaxArmor: 0
+  runtimeMaxAmmo: 2
+  runtimeFirepower: 2
+  runtimeFireArc: 40
+  runtimeRangeX: 3
+  runtimeRangeY: 6
+  runtimeMaxArmor: 2

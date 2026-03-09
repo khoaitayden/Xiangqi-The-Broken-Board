@@ -78,8 +78,6 @@ public class DraftManager : MonoBehaviour
             return validYangs[Random.Range(0, validYangs.Count)];
         }
 
-        // FALLBACK: If we couldn't find a perfectly balanced card (or ran out of unique ones),
-        // we just find ANY unique Yang card.
         List<CardSO> remainingUniqueYangs = new List<CardSO>();
         foreach (CardSO yang in allYangCards)
         {
@@ -91,7 +89,6 @@ public class DraftManager : MonoBehaviour
             return remainingUniqueYangs[Random.Range(0, remainingUniqueYangs.Count)];
         }
 
-        // EXTREME FALLBACK: (You have less than 2 Yang cards total in your game)
         return allYangCards[Random.Range(0, allYangCards.Count)];
     }
 

@@ -102,24 +102,57 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        // 4. APPLY RUN MANAGER BUFFS (Conscription)
+        // 4. APPLY RUN MANAGER BUFFS (Conscription - Extra Pawns)
         if (RunManager.Instance != null && RunManager.Instance.BonusStartingPawns > 0)
         {
+            // Build the list of safe empty spots ONCE
+            List<BoardNode> emptyTopNodes = new List<BoardNode>();
+            for (int x = 0; x < GridManager.Instance.width; x++)
+            {
+                for (int y = 5; y < GridManager.Instance.height; y++) 
+                {
+                    if (GridManager.Instance.grid[x, y].IsEmpty())
+                        emptyTopNodes.Add(GridManager.Instance.grid[x, y]);
+                }
+            }
+
+            // Spawn the pawns and remove the used spots
             for (int i = 0; i < RunManager.Instance.BonusStartingPawns; i++)
             {
-                SpawnRandomExtraPawn();
+                if (emptyTopNodes.Count > 0)
+                {
+                    int randomIndex = Random.Range(0, emptyTopNodes.Count);
+                    BoardNode chosenNode = emptyTopNodes[randomIndex];
+                    SpawnEnemy(enemyPawnPrefab, chosenNode.x, chosenNode.y, 3);
+                    emptyTopNodes.RemoveAt(randomIndex); // FIX: Remove from list!
+                }
             }
         }
 
-        // 5. APPLY RUN MANAGER BUFFS (The Vanguard)
+        // 5. APPLY RUN MANAGER BUFFS (The Vanguard - Extra Chariots)
         if (RunManager.Instance != null && RunManager.Instance.BonusStartingChariots > 0)
         {
+            List<BoardNode> emptyBackNodes = new List<BoardNode>();
+            for (int x = 0; x < GridManager.Instance.width; x++)
+            {
+                for (int y = 8; y <= 9; y++) 
+                {
+                    if (GridManager.Instance.grid[x, y].IsEmpty())
+                        emptyBackNodes.Add(GridManager.Instance.grid[x, y]);
+                }
+            }
+
             for (int i = 0; i < RunManager.Instance.BonusStartingChariots; i++)
             {
-                SpawnRandomExtraChariot();
+                if (emptyBackNodes.Count > 0)
+                {
+                    int randomIndex = Random.Range(0, emptyBackNodes.Count);
+                    BoardNode chosenNode = emptyBackNodes[randomIndex];
+                    SpawnEnemy(enemyChariotPrefab, chosenNode.x, chosenNode.y, 3);
+                    emptyBackNodes.RemoveAt(randomIndex); // FIX: Remove from list!
+                }
             }
         }
-
         // Reset Turn to Player
         TurnManager.Instance.CurrentTurn = TurnManager.TurnState.PlayerTurn;
         Debug.Log($"Loaded Level {_currentLevelIndex + 1}: {levelData.levelName}");

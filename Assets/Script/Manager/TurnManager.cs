@@ -89,7 +89,6 @@ public class TurnManager : MonoBehaviour
         }
 
         // 2. NEW SAFETY CHECK: Only give the turn back to the player if the state is STILL EnemyTurn.
-        // This prevents the enemy phase from accidentally overwriting the Drafting state.
         if (CurrentTurn == TurnState.EnemyTurn) 
         {
             CurrentTurn = TurnState.PlayerTurn;

@@ -18,7 +18,7 @@ MonoBehaviour:
   enemyGeneralStartingCooldown: 2
   enemySpawns:
   - pieceType: 4
-    position: {x: 4, y: 9}
+    position: {x: 3, y: 9}
     startingCooldown: 1
   - pieceType: 3
     position: {x: 1, y: 6}
