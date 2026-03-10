@@ -149,6 +149,16 @@ public abstract class Piece : MonoBehaviour
 
     public abstract bool IsValidMove(BoardNode targetNode, BoardNode[,] grid);
     public virtual BoardNode GetAIMove(BoardNode[,] grid) { return null; }
+    public virtual List<BoardNode> GetValidMoves(BoardNode[,] grid)
+    {
+        List<BoardNode> validMoves = new List<BoardNode>();
+        // For standard pieces (Pawns, Horses, Elephants), we just check the whole board. It's instantly fast.
+        foreach (BoardNode node in grid)
+        {
+            if (IsValidMove(node, grid)) validMoves.Add(node);
+        }
+        return validMoves;
+    }
 
     // PRIVATE HELPERS
 
@@ -215,14 +225,15 @@ public abstract class Piece : MonoBehaviour
         BoardNode bestNode = null;
         int bestScore = int.MinValue;
 
+        // NEW: Figure out how many blockers the player is allowed to shoot through
+        int allowedBlockers = (RunManager.Instance != null && RunManager.Instance.MandateOfHeavenEnabled) ? 1 : 0;
+
         foreach (BoardNode testNode in validMoves)
         {
-            // 0-STEP: INSTANT WIN
             if (testNode == playerNode) return testNode; 
 
             int score = 0;
 
-            // --- SIMULATE THE FUTURE ---
             int oldX = X;
             int oldY = Y;
             X = testNode.x;
@@ -231,19 +242,56 @@ public abstract class Piece : MonoBehaviour
             grid[oldX, oldY].currentPiece = null;
             testNode.currentPiece = this;
 
-            // 1-STEP LOOKAHEAD: "CHECK"
+            if (this is EnemyGeneral)
+            {
+                if (testNode.x == player.X)
+                {
+                    int minY = Mathf.Min(player.Y, testNode.y);
+                    int maxY = Mathf.Max(player.Y, testNode.y);
+                    int blockers = 0;
+
+                    for (int y = minY + 1; y < maxY; y++)
+                    {
+                        if (!grid[player.X, y].IsEmpty()) blockers++;
+                    }
+
+                    if (blockers <= allowedBlockers)
+                    {
+                        score -= 5000; 
+                    }
+                }
+                else
+                {
+                    score += 500; 
+                }
+            }
+            else 
+            {
+                // If this is a normal piece (like an Advisor or Pawn)
+                EnemyGeneral boss = Object.FindFirstObjectByType<EnemyGeneral>();
+                if (boss != null && boss.X == player.X) 
+                {
+                    if (testNode.x == player.X && testNode.y > Mathf.Min(player.Y, boss.Y) && testNode.y < Mathf.Max(player.Y, boss.Y))
+                    {
+                        score += 1000; 
+                    }
+                }
+            }
+
+
+            // 1-STEP LOOKAHEAD: "CHECK" (Can I attack the player next turn?)
             if (IsValidMove(playerNode, grid))
             {
                 score += 100; 
             }
 
-            // 2-STEP LOOKAHEAD: "CHECKMATE / AREA DENIAL"
+            // 2-STEP LOOKAHEAD: "AREA DENIAL" (Surrounding the player)
             int restrictedEscapeRoutes = 0;
             for (int dx = -1; dx <= 1; dx++)
             {
                 for (int dy = -1; dy <= 1; dy++)
                 {
-                    if (dx == 0 && dy == 0) continue; // Skip player's current tile
+                    if (dx == 0 && dy == 0) continue; 
                     
                     int adjX = player.X + dx;
                     int adjY = player.Y + dy;
@@ -251,7 +299,6 @@ public abstract class Piece : MonoBehaviour
                     if (adjX >= 0 && adjX < GridManager.Instance.width && adjY >= 0 && adjY < GridManager.Instance.height)
                     {
                         BoardNode adjNode = grid[adjX, adjY];
-                        // If the escape route is empty AND I can attack it from my new simulated position
                         if (adjNode.IsEmpty() && IsValidMove(adjNode, grid))
                         {
                             restrictedEscapeRoutes++;
@@ -261,18 +308,23 @@ public abstract class Piece : MonoBehaviour
             }
             score += restrictedEscapeRoutes * 15;
 
+            // 3. DISTANCE HEURISTIC (March toward the player)
+            int distX = Mathf.Abs(testNode.x - player.X);
+            int distY = Mathf.Abs(testNode.y - player.Y);
+            int distanceToPlayer = distX + distY; 
+            
+            // If it's the Boss, we actually want them to stay away from the player (hide in the back)
+            if (this is EnemyGeneral) score += distanceToPlayer * 5; 
+            else score -= distanceToPlayer * 2; 
+
+            // Tie-breaker randomness
+            score += Random.Range(0, 5);
+
+            // --- REVERT THE SIMULATION ---
             grid[oldX, oldY].currentPiece = this;
             testNode.currentPiece = null;
             X = oldX;
             Y = oldY;
-
-            // 3. DISTANCE HEURISTIC
-            int distX = Mathf.Abs(testNode.x - player.X);
-            int distY = Mathf.Abs(testNode.y - player.Y);
-            int distanceToPlayer = distX + distY; 
-            score -= distanceToPlayer * 2; 
-
-            score += Random.Range(0, 3);
 
             // SAVE THE BEST SCORE
             if (score > bestScore)
@@ -284,4 +336,5 @@ public abstract class Piece : MonoBehaviour
 
         return bestNode;
     }
+
 }

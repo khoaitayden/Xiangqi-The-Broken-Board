@@ -6,6 +6,7 @@ public class PlayerActionController : MonoBehaviour
 {
     [Header("Aiming & Shooting")]
     public GameObject projectilePrefab; 
+    public AimConeRenderer aimVisualizer;
     
     private bool isAimingMode = false;
     private Vector2 currentAimDirection;
@@ -19,16 +20,37 @@ public class PlayerActionController : MonoBehaviour
         TurnManager turnMan = TurnManager.Instance;
         GridManager gridMan = GridManager.Instance;
 
-        if (turnMan.CurrentTurn != TurnManager.TurnState.PlayerTurn || isExecutingAction || turnMan.activePlayer == null) return;
+        // SAFETY: Hide cone immediately if it's not our turn, or we are shooting
+        if (turnMan.CurrentTurn != TurnManager.TurnState.PlayerTurn || isExecutingAction || turnMan.activePlayer == null)
+        {
+            if (aimVisualizer != null) aimVisualizer.HideCone();
+            return;
+        }
 
         Vector2 worldPosition = InputHandler.Instance.MouseWorldPosition;
         BoardNode hoveredNode = gridMan.GetNodeAtPosition(worldPosition);
 
+        if (hoveredNode == null)
+        {
+            // Mouse is completely off the board. Hide everything!
+            if (aimVisualizer != null) aimVisualizer.HideCone();
+            gridMan.ClearAllHighlights();
+            return; 
+        }
+        gridMan.UpdateHoverHighlight(hoveredNode);
+
+        // --- NORMAL AIMING LOGIC ---
         DetermineInputContext(worldPosition, hoveredNode, turnMan.activePlayer, gridMan);
+
 
         if (isAimingMode)
         {
-            DrawAimConeAndHighlightEnemies(turnMan);
+            DrawAimConeAndHighlightEnemies(turnMan, worldPosition); // Pass the mouse position!
+        }
+        else
+        {
+            // SAFETY: Hide cone when hovering a move tile
+            if (aimVisualizer != null) aimVisualizer.HideCone();
         }
 
         if (InputHandler.Instance.IsClickTriggered) 
@@ -110,26 +132,27 @@ public class PlayerActionController : MonoBehaviour
         }
     }
 
-    void DrawAimConeAndHighlightEnemies(TurnManager turnMan)
+    void DrawAimConeAndHighlightEnemies(TurnManager turnMan, Vector2 mouseWorldPos)
     {
         PlayerGeneral player = turnMan.activePlayer;
         Vector3 playerPos = player.transform.position;
         
+        // Un-highlight all enemies
         foreach (Piece enemy in turnMan.enemyPieces) { if (enemy != null) enemy.SetTargeted(false); }
 
         if (currentShotMode == SpecialShotMode.FlyingGeneral)
         {
-            // Draw a massive glowing line straight to the boss
-            Debug.DrawRay(playerPos, currentAimDirection * 15f, Color.magenta);
+            // ... (Keep Laser logic) ...
+            if (aimVisualizer != null) aimVisualizer.HideCone(); 
+            Debug.DrawRay(playerPos, currentAimDirection * 15f, Color.magenta); 
             EnemyGeneral enemyBoss = Object.FindFirstObjectByType<EnemyGeneral>();
             if (enemyBoss != null) enemyBoss.SetTargeted(true);
         }
         else if (currentShotMode == SpecialShotMode.CrouchingTiger)
         {
-            // Draw a straight red laser
-            Debug.DrawRay(playerPos, currentAimDirection * 15f, Color.red);
-            
-            // Highlight targets in the laser path
+            // ... (Keep Laser logic) ...
+            if (aimVisualizer != null) aimVisualizer.HideCone();
+            Debug.DrawRay(playerPos, currentAimDirection * 15f, Color.red); 
             RaycastHit2D[] hits = Physics2D.RaycastAll(playerPos, currentAimDirection, 15f);
             int hitCount = 0;
             foreach (var hit in hits)
@@ -138,21 +161,29 @@ public class PlayerActionController : MonoBehaviour
                 if (hitPiece != null && !hitPiece.IsPlayer)
                 {
                     hitCount++;
-                    if (hitCount == 2) { hitPiece.SetTargeted(true); break; } // Targets the 2nd piece
+                    if (hitCount == 2) { hitPiece.SetTargeted(true); break; } 
                 }
             }
         }
-        else
+        else 
         {
-            // STANDARD CONE SPREAD
+
+            float distanceToMouse = Vector2.Distance(playerPos, mouseWorldPos);
+
+            float currentRangeX = Mathf.Min(distanceToMouse, player.RangeX);
+            
+
+            float currentRangeY = Mathf.Max(currentRangeX, Mathf.Min(distanceToMouse, player.RangeY));
+
+            // --- RENDER CONE ---
+            if (aimVisualizer != null)
+            {
+                aimVisualizer.DrawCone(playerPos, currentAimDirection, player.FireArc, currentRangeX, currentRangeY);
+            }
+
+
             float aimAngle = Mathf.Atan2(currentAimDirection.y, currentAimDirection.x) * Mathf.Rad2Deg;
             float halfArc = player.FireArc / 2f;
-            Vector3 edge1 = Quaternion.Euler(0, 0, aimAngle - halfArc) * Vector3.right;
-            Vector3 edge2 = Quaternion.Euler(0, 0, aimAngle + halfArc) * Vector3.right;
-
-            Debug.DrawRay(playerPos, edge1 * player.RangeX, Color.red);
-            Debug.DrawRay(playerPos, edge2 * player.RangeX, Color.red);
-            
             foreach (Piece enemy in turnMan.enemyPieces)
             {
                 if (enemy == null) continue;
@@ -164,7 +195,7 @@ public class PlayerActionController : MonoBehaviour
             }
         }
     }
-
+    
     IEnumerator ExecuteShootCoroutine(TurnManager turnMan)
     {
         turnMan.SaveState();
@@ -204,6 +235,10 @@ public class PlayerActionController : MonoBehaviour
         }
         else
         {
+            // Find boss and start batching BEFORE bullets spawn
+            EnemyGeneral enemyBoss = Object.FindFirstObjectByType<EnemyGeneral>();
+            if (enemyBoss != null) enemyBoss.BeginDamageBatch();
+
             // STANDARD SHOTGUN PELLET SPREAD
             float aimAngle = Mathf.Atan2(currentAimDirection.y, currentAimDirection.x) * Mathf.Rad2Deg;
             float halfArc = player.FireArc / 2f;
@@ -220,15 +255,16 @@ public class PlayerActionController : MonoBehaviour
             }
 
             yield return new WaitUntil(() => FindObjectsByType<Projectile>(FindObjectsSortMode.None).Length == 0);
+
+            if (enemyBoss != null) enemyBoss.EndDamageBatch();
         }
 
+        // --- MISSING CODE ADDED BACK HERE ---
         isExecutingAction = false;
         turnMan.StartEnemyPhase();
     }
-
     void ExecuteMove(BoardNode targetNode, TurnManager turnMan)
     {
-        // ... (Keep your existing Red Hare logic from earlier here!)
         turnMan.SaveState();
         PlayerGeneral player = turnMan.activePlayer;
         bool isDiagonalMove = Mathf.Abs(targetNode.x - player.X) == 1 && Mathf.Abs(targetNode.y - player.Y) == 1;

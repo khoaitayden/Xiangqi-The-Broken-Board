@@ -8,9 +8,10 @@ public class UIManager : MonoBehaviour
     [Header("Player UI")]
     public TextMeshProUGUI ammoText;
     public TextMeshProUGUI armorText;
+    public TextMeshProUGUI weaponStatsText; // NEW: Drag your new Text object here
 
     [Header("Enemy Hover UI")]
-    public GameObject enemyPanel; // Parent object to hide/show everything at once
+    public GameObject enemyPanel; 
     public TextMeshProUGUI enemyNameText;
     public TextMeshProUGUI enemyHPText;
     public TextMeshProUGUI enemyCooldownText;
@@ -35,21 +36,23 @@ public class UIManager : MonoBehaviour
         {
             ammoText.text = $"Ammo: {player.LoadedAmmo} / {player.MaxAmmo}";
             armorText.text = $"Armor: {player.CurrentArmor}";
+            
+            // NEW: Show Firepower and Arc
+            weaponStatsText.text = $"Firepower: {player.Firepower} Pellets\nSpread Arc: {player.FireArc}°";
         }
         else
         {
             ammoText.text = "Ammo: 0";
             armorText.text = "Armor: 0";
+            if (weaponStatsText != null) weaponStatsText.text = "";
         }
     }
 
     private void UpdateEnemyHoverInfo()
     {
-        // 1. Get the hovered node
         Vector2 mouseWorldPos = InputHandler.Instance.MouseWorldPosition;
         BoardNode hoveredNode = GridManager.Instance.GetNodeAtPosition(mouseWorldPos);
 
-        // 2. SAFETY CHECK: Mouse off the board
         if (hoveredNode == null)
         {
             enemyPanel.SetActive(false);
@@ -60,7 +63,6 @@ public class UIManager : MonoBehaviour
         {
             Piece enemy = hoveredNode.currentPiece;
             
-            // Format name nicely
             string cleanName = enemy.gameObject.name.Replace("Enemy", "").Replace("(Clone)", "");
 
             enemyNameText.text = cleanName.ToUpper();
@@ -69,7 +71,6 @@ public class UIManager : MonoBehaviour
             
             enemyPanel.SetActive(true);
         }
-        // 4. CHECK FOR CORPSE
         else if (hoveredNode.currentCorpse != null)
         {
             Corpse corpse = hoveredNode.currentCorpse;
@@ -80,7 +81,6 @@ public class UIManager : MonoBehaviour
             
             enemyPanel.SetActive(true);
         }
-        // 5. EMPTY TILE OR PLAYER TILE
         else
         {
             enemyPanel.SetActive(false);

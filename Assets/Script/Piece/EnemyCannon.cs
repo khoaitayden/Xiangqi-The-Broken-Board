@@ -10,7 +10,7 @@ public class EnemyCannon : Piece
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid) { return false; }
 
-    public override BoardNode GetAIMove(BoardNode[,] grid)
+    public override List<BoardNode> GetValidMoves(BoardNode[,] grid)
     {
         List<BoardNode> validMoves = new List<BoardNode>();
         Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
@@ -28,13 +28,13 @@ public class EnemyCannon : Piece
                 if (!hasJumped)
                 {
                     if (testNode.IsEmpty()) validMoves.Add(testNode); 
-                    else hasJumped = true; // Hit a piece OR a corpse! Mount created!
+                    else hasJumped = true; 
                 }
                 else
                 {
-                    if (!testNode.IsEmpty()) // Hit second object
+                    if (!testNode.IsEmpty()) 
                     {
-                        if (testNode.currentPiece != null && testNode.currentPiece.IsPlayer) return testNode; 
+                        if (testNode.currentPiece != null && testNode.currentPiece.IsPlayer) validMoves.Add(testNode); 
                         break; 
                     }
                 }
@@ -42,6 +42,7 @@ public class EnemyCannon : Piece
                 checkY += dir.y;
             }
         }
-        return EvaluateAndPickBestMove(validMoves, grid);
+        // Return the list!
+        return validMoves;
     }
 }

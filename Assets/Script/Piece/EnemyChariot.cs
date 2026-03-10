@@ -12,8 +12,7 @@ public class EnemyChariot : Piece
     {
         return false; 
     }
-
-    public override BoardNode GetAIMove(BoardNode[,] grid)
+    public override List<BoardNode> GetValidMoves(BoardNode[,] grid)
     {
         List<BoardNode> validMoves = new List<BoardNode>();
         Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
@@ -31,19 +30,16 @@ public class EnemyChariot : Piece
                 {
                     validMoves.Add(testNode); 
                 }
-                else // Hit a piece OR a corpse
+                else 
                 {
-                    if (testNode.currentPiece != null && testNode.currentPiece.IsPlayer)
-                    {
-                        return testNode; // Hit player
-                    }
+                    if (testNode.currentPiece != null && testNode.currentPiece.IsPlayer) validMoves.Add(testNode); 
                     break; 
                 }
-
                 checkX += dir.x;
                 checkY += dir.y;
             }
         }
-        return EvaluateAndPickBestMove(validMoves, grid);
+        // Return the list instead of evaluating!
+        return validMoves; 
     }
 }

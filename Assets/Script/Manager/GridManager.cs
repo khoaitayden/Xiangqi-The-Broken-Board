@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class GridManager : MonoBehaviour
 {
@@ -11,6 +12,8 @@ public class GridManager : MonoBehaviour
     public GameObject nodePrefab; 
 
     public BoardNode[,] grid;
+    
+    private Piece currentlyHighlightedEnemy;
 
     private void Awake()
     {
@@ -36,8 +39,8 @@ public class GridManager : MonoBehaviour
                 spawnedNode.name = $"Node ({x}, {y})";
                 spawnedNode.transform.parent = this.transform;
                 
-                if (newNode.isPlayerPalace) spawnedNode.GetComponent<SpriteRenderer>().color = Color.blue;
-                if (newNode.isEnemyPalace) spawnedNode.GetComponent<SpriteRenderer>().color = Color.red;
+                // HIDE THE DOT BY DEFAULT!
+                spawnedNode.GetComponent<SpriteRenderer>().enabled = false;
 
                 newNode.nodeGameObject = spawnedNode;
             }
@@ -59,6 +62,46 @@ public class GridManager : MonoBehaviour
         return null;
     }
 
+    // --- NEW HIGHLIGHT SYSTEM ---
+    public void UpdateHoverHighlight(BoardNode hoveredNode)
+    {
+
+        if (hoveredNode == null || hoveredNode.currentPiece == null || hoveredNode.currentPiece.IsPlayer)
+        {
+            if (currentlyHighlightedEnemy != null)
+            {
+                ClearAllHighlights();
+                currentlyHighlightedEnemy = null;
+            }
+            return;
+        }
+
+
+        Piece enemy = hoveredNode.currentPiece;
+
+        if (enemy != currentlyHighlightedEnemy)
+        {
+            ClearAllHighlights();
+            currentlyHighlightedEnemy = enemy;
+            
+            List<BoardNode> enemyMoves = enemy.GetValidMoves(grid);
+            foreach (BoardNode node in enemyMoves)
+            {
+                SpriteRenderer sr = node.nodeGameObject.GetComponent<SpriteRenderer>();
+                sr.enabled = true; 
+            }
+        }
+    }
+
+    public void ClearAllHighlights()
+    {
+        if (grid == null) return;
+        foreach (BoardNode node in grid)
+        {
+            node.nodeGameObject.GetComponent<SpriteRenderer>().enabled = false;
+        }
+        currentlyHighlightedEnemy = null;
+    } 
     private void OnDrawGizmos()
     {
         if (!Application.isPlaying && grid == null) return;

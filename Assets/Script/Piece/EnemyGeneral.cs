@@ -1,8 +1,11 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 public class EnemyGeneral : Piece
 {
+    private int _pendingDamage = 0;
+    private bool _isBatchingDamage = false;
     protected override void Awake()
     {
         base.Awake();
@@ -68,23 +71,43 @@ public class EnemyGeneral : Piece
         }
     }
 
-    public override void TakeDamage(int damage)
+    public void BeginDamageBatch()
     {
+        _pendingDamage = 0;
+        _isBatchingDamage = true;
+    }
+
+    public void EndDamageBatch()
+    {
+        _isBatchingDamage = false;
+        
+        if (_pendingDamage <= 0) return;
+
+        // Apply AdvisorsProtectGeneral ONCE for the whole volley
         if (RunManager.Instance != null && RunManager.Instance.AdvisorsProtectGeneral)
         {
-            bool advisorAlive = false;
-            foreach (Piece p in TurnManager.Instance.enemyPieces)
-            {
-                if (p is EnemyAdvisor) { advisorAlive = true; break; }
-            }
+            bool advisorAlive = TurnManager.Instance.enemyPieces
+                .Any(p => p is EnemyAdvisor);
             
-            if (advisorAlive) 
+            if (advisorAlive)
             {
-                damage = Mathf.Max(0, damage - 1);
-                Debug.Log("Advisor shielded the General!");
+                _pendingDamage = Mathf.Max(0, _pendingDamage - 1);
+                Debug.Log("Advisor shielded the General! Reduced volley by 1.");
             }
         }
-        
+
+        base.TakeDamage(_pendingDamage);
+    }
+
+    public override void TakeDamage(int damage)
+    {
+        if (_isBatchingDamage)
+        {
+            _pendingDamage += damage;  // Just accumulate, don't apply yet
+            return;
+        }
+
+        // Fallback: single hit (e.g. Flying General instant kill)
         base.TakeDamage(damage);
     }
 }
