@@ -50,6 +50,13 @@ public class UIManager : MonoBehaviour
 
     private void UpdateEnemyHoverInfo()
     {
+        // THE FIX: If it's not the player's turn, hide the panel and do nothing.
+        if (TurnManager.Instance.CurrentTurn != TurnManager.TurnState.PlayerTurn)
+        {
+            enemyPanel.SetActive(false);
+            return;
+        }
+        
         Vector2 mouseWorldPos = InputHandler.Instance.MouseWorldPosition;
         BoardNode hoveredNode = GridManager.Instance.GetNodeAtPosition(mouseWorldPos);
 

@@ -83,31 +83,43 @@ public class EnemyGeneral : Piece
         
         if (_pendingDamage <= 0) return;
 
-        // Apply AdvisorsProtectGeneral ONCE for the whole volley
+        // THE FIX: Apply Imperial Mandate damage reduction here!
         if (RunManager.Instance != null && RunManager.Instance.AdvisorsProtectGeneral)
         {
-            bool advisorAlive = TurnManager.Instance.enemyPieces
-                .Any(p => p is EnemyAdvisor);
+            bool advisorAlive = TurnManager.Instance.enemyPieces.Any(p => p is EnemyAdvisor);
             
             if (advisorAlive)
             {
+                // Reduce total volley damage by 1
                 _pendingDamage = Mathf.Max(0, _pendingDamage - 1);
-                Debug.Log("Advisor shielded the General! Reduced volley by 1.");
+                Debug.Log("Advisor shielded the General! Reduced volley damage by 1.");
             }
         }
 
+        // Apply the final, reduced damage amount
         base.TakeDamage(_pendingDamage);
     }
 
     public override void TakeDamage(int damage)
     {
+        // If a volley is active, just add to the total
         if (_isBatchingDamage)
         {
-            _pendingDamage += damage;  // Just accumulate, don't apply yet
+            _pendingDamage += damage;
             return;
         }
 
-        // Fallback: single hit (e.g. Flying General instant kill)
+        // This path is for single, powerful hits (like Flying General or future abilities)
+        // We still need to check for Imperial Mandate here!
+        if (RunManager.Instance != null && RunManager.Instance.AdvisorsProtectGeneral)
+        {
+            bool advisorAlive = TurnManager.Instance.enemyPieces.Any(p => p is EnemyAdvisor);
+            if (advisorAlive)
+            {
+                damage = Mathf.Max(0, damage - 1);
+                Debug.Log("Advisor shielded the General! Reduced hit by 1.");
+            }
+        }
         base.TakeDamage(damage);
     }
 }

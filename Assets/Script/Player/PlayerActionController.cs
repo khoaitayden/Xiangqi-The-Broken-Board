@@ -20,12 +20,13 @@ public class PlayerActionController : MonoBehaviour
         TurnManager turnMan = TurnManager.Instance;
         GridManager gridMan = GridManager.Instance;
 
-        // SAFETY: Hide cone immediately if it's not our turn, or we are shooting
         if (turnMan.CurrentTurn != TurnManager.TurnState.PlayerTurn || isExecutingAction || turnMan.activePlayer == null)
         {
             if (aimVisualizer != null) aimVisualizer.HideCone();
+            gridMan.ClearAllHighlights(); // Explicitly clear highlights when not player's turn
             return;
         }
+
 
         Vector2 worldPosition = InputHandler.Instance.MouseWorldPosition;
         BoardNode hoveredNode = gridMan.GetNodeAtPosition(worldPosition);
@@ -195,7 +196,7 @@ public class PlayerActionController : MonoBehaviour
             }
         }
     }
-    
+
     IEnumerator ExecuteShootCoroutine(TurnManager turnMan)
     {
         turnMan.SaveState();
