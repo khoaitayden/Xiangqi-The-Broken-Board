@@ -44,11 +44,11 @@ public class DraftManager : MonoBehaviour
         p2Yang = GetBalancedYangCard(p2Yin, offeredYangCardsThisDraft);
 
         // Update UI
-        pair1YinText.text = $"[YIN {p1Yin.weight}] {p1Yin.cardName}\n{p1Yin.description}";
-        pair1YangText.text = $"[YANG +{p1Yang.weight}] {p1Yang.cardName}\n{p1Yang.description}";
+        pair1YinText.text = $"{p1Yin.cardName}\n{p1Yin.description}";
+        pair1YangText.text = $"{p1Yang.cardName}\n{p1Yang.description}";
 
-        pair2YinText.text = $"[YIN {p2Yin.weight}] {p2Yin.cardName}\n{p2Yin.description}";
-        pair2YangText.text = $"[YANG +{p2Yang.weight}] {p2Yang.cardName}\n{p2Yang.description}";
+        pair2YinText.text = $"{p2Yin.cardName}\n{p2Yin.description}";
+        pair2YangText.text = $"{p2Yang.cardName}\n{p2Yang.description}";
 
         draftUIPanel.SetActive(true);
     }
