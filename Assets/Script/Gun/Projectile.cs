@@ -7,7 +7,7 @@ public class Projectile : MonoBehaviour
     public float rangeX;
     public float rangeY;
     public int damage = 1;
-
+    private Vector3 startPos;
     void Start()
     {
         startPosition = transform.position;
@@ -37,9 +37,25 @@ public class Projectile : MonoBehaviour
         Piece hitPiece = collision.GetComponent<Piece>();
         if (hitPiece != null)
         {
-            if (!hitPiece.IsPlayer) 
+            if (!hitPiece.IsPlayer)
             {
                 hitPiece.TakeDamage(damage);
+
+                // PIERCING DRAGON LOGIC
+                float distance = Vector3.Distance(startPos, transform.position);
+                bool hasPiercing = RunManager.Instance != null && RunManager.Instance.PiercingDragonEnabled;
+                
+                if (hasPiercing && distance <= 2.0f) // If fired point-blank
+                {
+                    // Raycast slightly forward to hit the guy behind him
+                    RaycastHit2D hit = Physics2D.Raycast(transform.position + transform.right * 0.5f, transform.right, 2.0f);
+                    if (hit.collider != null)
+                    {
+                        Piece behindPiece = hit.collider.GetComponent<Piece>();
+                        if (behindPiece != null && !behindPiece.IsPlayer) behindPiece.TakeDamage(1);
+                    }
+                }
+
                 Destroy(gameObject); 
             }
             return;

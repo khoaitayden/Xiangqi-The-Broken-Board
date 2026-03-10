@@ -153,6 +153,29 @@ public class LevelManager : MonoBehaviour
                 }
             }
         }
+
+        // APPLY RUN MANAGER BUFFS (Artillery Backup)
+        if (RunManager.Instance != null && RunManager.Instance.BonusStartingCannons > 0)
+        {
+            List<BoardNode> emptyMidNodes = new List<BoardNode>();
+            for (int x = 0; x < GridManager.Instance.width; x++)
+            {
+                for (int y = 6; y <= 7; y++) 
+                {
+                    if (GridManager.Instance.grid[x, y].IsEmpty()) emptyMidNodes.Add(GridManager.Instance.grid[x, y]);
+                }
+            }
+            for (int i = 0; i < RunManager.Instance.BonusStartingCannons; i++)
+            {
+                if (emptyMidNodes.Count > 0)
+                {
+                    int randomIndex = Random.Range(0, emptyMidNodes.Count);
+                    BoardNode chosenNode = emptyMidNodes[randomIndex];
+                    SpawnEnemy(enemyCannonPrefab, chosenNode.x, chosenNode.y, 2);
+                    emptyMidNodes.RemoveAt(randomIndex); 
+                }
+            }
+        }
         // Reset Turn to Player
         TurnManager.Instance.CurrentTurn = TurnManager.TurnState.PlayerTurn;
         Debug.Log($"Loaded Level {_currentLevelIndex + 1}: {levelData.levelName}");

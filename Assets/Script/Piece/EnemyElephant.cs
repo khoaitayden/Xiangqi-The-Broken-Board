@@ -10,7 +10,8 @@ public class EnemyElephant : Piece
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {
-        if (targetNode.y < 5) return false; 
+        bool canCross = RunManager.Instance != null && RunManager.Instance.ElephantsCrossRiver;
+        if (!canCross && targetNode.y < 5) return false; 
 
         int dirX = targetNode.x - X;
         int dirY = targetNode.y - Y;

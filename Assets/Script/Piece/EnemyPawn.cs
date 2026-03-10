@@ -10,15 +10,20 @@ public class EnemyPawn : Piece
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {
-        int dirX = targetNode.x - X; 
+        int dirX = targetNode.x - X;
         int dirY = targetNode.y - Y;
 
         if (dirY > 0) return false;
-        if (Mathf.Abs(dirX) > 0 && Mathf.Abs(dirY) > 0) return false;
-        if (dirX == 0 && dirY == -1) return true;
+        if (dirX == 0 && dirY == -1) return true; // Forward 1
+        
+        bool hasCrossedRiver = Y <= 4;
+        if (hasCrossedRiver && dirY == 0 && Mathf.Abs(dirX) == 1) return true; 
 
-        bool hasCrossedRiver = Y <= 4; // Capital Y
-        if (hasCrossedRiver && dirY == 0 && Mathf.Abs(dirX) == 1) return true;
+        bool bloodthirsty = RunManager.Instance != null && RunManager.Instance.PawnsAttackDiagonal;
+        if (bloodthirsty && dirY == -1 && Mathf.Abs(dirX) == 1)
+        {
+            if (targetNode.currentPiece != null && targetNode.currentPiece.IsPlayer) return true;
+        }
 
         return false;
     }

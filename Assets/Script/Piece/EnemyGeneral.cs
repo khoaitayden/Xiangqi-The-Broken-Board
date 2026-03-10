@@ -67,4 +67,24 @@ public class EnemyGeneral : Piece
             draft.ShowDraftScreen();
         }
     }
+
+    public override void TakeDamage(int damage)
+    {
+        if (RunManager.Instance != null && RunManager.Instance.AdvisorsProtectGeneral)
+        {
+            bool advisorAlive = false;
+            foreach (Piece p in TurnManager.Instance.enemyPieces)
+            {
+                if (p is EnemyAdvisor) { advisorAlive = true; break; }
+            }
+            
+            if (advisorAlive) 
+            {
+                damage = Mathf.Max(0, damage - 1);
+                Debug.Log("Advisor shielded the General!");
+            }
+        }
+        
+        base.TakeDamage(damage);
+    }
 }

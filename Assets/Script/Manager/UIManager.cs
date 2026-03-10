@@ -5,9 +5,15 @@ public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
 
-    [Header("UI References")]
-    public TextMeshProUGUI playerStatsText;
-    public TextMeshProUGUI enemyInfoText;
+    [Header("Player UI")]
+    public TextMeshProUGUI ammoText;
+    public TextMeshProUGUI armorText;
+
+    [Header("Enemy Hover UI")]
+    public GameObject enemyPanel; // Parent object to hide/show everything at once
+    public TextMeshProUGUI enemyNameText;
+    public TextMeshProUGUI enemyHPText;
+    public TextMeshProUGUI enemyCooldownText;
 
     private void Awake()
     {
@@ -27,49 +33,57 @@ public class UIManager : MonoBehaviour
 
         if (player != null)
         {
-            // E.g., "AMMO: 2/2   ARMOR: 1"
-            playerStatsText.text = $"AMMO: {player.LoadedAmmo}/{player.MaxAmmo}\nARMOR: {player.CurrentArmor}";
+            ammoText.text = $"Ammo: {player.LoadedAmmo} / {player.MaxAmmo}";
+            armorText.text = $"Armor: {player.CurrentArmor}";
         }
         else
         {
-            playerStatsText.text = "PLAYER DEAD";
+            ammoText.text = "Ammo: 0";
+            armorText.text = "Armor: 0";
         }
     }
 
     private void UpdateEnemyHoverInfo()
     {
-        // 1. Get the node the mouse is currently hovering over
+        // 1. Get the hovered node
         Vector2 mouseWorldPos = InputHandler.Instance.MouseWorldPosition;
         BoardNode hoveredNode = GridManager.Instance.GetNodeAtPosition(mouseWorldPos);
 
-        // 2. Check if there is an Enemy on that node
-        if (hoveredNode != null && !hoveredNode.IsEmpty() && !hoveredNode.currentPiece.IsPlayer)
+        // 2. SAFETY CHECK: Mouse off the board
+        if (hoveredNode == null)
+        {
+            enemyPanel.SetActive(false);
+            return;
+        }
+
+        if (hoveredNode.currentPiece != null && !hoveredNode.currentPiece.IsPlayer)
         {
             Piece enemy = hoveredNode.currentPiece;
             
-            // Format the name nicely (e.g., "EnemyHorse(Clone)" -> "Horse")
+            // Format name nicely
             string cleanName = enemy.gameObject.name.Replace("Enemy", "").Replace("(Clone)", "");
 
-            // Show HP and Cooldown
-            string cooldownText = enemy.CurrentCooldown == 0 ? "<color=red>READY TO STRIKE</color>" : $"Attacks in: {enemy.CurrentCooldown} turns";
+            enemyNameText.text = cleanName.ToUpper();
+            enemyHPText.text = $"HP: {enemy.CurrentHp} / {enemy.MaxHp}";
+            enemyCooldownText.text = $"Cooldown: {enemy.CurrentCooldown}";
             
-            enemyInfoText.text = $"<b>{cleanName.ToUpper()}</b>\nHP: {enemy.CurrentHp}/{enemy.MaxHp}\n{cooldownText}";
-            
-            // Optional: Show background panel if you add one later
-            enemyInfoText.gameObject.SetActive(true);
+            enemyPanel.SetActive(true);
         }
-        else if (hoveredNode != null && hoveredNode.currentCorpse != null)
+        // 4. CHECK FOR CORPSE
+        else if (hoveredNode.currentCorpse != null)
         {
-            // Bonus: Show info for Corpses!
             Corpse corpse = hoveredNode.currentCorpse;
-            enemyInfoText.text = $"<b>CORPSE</b>\nFades in: {corpse.turnsRemaining} turns";
-            enemyInfoText.gameObject.SetActive(true);
+            
+            enemyNameText.text = "CORPSE";
+            enemyHPText.text = $"Fades in: {corpse.turnsRemaining} turns";
+            enemyCooldownText.text = ""; 
+            
+            enemyPanel.SetActive(true);
         }
+        // 5. EMPTY TILE OR PLAYER TILE
         else
         {
-            // Hide the text if we aren't hovering anything interesting
-            enemyInfoText.text = "";
-            enemyInfoText.gameObject.SetActive(false);
+            enemyPanel.SetActive(false);
         }
     }
 }

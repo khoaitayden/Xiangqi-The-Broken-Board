@@ -27,14 +27,31 @@ public class PlayerGeneral : Piece
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {
-        // Use property X and Y instead of currentX
         int distanceX = Mathf.Abs(targetNode.x - X);
         int distanceY = Mathf.Abs(targetNode.y - Y);
 
         if (distanceX <= 1 && distanceY <= 1 && !(distanceX == 0 && distanceY == 0))
         {
+            // CLOUD STEP: Allow moving onto corpses!
+            bool cloudStep = RunManager.Instance != null && RunManager.Instance.CloudStepEnabled;
+            
             if (targetNode.IsEmpty()) return true;
+            if (cloudStep && targetNode.currentPiece == null && targetNode.currentCorpse != null) return true; 
         }
         return false;
     }
+
+    public override void MoveTo(BoardNode targetNode)
+    {
+        // CLOUD STEP: Destroy the corpse if we step on it!
+        if (RunManager.Instance != null && RunManager.Instance.CloudStepEnabled && targetNode.currentCorpse != null)
+        {
+            TurnManager.Instance.activeCorpses.Remove(targetNode.currentCorpse);
+            Destroy(targetNode.currentCorpse.gameObject);
+            targetNode.currentCorpse = null;
+        }
+
+        base.MoveTo(targetNode);
+    }
+
 }
