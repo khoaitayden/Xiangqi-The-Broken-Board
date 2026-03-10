@@ -1251,7 +1251,7 @@ GameObject:
   - component: {fileID: 721982387}
   - component: {fileID: 721982386}
   m_Layer: 0
-  m_Name: AimConeVisualizer
+  m_Name: AimVisualizer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1270,8 +1270,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AimConeRenderer
   coneMaterial: {fileID: 2100000, guid: 5dfac0080190dcac0af206e0af431237, type: 2}
-  optimalColor: {r: 0, g: 0, b: 0, a: 0.3}
-  falloffColor: {r: 1, g: 1, b: 1, a: 0.15}
+  optimalColor: {r: 0, g: 0, b: 0, a: 0.39215687}
+  falloffColor: {r: 1, g: 1, b: 1, a: 0.39215687}
+  lazerColor: {r: 1, g: 0, b: 0, a: 0.5882353}
   resolution: 20
 --- !u!23 &721982387
 MeshRenderer:

@@ -6,7 +6,7 @@ public class PlayerActionController : MonoBehaviour
 {
     [Header("Aiming & Shooting")]
     public GameObject projectilePrefab; 
-    public AimConeRenderer aimVisualizer;
+    public AimVisualizer aimVisualizer;
     
     private bool isAimingMode = false;
     private Vector2 currentAimDirection;
@@ -22,7 +22,7 @@ public class PlayerActionController : MonoBehaviour
 
         if (turnMan.CurrentTurn != TurnManager.TurnState.PlayerTurn || isExecutingAction || turnMan.activePlayer == null)
         {
-            if (aimVisualizer != null) aimVisualizer.HideCone();
+            if (aimVisualizer != null) aimVisualizer.Hide();
             gridMan.ClearAllHighlights(); // Explicitly clear highlights when not player's turn
             return;
         }
@@ -34,7 +34,7 @@ public class PlayerActionController : MonoBehaviour
         if (hoveredNode == null)
         {
             // Mouse is completely off the board. Hide everything!
-            if (aimVisualizer != null) aimVisualizer.HideCone();
+            if (aimVisualizer != null) aimVisualizer.Hide();
             gridMan.ClearAllHighlights();
             return; 
         }
@@ -51,7 +51,7 @@ public class PlayerActionController : MonoBehaviour
         else
         {
             // SAFETY: Hide cone when hovering a move tile
-            if (aimVisualizer != null) aimVisualizer.HideCone();
+            if (aimVisualizer != null) aimVisualizer.Hide();
         }
 
         if (InputHandler.Instance.IsClickTriggered) 
@@ -143,16 +143,21 @@ public class PlayerActionController : MonoBehaviour
 
         if (currentShotMode == SpecialShotMode.FlyingGeneral)
         {
-            // ... (Keep Laser logic) ...
-            if (aimVisualizer != null) aimVisualizer.HideCone(); 
-            Debug.DrawRay(playerPos, currentAimDirection * 15f, Color.magenta); 
             EnemyGeneral enemyBoss = Object.FindFirstObjectByType<EnemyGeneral>();
-            if (enemyBoss != null) enemyBoss.SetTargeted(true);
+            if (enemyBoss != null && aimVisualizer != null)
+            {
+                // Calculate distance to boss for accurate laser length
+                float distanceToBoss = Vector3.Distance(playerPos, enemyBoss.transform.position);
+
+                // Call the new DrawLine method!
+                aimVisualizer.DrawLine(playerPos, currentAimDirection, distanceToBoss, 0.2f);
+
+                enemyBoss.SetTargeted(true);
+            }
         }
         else if (currentShotMode == SpecialShotMode.CrouchingTiger)
         {
-            // ... (Keep Laser logic) ...
-            if (aimVisualizer != null) aimVisualizer.HideCone();
+            if (aimVisualizer != null) aimVisualizer.Hide();
             Debug.DrawRay(playerPos, currentAimDirection * 15f, Color.red); 
             RaycastHit2D[] hits = Physics2D.RaycastAll(playerPos, currentAimDirection, 15f);
             int hitCount = 0;

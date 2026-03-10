@@ -1,17 +1,18 @@
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-public class AimConeRenderer : MonoBehaviour
+public class AimVisualizer : MonoBehaviour
 {
     private Mesh mesh;
     private MeshFilter meshFilter;
     private MeshRenderer meshRenderer;
 
     [Header("Visual Settings")]
-    public Material coneMaterial; // We will assign a transparent material here
-    public Color optimalColor = new Color(1f, 0f, 0f, 0.3f);  // Translucent Red
-    public Color falloffColor = new Color(1f, 1f, 0f, 0.15f); // Translucent Yellow
-    public int resolution = 20; // How smooth the curved edge is
+    public Material coneMaterial; 
+    public Color optimalColor ;  
+    public Color falloffColor ; 
+    public Color lazerColor; 
+    public int resolution = 20; 
 
     private void Awake()
     {
@@ -83,8 +84,41 @@ public class AimConeRenderer : MonoBehaviour
         mesh.triangles = triangles;
         mesh.RecalculateBounds();
     }
+    
+    public void DrawLine(Vector3 origin, Vector2 direction, float length, float width)
+    {
+        // A line/rectangle is made of 4 vertices and 2 triangles
+        Vector3[] vertices = new Vector3[4];
+        Color[] colors = new Color[4];
+        int[] triangles = new int[6];
 
-    public void HideCone()
+        // Find the vector perpendicular to the direction to create width
+        Vector3 perpendicular = new Vector3(-direction.y, direction.x, 0) * (width / 2f);
+        
+        // Find the end point of the laser
+        Vector3 endPoint = origin + (Vector3)direction * length;
+
+        // Define the 4 corners of the rectangle in local space
+        vertices[0] = transform.InverseTransformPoint(origin - perpendicular);
+        vertices[1] = transform.InverseTransformPoint(origin + perpendicular);
+        vertices[2] = transform.InverseTransformPoint(endPoint - perpendicular);
+        vertices[3] = transform.InverseTransformPoint(endPoint + perpendicular);
+
+        // Apply the laser color to all vertices
+        for (int i = 0; i < 4; i++) { colors[i] = lazerColor; }
+
+        // Define the 2 triangles that make the rectangle
+        triangles[0] = 0; triangles[1] = 1; triangles[2] = 2;
+        triangles[3] = 2; triangles[4] = 1; triangles[5] = 3;
+        
+        // Update the mesh
+        mesh.Clear();
+        mesh.vertices = vertices;
+        mesh.colors = colors;
+        mesh.triangles = triangles;
+        mesh.RecalculateBounds();
+    }
+    public void Hide() 
     {
         mesh.Clear();
     }
