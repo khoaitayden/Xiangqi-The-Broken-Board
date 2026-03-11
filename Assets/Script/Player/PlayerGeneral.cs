@@ -5,7 +5,6 @@ public class PlayerGeneral : Piece
     [Header("Player Stats Data")]
     [SerializeField] private PlayerStatsSO _playerStats;
 
-    // UPDATE the Properties to read straight from the SO:
     public int MaxAmmo => _playerStats.runtimeMaxAmmo;
     public int Firepower => _playerStats.runtimeFirepower;
     public float FireArc => _playerStats.runtimeFireArc;
@@ -39,6 +38,20 @@ public class PlayerGeneral : Piece
             if (cloudStep && targetNode.currentPiece == null && targetNode.currentCorpse != null) return true; 
         }
         return false;
+    }
+    protected override void Die()
+    {
+        if (_isDead) return;
+        _isDead = true;
+
+        StopAllCoroutines(); 
+
+        if (CurrentNode != null) CurrentNode.currentPiece = null;
+
+        if (_spriteRenderer != null && _deadSprite != null)
+        {
+            _spriteRenderer.sprite = _deadSprite;
+        }
     }
 
     public override void MoveTo(BoardNode targetNode)

@@ -45,6 +45,7 @@ public class TurnManager : MonoBehaviour
         yield return new WaitForSeconds(0.25f); 
 
         List<Piece> enemiesToMove = new List<Piece>(enemyPieces);
+        bool playerWasExecuted = false;
 
         foreach (Piece enemy in enemiesToMove)
         {
@@ -58,12 +59,31 @@ public class TurnManager : MonoBehaviour
 
                 if (targetNode != null)
                 {
+                    // DID WE HIT THE PLAYER?
                     if (targetNode.currentPiece == activePlayer)
                     {
-                        TriggerArmorRewind();   
-                        yield break; 
+                        if (activePlayer.CurrentArmor > 0)
+                        {
+                            // Armor saves you! Instant rewind.
+                            TriggerArmorRewind();   
+                            yield break; 
+                        }
+                        else
+                        {
+                            // NO ARMOR. EXECUTION INITIATED!
+                            playerWasExecuted = true;
+                            
+                            // Move the enemy onto the player
+                            GridManager.Instance.grid[enemy.X, enemy.Y].currentPiece = null;
+                            enemy.MoveTo(targetNode);
+                            targetNode.currentPiece = enemy;
+                            
+                            // We break the loop so no other enemies move while the execution happens
+                            break; 
+                        }
                     }
 
+                    // Normal Move
                     GridManager.Instance.grid[enemy.X, enemy.Y].currentPiece = null;
                     enemy.MoveTo(targetNode);
                     targetNode.currentPiece = enemy;
@@ -87,9 +107,13 @@ public class TurnManager : MonoBehaviour
                 }
             }
         }
-
-        // 2. NEW SAFETY CHECK: Only give the turn back to the player if the state is STILL EnemyTurn.
-        if (CurrentTurn == TurnState.EnemyTurn) 
+        if (playerWasExecuted)
+        {
+            CurrentTurn = TurnState.GameOver;
+            Debug.Log("GAME OVER! You were crushed!");
+            //UIManager.Instance.ShowGameOverScreen()
+        }
+        else if (CurrentTurn == TurnState.EnemyTurn) 
         {
             CurrentTurn = TurnState.PlayerTurn;
             CheckForPlayerThreats();
@@ -125,59 +149,48 @@ public class TurnManager : MonoBehaviour
     }
     public void TriggerArmorRewind()
     {
-        if (activePlayer.CurrentArmor > 0)
+        // We removed the "if (armor > 0)" check, because the coroutine now only calls this IF armor > 0!
+        
+        activePlayer.CurrentArmor--;
+        Debug.Log($"ARMOR BROKEN! Rewinding... ({activePlayer.CurrentArmor} Left)");
+
+        // 1. Cleanup Future Corpses
+        for (int i = activeCorpses.Count - 1; i >= 0; i--)
         {
-            activePlayer.CurrentArmor--;
-            Debug.Log($"ARMOR BROKEN! Rewinding... ({activePlayer.CurrentArmor} Left)");
-
-            // --- 1. CLEANUP "FUTURE" CORPSES ---
-            for (int i = activeCorpses.Count - 1; i >= 0; i--)
+            Corpse c = activeCorpses[i];
+            if (c != null && !previousTurnState.savedCorpses.Contains(c))
             {
-                Corpse c = activeCorpses[i];
-                // If this corpse wasn't in our save file, it was created THIS turn. Erase it!
-                if (c != null && !previousTurnState.savedCorpses.Contains(c))
-                {
-                    BoardNode node = GridManager.Instance.GetNodeAtPosition(c.transform.position);
-                    if (node != null && node.currentCorpse == c) node.currentCorpse = null; // Free the grid space
-                    
-                    Destroy(c.gameObject); // Destroy the clone
-                }
+                BoardNode node = GridManager.Instance.GetNodeAtPosition(c.transform.position);
+                if (node != null && node.currentCorpse == c) node.currentCorpse = null; 
+                Destroy(c.gameObject); 
             }
-            activeCorpses = new List<Corpse>(previousTurnState.savedCorpses);
-
-            foreach (var node in GridManager.Instance.grid)
-            {
-                node.currentPiece = null;
-            }
-
-            BoardNode oldPlayerNode = GridManager.Instance.grid[previousTurnState.playerX, previousTurnState.playerY];
-            activePlayer.MoveTo(oldPlayerNode); 
-            activePlayer.LoadedAmmo = previousTurnState.playerAmmo;
-
-            // --- 4. RESTORE ENEMIES ---
-            enemyPieces.Clear(); // Empty the current list
-            foreach (var data in previousTurnState.savedPieces)
-            {
-                Piece p = data.pieceReference;
-                
-                if (p != null)
-                {
-                    enemyPieces.Add(p); 
-
-                    p.gameObject.SetActive(true);
-                    p.ForceSetStats(data.hp, data.cooldown);
-                    
-                    BoardNode oldNode = GridManager.Instance.grid[data.x, data.y];
-                    p.MoveTo(oldNode);
-                }
-            }
-
-            _currentTurn = TurnState.PlayerTurn;
         }
-        else
+        activeCorpses = new List<Corpse>(previousTurnState.savedCorpses);
+
+        // 2. Clear Board
+        foreach (var node in GridManager.Instance.grid) { node.currentPiece = null; }
+
+        // 3. Restore Player
+        BoardNode oldPlayerNode = GridManager.Instance.grid[previousTurnState.playerX, previousTurnState.playerY];
+        activePlayer.MoveTo(oldPlayerNode); 
+        activePlayer.LoadedAmmo = previousTurnState.playerAmmo;
+
+        // 4. Restore Enemies
+        enemyPieces.Clear(); 
+        foreach (var data in previousTurnState.savedPieces)
         {
-            Debug.Log("GAME OVER! No Armor Left!");
-            _currentTurn = TurnState.GameOver;
+            Piece p = data.pieceReference;
+            if (p != null)
+            {
+                enemyPieces.Add(p); 
+                p.gameObject.SetActive(true); 
+                p.ForceSetStats(data.hp, data.cooldown); 
+                BoardNode oldNode = GridManager.Instance.grid[data.x, data.y];
+                p.MoveTo(oldNode); 
+            }
         }
+
+        CurrentTurn = TurnState.PlayerTurn;
+        CheckForPlayerThreats(); 
     }
 }

@@ -39,7 +39,7 @@ public abstract class Piece : MonoBehaviour
 
     // --- Visuals ---
     [Header("Visuals")]
-    [SerializeField] private Sprite _deadSprite;
+    [SerializeField] protected Sprite _deadSprite;
     [SerializeField] private float _jumpHeight = 0.5f;
     [SerializeField] private float _moveDuration = 0.25f;
 
@@ -108,10 +108,16 @@ public abstract class Piece : MonoBehaviour
     {
         if (CurrentNode != null) CurrentNode.currentPiece = null;
 
+        bool killedPlayer = false; // Track if this was an execution
+
         if (targetNode.currentPiece != null && targetNode.currentPiece != this)
         {
             Piece targetPiece = targetNode.currentPiece.GetComponent<Piece>();
-            if (targetPiece != null) targetPiece.TakeDamage(999);
+            if (targetPiece != null) 
+            {
+                if (targetPiece.IsPlayer) killedPlayer = true; // We crushed the boss!
+                targetPiece.TakeDamage(999);
+            }
             else Destroy(targetNode.currentPiece.gameObject);
         }
 
@@ -122,10 +128,12 @@ public abstract class Piece : MonoBehaviour
 
         TargetPosition = targetNode.nodeGameObject.transform.position;
         
-        // Start Move Coroutine
         if (_moveCoroutine != null) StopCoroutine(_moveCoroutine);
-        _moveCoroutine = StartCoroutine(MoveRoutine(TargetPosition));
+        
+        // Pass the killedPlayer flag to the move coroutine
+        _moveCoroutine = StartCoroutine(MoveRoutine(TargetPosition, killedPlayer)); 
     }
+
 
     public virtual void TakeDamage(int damage)
     {
@@ -150,10 +158,9 @@ public abstract class Piece : MonoBehaviour
 
     // --- COROUTINE ANIMATIONS ---
 
-    private IEnumerator MoveRoutine(Vector3 targetPos)
+    private IEnumerator MoveRoutine(Vector3 targetPos, bool shouldFadeAfter = false)
     {
         _isMoving = true; 
-
         if (_jiggleCoroutine != null) StopCoroutine(_jiggleCoroutine);
 
         float timer = 0f;
@@ -164,16 +171,29 @@ public abstract class Piece : MonoBehaviour
         {
             timer += Time.deltaTime;
             float t = timer / _moveDuration;
-            
             transform.position = (1 - t) * (1 - t) * startPos + 2 * (1 - t) * t * p1 + t * t * targetPos;
             yield return null;
         }
 
         transform.position = targetPos;
-        
         _isMoving = false;
         
-        EvaluateJiggleState(); 
+        if (shouldFadeAfter)
+        {
+            float fadeTimer = 0f;
+            Color startColor = _spriteRenderer.color;
+            while (fadeTimer < 0.5f) // Half second fade
+            {
+                fadeTimer += Time.deltaTime;
+                float alpha = Mathf.Lerp(1f, 0f, fadeTimer / 0.5f);
+                _spriteRenderer.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
+                yield return null;
+            }
+        }
+        else
+        {
+            EvaluateJiggleState(); 
+        }
     }
 
     private void EvaluateJiggleState()
@@ -198,7 +218,7 @@ public abstract class Piece : MonoBehaviour
     {
         while (true)
         {
-            float offsetY = Mathf.Sin(Time.time * 10f) * 0.05f;
+            float offsetY = Mathf.Sin(Time.time * 8f) * 0.05f;
             transform.position = TargetPosition + new Vector3(0, offsetY, 0);
             yield return null;
         }

@@ -20,11 +20,11 @@ MonoBehaviour:
   baseFirepower: 2
   baseFireArc: 40
   baseRangeX: 2
-  baseRangeY: 4
+  baseRangeY: 3.5
   baseMaxArmor: 2
   runtimeMaxAmmo: 2
   runtimeFirepower: 2
   runtimeFireArc: 40
   runtimeRangeX: 2
-  runtimeRangeY: 4
+  runtimeRangeY: 3.5
   runtimeMaxArmor: 2
