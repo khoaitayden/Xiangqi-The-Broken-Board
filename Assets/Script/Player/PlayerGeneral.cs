@@ -54,4 +54,6 @@ public class PlayerGeneral : Piece
         base.MoveTo(targetNode);
     }
 
+    
+
 }

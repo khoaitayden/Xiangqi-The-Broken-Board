@@ -64,10 +64,11 @@ public class EnemyGeneral : Piece
     protected override void Die()
     {
         base.Die();
-        DraftManager draft = FindFirstObjectByType<DraftManager>();
-        if (draft != null)
+        
+        // Tell the DraftManager to do its math and begin the process
+        if (DraftManager.Instance != null)
         {
-            draft.ShowDraftScreen();
+            DraftManager.Instance.StartDraft();
         }
     }
 

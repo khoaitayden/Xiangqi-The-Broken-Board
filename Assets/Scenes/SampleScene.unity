@@ -1645,7 +1645,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53828dec619d2a4499924d9fcedb6f81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DraftManager
-  allYinCards:
+  _allYinCards:
   - {fileID: 11400000, guid: bba48b05cd33c2e628a2fa4665694d23, type: 2}
   - {fileID: 11400000, guid: 902c0e52f081920539f630cddae6665f, type: 2}
   - {fileID: 11400000, guid: 25433ad7aa003373fb4c4aa8334187c2, type: 2}
@@ -1654,7 +1654,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 05630a489225b8db3a62d17da4070206, type: 2}
   - {fileID: 11400000, guid: 88f1d80f2a2e2ac30bc36aa012963a6b, type: 2}
   - {fileID: 11400000, guid: 1024ca9e84a92e0dd8340f2d5abae291, type: 2}
-  allYangCards:
+  _allYangCards:
   - {fileID: 11400000, guid: 769cd1d851d1436238bbeec6b30e7783, type: 2}
   - {fileID: 11400000, guid: b8b846bc941f75f1eadf1e3b916e3818, type: 2}
   - {fileID: 11400000, guid: 980bee7aca7aac270b758f0400a2c666, type: 2}
@@ -1663,13 +1663,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fb4021b7a3848450da5f1aefc505188a, type: 2}
   - {fileID: 11400000, guid: 62743658744fd3793bfccdad46fcf19c, type: 2}
   - {fileID: 11400000, guid: bfb413798d1ae4dae9a5359560c966dd, type: 2}
-  draftUIPanel: {fileID: 498851287}
-  pair1YinText: {fileID: 834691999}
-  pair1YangText: {fileID: 1716321786}
-  selectPair1Button: {fileID: 1572718094}
-  pair2YinText: {fileID: 1783079824}
-  pair2YangText: {fileID: 501532105}
-  selectPair2Button: {fileID: 2109193792}
 --- !u!4 &802523512
 Transform:
   m_ObjectHideFlags: 0
@@ -2460,8 +2453,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13954e3d8d4c6ff69bf5dc08a8b4874f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridManager
-  width: 9
-  height: 10
+  <width>k__BackingField: 9
+  <height>k__BackingField: 10
   spacing: 0.8
   nodePrefab: {fileID: 8865605849380458659, guid: b070d2c52883c055494e50089216ebaa, type: 3}
 --- !u!1 &1716321784
@@ -2724,6 +2717,13 @@ MonoBehaviour:
   enemyNameText: {fileID: 167186495}
   enemyHPText: {fileID: 643426817}
   enemyCooldownText: {fileID: 787734192}
+  _draftUIPanel: {fileID: 498851287}
+  _pair1YinText: {fileID: 834691999}
+  _pair1YangText: {fileID: 1716321786}
+  _selectPair1Button: {fileID: 1572718094}
+  _pair2YinText: {fileID: 1783079824}
+  _pair2YangText: {fileID: 501532105}
+  _selectPair2Button: {fileID: 2109193792}
 --- !u!1 &1783079822
 GameObject:
   m_ObjectHideFlags: 0

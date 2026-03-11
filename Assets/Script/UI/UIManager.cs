@@ -1,25 +1,45 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
 
     [Header("Player UI")]
-    public TextMeshProUGUI ammoText;
-    public TextMeshProUGUI armorText;
-    public TextMeshProUGUI weaponStatsText; // NEW: Drag your new Text object here
+    [SerializeField] private TextMeshProUGUI ammoText;
+    [SerializeField] private TextMeshProUGUI armorText;
+    [SerializeField] private TextMeshProUGUI weaponStatsText; // NEW: Drag your new Text object here
 
     [Header("Enemy Hover UI")]
-    public GameObject enemyPanel; 
-    public TextMeshProUGUI enemyNameText;
-    public TextMeshProUGUI enemyHPText;
-    public TextMeshProUGUI enemyCooldownText;
+    [SerializeField] private GameObject enemyPanel; 
+    [SerializeField] private TextMeshProUGUI enemyNameText;
+    [SerializeField] private TextMeshProUGUI enemyHPText;
+    [SerializeField] private TextMeshProUGUI enemyCooldownText;
+
+    [Header("Draft UI")]
+    [SerializeField] private GameObject _draftUIPanel;
+    [SerializeField] private TextMeshProUGUI _pair1YinText;
+    [SerializeField] private TextMeshProUGUI _pair1YangText;
+    [SerializeField] private Button _selectPair1Button;
+    [SerializeField] private TextMeshProUGUI _pair2YinText;
+    [SerializeField] private TextMeshProUGUI _pair2YangText;
+    [SerializeField] private Button _selectPair2Button;
+
+    private CardSO _currentP1Yin, _currentP1Yang, _currentP2Yin, _currentP2Yang;
 
     private void Awake()
     {
         if (Instance != null && Instance != this) Destroy(this);
         else Instance = this;
+    }
+
+    private void Start()
+    {
+        _draftUIPanel.SetActive(false);
+
+        _selectPair1Button.onClick.AddListener(OnPair1Clicked);
+        _selectPair2Button.onClick.AddListener(OnPair2Clicked);
     }
 
     void Update()
@@ -92,5 +112,36 @@ public class UIManager : MonoBehaviour
         {
             enemyPanel.SetActive(false);
         }
+    }
+
+    public void ShowDraftUI(CardSO p1Yin, CardSO p1Yang, CardSO p2Yin, CardSO p2Yang)
+    {
+        // Save references for the buttons
+        _currentP1Yin = p1Yin; _currentP1Yang = p1Yang;
+        _currentP2Yin = p2Yin; _currentP2Yang = p2Yang;
+
+        // Update Text
+        _pair1YinText.text = $"{p1Yin.cardName}\n{p1Yin.description}";
+        _pair1YangText.text = $"{p1Yang.cardName}\n{p1Yang.description}";
+
+        _pair2YinText.text = $"{p2Yin.cardName}\n{p2Yin.description}";
+        _pair2YangText.text = $"{p2Yang.cardName}\n{p2Yang.description}";
+
+        _draftUIPanel.SetActive(true);
+    }
+
+    public void HideDraftUI()
+    {
+        _draftUIPanel.SetActive(false);
+    }
+
+    private void OnPair1Clicked()
+    {
+        DraftManager.Instance.ResolveDraftChoice(_currentP1Yin, _currentP1Yang);
+    }
+
+    private void OnPair2Clicked()
+    {
+        DraftManager.Instance.ResolveDraftChoice(_currentP2Yin, _currentP2Yang);
     }
 }
