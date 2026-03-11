@@ -23,37 +23,36 @@ public class PlayerActionController : MonoBehaviour
         if (turnMan.CurrentTurn != TurnManager.TurnState.PlayerTurn || isExecutingAction || turnMan.activePlayer == null)
         {
             if (aimVisualizer != null) aimVisualizer.Hide();
-            gridMan.ClearAllHighlights(); // Explicitly clear highlights when not player's turn
+            gridMan.ClearAllHighlights(); 
             return;
         }
-
 
         Vector2 worldPosition = InputHandler.Instance.MouseWorldPosition;
         BoardNode hoveredNode = gridMan.GetNodeAtPosition(worldPosition);
 
         if (hoveredNode == null)
         {
-            // Mouse is completely off the board. Hide everything!
             if (aimVisualizer != null) aimVisualizer.Hide();
             gridMan.ClearAllHighlights();
             return; 
         }
-        gridMan.UpdateHoverHighlight(hoveredNode);
 
-        // --- NORMAL AIMING LOGIC ---
+        // --- DETERMINE CONTEXT ---
         DetermineInputContext(worldPosition, hoveredNode, turnMan.activePlayer, gridMan);
 
-
+        // --- HANDLE VISUALS BASED ON CONTEXT ---
         if (isAimingMode)
         {
-            DrawAimConeAndHighlightEnemies(turnMan, worldPosition); // Pass the mouse position!
+            DrawAimConeAndHighlightEnemies(turnMan, worldPosition);
+            gridMan.UpdateHoverHighlight(hoveredNode);
         }
         else
         {
-            // SAFETY: Hide cone when hovering a move tile
             if (aimVisualizer != null) aimVisualizer.Hide();
+            gridMan.UpdatePlayerMoveHighlight(turnMan.activePlayer); 
         }
 
+        // --- HANDLE CLICKS ---
         if (InputHandler.Instance.IsClickTriggered) 
         {
             bool hasAmmo = turnMan.activePlayer.LoadedAmmo > 0;
@@ -66,7 +65,6 @@ public class PlayerActionController : MonoBehaviour
             }
             else if (isAimingMode && canShoot)
             {
-                // ART OF WAR EXPENDITURE
                 if (!hasAmmo && artOfWarReady)
                 {
                     RunManager.Instance.ArtOfWarUsedThisFloor = true;
@@ -81,7 +79,6 @@ public class PlayerActionController : MonoBehaviour
             }
         }
     }
-
     void DetermineInputContext(Vector2 mouseWorldPos, BoardNode hoveredNode, PlayerGeneral player, GridManager gridMan)
     {
         currentShotMode = SpecialShotMode.None; // Reset
@@ -93,8 +90,12 @@ public class PlayerActionController : MonoBehaviour
             foreach (Piece enemy in TurnManager.Instance.enemyPieces) { if(enemy != null) enemy.SetTargeted(false); }
         }
         else
-        {
-            isAimingMode = true;
+        {     
+            if(isAimingMode==false)
+            {
+                gridMan.ClearAllHighlights();
+                isAimingMode = true;
+            }
             currentAimDirection = (mouseWorldPos - (Vector2)player.transform.position).normalized;
             if (currentAimDirection == Vector2.zero) currentAimDirection = Vector2.up; 
 

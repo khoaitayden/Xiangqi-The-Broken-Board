@@ -103,6 +103,19 @@ public class GridManager : MonoBehaviour
         }
         currentlyHighlightedEnemy = null;
     } 
+
+    public void UpdatePlayerMoveHighlight(PlayerGeneral player)
+    {
+        ClearAllHighlights();
+
+        List<BoardNode> playerMoves = player.GetValidMoves(grid);
+
+        foreach (BoardNode node in playerMoves)
+        {
+            SpriteRenderer sr = node.nodeGameObject.GetComponent<SpriteRenderer>();
+            sr.enabled = true; 
+        }
+    }
     private void OnDrawGizmos()
     {
         if (!Application.isPlaying && grid == null) return;
