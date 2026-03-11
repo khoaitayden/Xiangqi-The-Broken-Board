@@ -8,7 +8,10 @@ public class EnemyCannon : Piece
         base.Awake();  
     }
 
-    public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid) { return false; }
+    public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid) 
+    { 
+        return GetValidMoves(grid).Contains(targetNode); 
+    }
 
     public override List<BoardNode> GetValidMoves(BoardNode[,] grid)
     {
@@ -28,12 +31,13 @@ public class EnemyCannon : Piece
                 if (!hasJumped)
                 {
                     if (testNode.IsEmpty()) validMoves.Add(testNode); 
-                    else hasJumped = true; 
+                    else hasJumped = true; // Mount established!
                 }
                 else
                 {
                     if (!testNode.IsEmpty()) 
                     {
+                        // Found a target after jumping
                         if (testNode.currentPiece != null && testNode.currentPiece.IsPlayer) validMoves.Add(testNode); 
                         break; 
                     }
@@ -42,7 +46,6 @@ public class EnemyCannon : Piece
                 checkY += dir.y;
             }
         }
-        // Return the list!
         return validMoves;
     }
 }

@@ -148,16 +148,19 @@ public abstract class Piece : MonoBehaviour
     // ABSTRACT / VIRTUAL (AI & MOVEMENT VALIDATION)
 
     public abstract bool IsValidMove(BoardNode targetNode, BoardNode[,] grid);
-    public virtual BoardNode GetAIMove(BoardNode[,] grid) { return null; }
     public virtual List<BoardNode> GetValidMoves(BoardNode[,] grid)
     {
         List<BoardNode> validMoves = new List<BoardNode>();
-        // For standard pieces (Pawns, Horses, Elephants), we just check the whole board. It's instantly fast.
         foreach (BoardNode node in grid)
         {
             if (IsValidMove(node, grid)) validMoves.Add(node);
         }
         return validMoves;
+    }
+    public virtual BoardNode GetAIMove(BoardNode[,] grid)
+    {
+        List<BoardNode> validMoves = GetValidMoves(grid);
+        return EvaluateAndPickBestMove(validMoves, grid);
     }
 
     // PRIVATE HELPERS

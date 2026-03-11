@@ -10,8 +10,9 @@ public class EnemyChariot : Piece
 
     public override bool IsValidMove(BoardNode targetNode, BoardNode[,] grid)
     {
-        return false; 
+        return GetValidMoves(grid).Contains(targetNode); 
     }
+
     public override List<BoardNode> GetValidMoves(BoardNode[,] grid)
     {
         List<BoardNode> validMoves = new List<BoardNode>();
@@ -32,14 +33,16 @@ public class EnemyChariot : Piece
                 }
                 else 
                 {
-                    if (testNode.currentPiece != null && testNode.currentPiece.IsPlayer) validMoves.Add(testNode); 
+                    if (testNode.currentPiece != null && testNode.currentPiece.IsPlayer)
+                    {
+                        validMoves.Add(testNode); 
+                    }
                     break; 
                 }
                 checkX += dir.x;
                 checkY += dir.y;
             }
         }
-        // Return the list instead of evaluating!
         return validMoves; 
     }
 }
