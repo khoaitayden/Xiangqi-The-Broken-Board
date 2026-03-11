@@ -8,11 +8,12 @@ public class AimVisualizer : MonoBehaviour
     private MeshRenderer meshRenderer;
 
     [Header("Visual Settings")]
-    public Material coneMaterial; 
-    public Color optimalColor ;  
-    public Color falloffColor ; 
-    public Color lazerColor; 
-    public int resolution = 20; 
+    [SerializeField] private Material coneMaterial; 
+    [SerializeField] private int sortingOrder = 0;
+    [SerializeField] private Color optimalColor ;  
+    [SerializeField] private Color falloffColor ; 
+    [SerializeField] private Color lazerColor; 
+    [SerializeField] private int resolution = 20; 
 
     private void Awake()
     {
@@ -20,6 +21,7 @@ public class AimVisualizer : MonoBehaviour
         meshRenderer = GetComponent<MeshRenderer>();
         mesh = new Mesh();
         meshFilter.mesh = mesh;
+        meshRenderer.sortingOrder = sortingOrder;
     }
 
     public void DrawCone(Vector3 origin, Vector2 direction, float arcAngle, float currentRangeX, float currentRangeY)

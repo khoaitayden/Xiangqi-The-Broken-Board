@@ -42,7 +42,7 @@ public class TurnManager : MonoBehaviour
 
     private IEnumerator EnemyPhaseCoroutine()
     {
-        yield return new WaitForSeconds(0.2f); 
+        yield return new WaitForSeconds(0.25f); 
 
         List<Piece> enemiesToMove = new List<Piece>(enemyPieces);
 

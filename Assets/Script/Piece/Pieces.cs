@@ -1,10 +1,9 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class Piece : MonoBehaviour
 {
-    // FIELDS
-
     // --- Coordinates ---
     [SerializeField] private int _x;
     [SerializeField] private int _y;
@@ -31,7 +30,11 @@ public abstract class Piece : MonoBehaviour
     public int CurrentCooldown
     {
         get { return _currentCooldown; }
-        set { _currentCooldown = value; }
+        set 
+        { 
+            _currentCooldown = value; 
+            EvaluateJiggleState(); // Event-driven: check if we should start jiggling!
+        }
     }
 
     // --- Visuals ---
@@ -40,18 +43,26 @@ public abstract class Piece : MonoBehaviour
     [SerializeField] private float _jumpHeight = 0.5f;
     [SerializeField] private float _moveDuration = 0.25f;
 
+    [Header("Targeting Outline")]
+    [SerializeField] private GameObject _outlinePrefab;
+    [SerializeField] private Color _outlineColor = Color.red;
+    [SerializeField] private float _pulseSpeed = 6f;
+    [SerializeField] private float _minPulseScale = 1.1f;
+    [SerializeField] private float _maxPulseScale = 1.2f;
     [HideInInspector] public Vector3 TargetPosition;
-
+    
+    private SpriteRenderer _outlineRenderer;
     protected SpriteRenderer _spriteRenderer;
     protected Color _originalColor;
 
-    // --- State ---
+    // --- State & Coroutines ---
     protected bool _isDead = false;
+    private bool _isTargeted = false;
     public bool IsDead => _isDead;
 
-    private float _moveTimer;
-    private bool _isMoving;
-    private Vector3 _startMovePosition;
+    private Coroutine _moveCoroutine;
+    private Coroutine _jiggleCoroutine;
+    private Coroutine _pulseCoroutine;
 
     // LIFECYCLE
 
@@ -61,15 +72,11 @@ public abstract class Piece : MonoBehaviour
         _spriteRenderer = GetComponent<SpriteRenderer>();
         if (_spriteRenderer != null)
             _originalColor = _spriteRenderer.color;
+
+        CreateOutline();
     }
 
-    protected virtual void Update()
-    {
-        if (_isMoving)
-            UpdateMovement();
-        else
-            UpdateIdle();
-    }
+    // NO MORE UPDATE LOOP! 
 
     // INITIALIZATION
 
@@ -82,12 +89,14 @@ public abstract class Piece : MonoBehaviour
 
         TargetPosition = node.nodeGameObject.transform.position;
         transform.position = TargetPosition;
+
+        EvaluateJiggleState();
     }
 
     public void ForceSetStats(int hp, int cooldown)
     {
         CurrentHp = hp;
-        CurrentCooldown = cooldown;
+        CurrentCooldown = cooldown; // This triggers EvaluateJiggleState() automatically
         _isDead = false;
         gameObject.SetActive(true);
     }
@@ -96,8 +105,7 @@ public abstract class Piece : MonoBehaviour
 
     public virtual void MoveTo(BoardNode targetNode)
     {
-        if (CurrentNode != null)
-            CurrentNode.currentPiece = null;
+        if (CurrentNode != null) CurrentNode.currentPiece = null;
 
         if (targetNode.currentPiece != null && targetNode.currentPiece != this)
         {
@@ -112,9 +120,10 @@ public abstract class Piece : MonoBehaviour
         targetNode.currentPiece = this;
 
         TargetPosition = targetNode.nodeGameObject.transform.position;
-        _startMovePosition = transform.position;
-        _moveTimer = 0f;
-        _isMoving = true;
+        
+        // Start Move Coroutine
+        if (_moveCoroutine != null) StopCoroutine(_moveCoroutine);
+        _moveCoroutine = StartCoroutine(MoveRoutine(TargetPosition));
     }
 
     public virtual void TakeDamage(int damage)
@@ -129,25 +138,112 @@ public abstract class Piece : MonoBehaviour
         if (_isDead) return;
         _isDead = true;
 
-        if (CurrentNode != null)
-            CurrentNode.currentPiece = null;
+        StopAllCoroutines(); // Instantly stop moving/jiggling/pulsing
 
-        if (!_isPlayer)
-            TurnManager.Instance.enemyPieces.Remove(this);
+        if (CurrentNode != null) CurrentNode.currentPiece = null;
+        if (!_isPlayer) TurnManager.Instance.enemyPieces.Remove(this);
 
         SpawnCorpse();
         gameObject.SetActive(false);
     }
 
+    // --- COROUTINE ANIMATIONS ---
+
+    private IEnumerator MoveRoutine(Vector3 targetPos)
+    {
+        // Stop jiggling while moving
+        if (_jiggleCoroutine != null) StopCoroutine(_jiggleCoroutine);
+
+        float timer = 0f;
+        Vector3 startPos = transform.position;
+        Vector3 p1 = (startPos + targetPos) * 0.5f + new Vector3(0, _jumpHeight, 0);
+
+        while (timer < _moveDuration)
+        {
+            timer += Time.deltaTime;
+            float t = timer / _moveDuration;
+            
+            transform.position = (1 - t) * (1 - t) * startPos + 2 * (1 - t) * t * p1 + t * t * targetPos;
+            yield return null;
+        }
+
+        transform.position = targetPos;
+        EvaluateJiggleState(); // Check if we should start jiggling again
+    }
+
+    private void EvaluateJiggleState()
+    {
+        if (_jiggleCoroutine != null) StopCoroutine(_jiggleCoroutine);
+
+        // Only jiggle if it's an enemy, it's about to attack, and it's NOT currently moving
+        if (!_isPlayer && _currentCooldown <= 1 && !gameObject.activeInHierarchy == false)
+        {
+            _jiggleCoroutine = StartCoroutine(JiggleRoutine());
+        }
+        else
+        {
+            // Ensure it snaps perfectly back to center if jiggling stops
+            if (TargetPosition != Vector3.zero) transform.position = TargetPosition;
+        }
+    }
+
+    private IEnumerator JiggleRoutine()
+    {
+        while (true)
+        {
+            float offsetY = Mathf.Sin(Time.time * 10f) * 0.05f;
+            transform.position = TargetPosition + new Vector3(0, offsetY, 0);
+            yield return null;
+        }
+    }
+
+    // --- TARGETING OUTLINE ---
+
+    private void CreateOutline()
+    {
+
+        _outlineRenderer = _outlinePrefab.GetComponent<SpriteRenderer>();
+        if (_spriteRenderer != null) _outlineRenderer.sprite = _spriteRenderer.sprite;
+        
+        _outlineRenderer.color = _outlineColor;
+        _outlinePrefab.SetActive(false);
+    }
+
     public void SetTargeted(bool isTargeted)
     {
-        if (_spriteRenderer != null)
-            _spriteRenderer.color = isTargeted ? Color.yellow : _originalColor;
+        if (isTargeted && !_isTargeted)
+        {
+            _isTargeted = true;
+            _outlinePrefab.SetActive(true);
+            if (_pulseCoroutine != null) StopCoroutine(_pulseCoroutine);
+            _pulseCoroutine = StartCoroutine(PulseRoutine());
+        }
+        else if (!isTargeted && _isTargeted)
+        {
+            _isTargeted = false;
+            _outlinePrefab.SetActive(false);
+            if (_pulseCoroutine != null) StopCoroutine(_pulseCoroutine);
+        }
+    }
+
+    private IEnumerator PulseRoutine()
+    {
+        while (true)
+        {
+            float sineWave = Mathf.Sin(Time.time * _pulseSpeed); 
+            float scaleRange = _maxPulseScale - _minPulseScale;
+            float midPoint = (_minPulseScale + _maxPulseScale) / 2f;
+            float targetScale = midPoint + (sineWave * (scaleRange / 2f));
+
+            _outlinePrefab.transform.localScale = new Vector3(targetScale, targetScale, 1f);
+            yield return null;
+        }
     }
 
     // ABSTRACT / VIRTUAL (AI & MOVEMENT VALIDATION)
 
     public abstract bool IsValidMove(BoardNode targetNode, BoardNode[,] grid);
+    
     public virtual List<BoardNode> GetValidMoves(BoardNode[,] grid)
     {
         List<BoardNode> validMoves = new List<BoardNode>();
@@ -157,6 +253,7 @@ public abstract class Piece : MonoBehaviour
         }
         return validMoves;
     }
+
     public virtual BoardNode GetAIMove(BoardNode[,] grid)
     {
         List<BoardNode> validMoves = GetValidMoves(grid);
@@ -169,7 +266,10 @@ public abstract class Piece : MonoBehaviour
     {
         GameObject corpseObj = Instantiate(gameObject, transform.position, Quaternion.identity);
         corpseObj.name = gameObject.name + "_Corpse";
+        
+        // Cleanup old components
         Destroy(corpseObj.GetComponent<Piece>());
+        foreach (Transform child in corpseObj.transform) Destroy(child.gameObject); // Destroy the outline clone
 
         SpriteRenderer corpseSr = corpseObj.GetComponent<SpriteRenderer>();
         if (corpseSr != null)
@@ -183,38 +283,6 @@ public abstract class Piece : MonoBehaviour
 
         if (CurrentNode != null) CurrentNode.currentCorpse = corpseScript;
         TurnManager.Instance.activeCorpses.Add(corpseScript);
-    }
-
-    private void UpdateMovement()
-    {
-        _moveTimer += Time.deltaTime;
-        float t = _moveTimer / _moveDuration;
-
-        if (t >= 1f)
-        {
-            transform.position = TargetPosition;
-            _isMoving = false;
-            return;
-        }
-
-        // Quadratic Bezier arc
-        Vector3 p0 = _startMovePosition;
-        Vector3 p2 = TargetPosition;
-        Vector3 p1 = (p0 + p2) * 0.5f + new Vector3(0, _jumpHeight, 0);
-        transform.position = (1 - t) * (1 - t) * p0 + 2 * (1 - t) * t * p1 + t * t * p2;
-    }
-
-    private void UpdateIdle()
-    {
-        if (TargetPosition != Vector3.zero)
-            transform.position = TargetPosition;
-
-        // Jiggle when action is imminent
-        if (!_isPlayer && _currentCooldown <= 1)
-        {
-            float offsetY = Mathf.Sin(Time.time * 10f) * 0.05f;
-            transform.position = TargetPosition + new Vector3(0, offsetY, 0);
-        }
     }
     protected BoardNode EvaluateAndPickBestMove(List<BoardNode> validMoves, BoardNode[,] grid)
     {
@@ -347,5 +415,4 @@ public abstract class Piece : MonoBehaviour
 
         return bestNode;
     }
-
 }
