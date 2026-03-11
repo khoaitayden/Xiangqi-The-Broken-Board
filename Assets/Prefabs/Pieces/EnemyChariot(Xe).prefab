@@ -116,7 +116,7 @@ MonoBehaviour:
   _jumpHeight: 0
   _moveDuration: 0.25
   _outlinePrefab: {fileID: 7353200581788912115}
-  _outlineColor: {r: 1, g: 0, b: 0, a: 1}
+  _outlineColor: {r: 0, g: 0.54901963, b: 0.09019608, a: 1}
   _pulseSpeed: 6
   _minPulseScale: 1.1
   _maxPulseScale: 1.2

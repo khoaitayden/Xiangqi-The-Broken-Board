@@ -59,6 +59,7 @@ public abstract class Piece : MonoBehaviour
     protected bool _isDead = false;
     private bool _isTargeted = false;
     public bool IsDead => _isDead;
+    private bool _isMoving;
 
     private Coroutine _moveCoroutine;
     private Coroutine _jiggleCoroutine;
@@ -151,7 +152,8 @@ public abstract class Piece : MonoBehaviour
 
     private IEnumerator MoveRoutine(Vector3 targetPos)
     {
-        // Stop jiggling while moving
+        _isMoving = true; 
+
         if (_jiggleCoroutine != null) StopCoroutine(_jiggleCoroutine);
 
         float timer = 0f;
@@ -168,22 +170,27 @@ public abstract class Piece : MonoBehaviour
         }
 
         transform.position = targetPos;
-        EvaluateJiggleState(); // Check if we should start jiggling again
+        
+        _isMoving = false;
+        
+        EvaluateJiggleState(); 
     }
 
     private void EvaluateJiggleState()
     {
         if (_jiggleCoroutine != null) StopCoroutine(_jiggleCoroutine);
 
-        // Only jiggle if it's an enemy, it's about to attack, and it's NOT currently moving
-        if (!_isPlayer && _currentCooldown <= 1 && !gameObject.activeInHierarchy == false)
+        // THE FIX: Add '!_isMoving' to ensure we don't start jiggling mid-air!
+        if (!_isPlayer && _currentCooldown <= 1 && gameObject.activeInHierarchy && !_isMoving)
         {
             _jiggleCoroutine = StartCoroutine(JiggleRoutine());
         }
         else
         {
-            // Ensure it snaps perfectly back to center if jiggling stops
-            if (TargetPosition != Vector3.zero) transform.position = TargetPosition;
+            if (!_isMoving && TargetPosition != Vector3.zero) 
+            {
+                transform.position = TargetPosition;
+            }
         }
     }
 
@@ -203,7 +210,6 @@ public abstract class Piece : MonoBehaviour
     {
 
         _outlineRenderer = _outlinePrefab.GetComponent<SpriteRenderer>();
-        if (_spriteRenderer != null) _outlineRenderer.sprite = _spriteRenderer.sprite;
         
         _outlineRenderer.color = _outlineColor;
         _outlinePrefab.SetActive(false);

@@ -115,9 +115,8 @@ MonoBehaviour:
   _deadSprite: {fileID: 7661141335020852357, guid: b10fd6ecbd527a591935e7dda2db160b, type: 3}
   _jumpHeight: 0.1
   _moveDuration: 0.25
-  _outlineSprite: {fileID: 0}
   _outlinePrefab: {fileID: 2259450747561940517}
-  _outlineColor: {r: 1, g: 0, b: 0, a: 1}
+  _outlineColor: {r: 0, g: 0.5471698, b: 0.08801072, a: 1}
   _pulseSpeed: 6
   _minPulseScale: 1.1
   _maxPulseScale: 1.2

@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceStatsSO
   baseMaxHp: 2
   baseMaxCooldown: 2
-  runtimeMaxHp: 0
-  runtimeMaxCooldown: 0
+  runtimeMaxHp: 2
+  runtimeMaxCooldown: 2

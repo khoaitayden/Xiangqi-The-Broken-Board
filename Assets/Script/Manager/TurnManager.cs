@@ -92,11 +92,36 @@ public class TurnManager : MonoBehaviour
         if (CurrentTurn == TurnState.EnemyTurn) 
         {
             CurrentTurn = TurnState.PlayerTurn;
+            CheckForPlayerThreats();
         }
+
     }
     public void SaveState()
     {
         previousTurnState = new BoardState(activePlayer, enemyPieces, activeCorpses);
+    }
+
+    public void CheckForPlayerThreats()
+    {
+        if (activePlayer == null) return;
+
+        bool isPlayerInCheck = false;
+        BoardNode playerNode = GridManager.Instance.grid[activePlayer.X, activePlayer.Y];
+
+        foreach (Piece enemy in enemyPieces)
+        {
+            if (enemy == null || enemy.IsDead || !enemy.gameObject.activeInHierarchy) continue;
+
+            // If ANY enemy can legally move to the player's tile right now, the player is in danger!
+            if (enemy.IsValidMove(playerNode, GridManager.Instance.grid))
+            {
+                isPlayerInCheck = true;
+                break; // Stop checking, one threat is enough to trigger the warning
+            }
+        }
+
+        // Tell the player piece to turn its outline on or off
+        activePlayer.SetTargeted(isPlayerInCheck);
     }
     public void TriggerArmorRewind()
     {
