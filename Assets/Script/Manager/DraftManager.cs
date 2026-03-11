@@ -6,17 +6,17 @@ using TMPro;
 public class DraftManager : MonoBehaviour
 {
     [Header("Card Database")]
-    public List<CardSO> allYinCards;
-    public List<CardSO> allYangCards;
+    [SerializeField] private List<CardSO> allYinCards;
+    [SerializeField] private List<CardSO> allYangCards;
 
     [Header("UI References")]
-    public GameObject draftUIPanel;
-    public TextMeshProUGUI pair1YinText;
-    public TextMeshProUGUI pair1YangText;
-    public Button selectPair1Button;
-    public TextMeshProUGUI pair2YinText;
-    public TextMeshProUGUI pair2YangText;
-    public Button selectPair2Button;
+    [SerializeField] private GameObject draftUIPanel;
+    [SerializeField] private TextMeshProUGUI pair1YinText;
+    [SerializeField] private TextMeshProUGUI pair1YangText;
+    [SerializeField] private Button selectPair1Button;
+    [SerializeField] private TextMeshProUGUI pair2YinText;
+    [SerializeField] private TextMeshProUGUI pair2YangText;
+    [SerializeField] private Button selectPair2Button;
 
     private CardSO p1Yin, p1Yang, p2Yin, p2Yang;
 

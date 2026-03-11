@@ -215,6 +215,14 @@ public abstract class Piece : MonoBehaviour
     }
     protected BoardNode EvaluateAndPickBestMove(List<BoardNode> validMoves, BoardNode[,] grid)
     {
+                // --- AI PERSONALITY CONSTANTS ---
+        const int SURVIVAL_PENALTY = -5000; // Penalty for Boss staying in the Flying General file
+        const int SURVIVAL_BONUS = 500;     // Bonus for Boss stepping out of the file
+        const int BODYGUARD_BONUS = 1000;   // Bonus for a minion to jump in front of the bullet
+        const int CHECK_BONUS = 100;        // Bonus for putting the player in "check"
+        const int AREA_DENIAL_MULTIPLIER = 15; // Score per escape route cut off
+        const int DISTANCE_PENALTY = -2;    // Score penalty per tile away from the player (for minions)
+        const int DISTANCE_BONUS = 5;       // Score bonus per tile away (for Boss, to make it flee)
         if (validMoves.Count == 0) return null;
 
         PlayerGeneral player = TurnManager.Instance.activePlayer;
@@ -257,12 +265,12 @@ public abstract class Piece : MonoBehaviour
 
                     if (blockers <= allowedBlockers)
                     {
-                        score -= 5000; 
+                        score += SURVIVAL_PENALTY; 
                     }
                 }
                 else
                 {
-                    score += 500; 
+                    score += SURVIVAL_BONUS; 
                 }
             }
             else 
@@ -273,7 +281,7 @@ public abstract class Piece : MonoBehaviour
                 {
                     if (testNode.x == player.X && testNode.y > Mathf.Min(player.Y, boss.Y) && testNode.y < Mathf.Max(player.Y, boss.Y))
                     {
-                        score += 1000; 
+                        score += BODYGUARD_BONUS; 
                     }
                 }
             }
@@ -282,7 +290,7 @@ public abstract class Piece : MonoBehaviour
             // 1-STEP LOOKAHEAD: "CHECK" (Can I attack the player next turn?)
             if (IsValidMove(playerNode, grid))
             {
-                score += 100; 
+                score += CHECK_BONUS; 
             }
 
             // 2-STEP LOOKAHEAD: "AREA DENIAL" (Surrounding the player)
@@ -306,7 +314,7 @@ public abstract class Piece : MonoBehaviour
                     }
                 }
             }
-            score += restrictedEscapeRoutes * 15;
+            score += restrictedEscapeRoutes * AREA_DENIAL_MULTIPLIER;
 
             // 3. DISTANCE HEURISTIC (March toward the player)
             int distX = Mathf.Abs(testNode.x - player.X);
@@ -314,8 +322,8 @@ public abstract class Piece : MonoBehaviour
             int distanceToPlayer = distX + distY; 
             
             // If it's the Boss, we actually want them to stay away from the player (hide in the back)
-            if (this is EnemyGeneral) score += distanceToPlayer * 5; 
-            else score -= distanceToPlayer * 2; 
+            if (this is EnemyGeneral) score += distanceToPlayer * DISTANCE_BONUS; 
+            else score += distanceToPlayer * DISTANCE_PENALTY; 
 
             // Tie-breaker randomness
             score += Random.Range(0, 5);

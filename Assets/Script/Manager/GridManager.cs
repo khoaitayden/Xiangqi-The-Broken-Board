@@ -1,18 +1,19 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class GridManager : MonoBehaviour
 {
     public static GridManager Instance { get; private set; }
 
     [Header("Board Settings")]
-    public int width = 9;  
-    public int height = 10; 
-    public float spacing = 1.5f; 
-    public GameObject nodePrefab; 
+    [field: SerializeField] public int width { get; private set; } = 9;
+    [field: SerializeField] public int height { get; private set; } = 10;
+    [SerializeField] private float spacing = 1.5f; 
+    [SerializeField] private GameObject nodePrefab; 
+
 
     public BoardNode[,] grid;
-    
     private Piece currentlyHighlightedEnemy;
 
     private void Awake()

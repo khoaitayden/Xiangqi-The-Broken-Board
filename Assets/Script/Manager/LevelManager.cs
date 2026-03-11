@@ -10,14 +10,14 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private int _currentLevelIndex = 0;
 
     [Header("Prefabs")]
-    public GameObject playerGeneralPrefab;
-    public GameObject enemyPawnPrefab; 
-    public GameObject enemyHorsePrefab;
-    public GameObject enemyAdvisorPrefab;
-    public GameObject enemyElephantPrefab;
-    public GameObject enemyGeneralPrefab;
-    public GameObject enemyChariotPrefab;
-    public GameObject enemyCannonPrefab;
+    [SerializeField] private GameObject playerGeneralPrefab;
+    [SerializeField] private GameObject enemyPawnPrefab; 
+    [SerializeField] private GameObject enemyHorsePrefab;
+    [SerializeField] private GameObject enemyAdvisorPrefab;
+    [SerializeField] private GameObject enemyElephantPrefab;
+    [SerializeField] private GameObject enemyGeneralPrefab;
+    [SerializeField] private GameObject enemyChariotPrefab;
+    [SerializeField] private GameObject enemyCannonPrefab;
 
     private void Awake()
     {

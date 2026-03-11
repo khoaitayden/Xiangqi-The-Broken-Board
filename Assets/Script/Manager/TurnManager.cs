@@ -6,7 +6,7 @@ public class TurnManager : MonoBehaviour
 {
     public static TurnManager Instance { get; private set; }
 
-     public enum TurnState { PlayerTurn, EnemyTurn, GameOver, Drafting }
+    public enum TurnState { PlayerTurn, EnemyTurn, GameOver, Drafting }
     
     [Header("Game State")]
     [SerializeField] private TurnState _currentTurn = TurnState.PlayerTurn;

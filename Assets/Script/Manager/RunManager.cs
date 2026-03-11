@@ -10,14 +10,14 @@ public class RunManager : MonoBehaviour
     public IReadOnlyList<CardSO> ActiveCards => _activeCards;
 
     [Header("All Piece Stats")]
-    public PlayerStatsSO playerStats;
-    public PieceStatsSO pawnStats;
-    public PieceStatsSO horseStats;
-    public PieceStatsSO chariotStats;
-    public PieceStatsSO elephantStats;
-    public PieceStatsSO advisorStats;
-    public PieceStatsSO cannonStats;
-    public PieceStatsSO enemyGeneralStats;
+    [SerializeField] private PlayerStatsSO playerStats;
+    [SerializeField] private PieceStatsSO pawnStats;
+    [SerializeField] private PieceStatsSO horseStats;
+    [SerializeField] private PieceStatsSO chariotStats;
+    [SerializeField] private PieceStatsSO elephantStats;
+    [SerializeField] private PieceStatsSO advisorStats;
+    [SerializeField] private PieceStatsSO cannonStats;
+    [SerializeField] private PieceStatsSO enemyGeneralStats;
 
     // --- YIN MODIFIERS ---
     public int BonusStartingPawns { get; private set; }
