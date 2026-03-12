@@ -36,7 +36,12 @@ public class UIManager : MonoBehaviour
     [Header("Active Build UI")]
     [SerializeField] private Transform _yangLayoutGroup; 
     [SerializeField] private GameObject _yangCardPrefab;
-    private List<Image> _yangCardImages = new List<Image>();
+
+    [Header("Card Tooltip UI")]
+    [SerializeField] private GameObject _tooltipPanel;
+    [SerializeField] private TextMeshProUGUI _tooltipTitleText;
+    [SerializeField] private TextMeshProUGUI _tooltipDescText;
+    private List<CardHoverHandler> _yangCardSlots = new List<CardHoverHandler>(); 
 
     private CardSO _currentP1Yin, _currentP1Yang, _currentP2Yin, _currentP2Yang;
 
@@ -68,42 +73,54 @@ public class UIManager : MonoBehaviour
 
     private void InitializeBuildLayout()
     {
-        // 1. Clear any existing placeholders in the layout
-        foreach (Transform child in _yangLayoutGroup)
-        {
-            Destroy(child.gameObject);
-        }
-        _yangCardImages.Clear();
+        foreach (Transform child in _yangLayoutGroup) Destroy(child.gameObject);
+        _yangCardSlots.Clear();
 
-        // 2. Spawn exactly 8 empty placeholders
         for (int i = 0; i < 8; i++)
         {
             GameObject newSlot = Instantiate(_yangCardPrefab, _yangLayoutGroup);
             
-            // Find the child image (YangCardImage) inside the prefab
+            // Hide the symbol image inside the prefab
             Image symbolImage = newSlot.transform.GetChild(0).GetComponent<Image>();
-            
-            // Hide the symbol by default since it's empty
             symbolImage.color = new Color(1, 1, 1, 0); 
             
-            _yangCardImages.Add(symbolImage);
+            // Get the hover handler we just created
+            CardHoverHandler hoverHandler = newSlot.GetComponent<CardHoverHandler>();
+            hoverHandler.assignedCard = null; // Ensure it starts empty
+            
+            _yangCardSlots.Add(hoverHandler);
         }
+
+        if (RunManager.Instance != null)
+        {
+            foreach (CardSO card in RunManager.Instance.ActiveCards)
+            {
+                if (card.alignment == CardAlignment.Yang) AddYangCardToUI(card);
+            }
+        }
+        
+        // Hide tooltip at start
+        if (_tooltipPanel != null) _tooltipPanel.SetActive(false);
     }
     public void AddYangCardToUI(CardSO card)
     {
-        foreach (Image symbolImage in _yangCardImages)
+        foreach (CardHoverHandler slot in _yangCardSlots)
         {
-            if (symbolImage.color.a == 0f)
+            if (slot.assignedCard == null) // Found an empty slot!
             {
+                slot.assignedCard = card;
+
+                // 2. Update the image visually
+                Image symbolImage = slot.transform.GetChild(0).GetComponent<Image>();
                 if (card.cardIcon != null)
                 {
                     symbolImage.sprite = card.cardIcon;
                     symbolImage.color = new Color(1, 1, 1, 1); 
                 }
-                return; // Stop looking
+                return;
             }
         }
-        Debug.LogWarning("Yang Layout is full! Cannot display more than 8 cards.");
+        Debug.LogWarning("Yang Layout is full!");
     }
     private void UpdatePlayerStats()
     {
@@ -223,5 +240,22 @@ public class UIManager : MonoBehaviour
         // Once you make a Main Menu scene, you can do: SceneManager.LoadScene("MainMenu");
         Debug.Log("Returning to Main Menu...");
         Application.Quit(); 
+    }
+
+    public void ShowCardTooltip(CardSO card, Vector3 cardPosition)
+    {
+        if (_tooltipPanel == null) return;
+
+        _tooltipTitleText.text = card.cardName;
+        _tooltipDescText.text = card.description;
+
+        _tooltipPanel.transform.position = cardPosition + new Vector3(300, 0, 0);
+
+        _tooltipPanel.SetActive(true);
+    }
+
+    public void HideCardTooltip()
+    {
+        if (_tooltipPanel != null) _tooltipPanel.SetActive(false);
     }
 }

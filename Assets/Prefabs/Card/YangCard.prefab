@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7449559486769777711}
   - component: {fileID: 5884586240229264330}
   - component: {fileID: 371325412650516033}
+  - component: {fileID: 2727147475859805021}
   m_Layer: 5
   m_Name: YangCard
   m_TagString: Untagged
@@ -121,6 +122,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &2727147475859805021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 196879075316422897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af7a81b8c2caedfbf893c945515c9d27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CardHoverHandler
+  assignedCard: {fileID: 0}
 --- !u!1 &6247062964746673580
 GameObject:
   m_ObjectHideFlags: 0
