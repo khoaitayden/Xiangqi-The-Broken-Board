@@ -111,7 +111,7 @@ public class TurnManager : MonoBehaviour
         {
             CurrentTurn = TurnState.GameOver;
             Debug.Log("GAME OVER! You were crushed!");
-            //UIManager.Instance.ShowGameOverScreen()
+            UIManager.Instance.ShowDeathScreen();
         }
         else if (CurrentTurn == TurnState.EnemyTurn) 
         {

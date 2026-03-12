@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
@@ -26,6 +27,11 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _pair2YangText;
     [SerializeField] private Button _selectPair2Button;
 
+    [Header("Death UI")]
+    [SerializeField] private GameObject _deathPanel;
+    [SerializeField] private Button _tryAgainButton;
+    [SerializeField] private Button _returnToMainMenuButton;
+
     private CardSO _currentP1Yin, _currentP1Yang, _currentP2Yin, _currentP2Yang;
 
     private void Awake()
@@ -40,6 +46,11 @@ public class UIManager : MonoBehaviour
 
         _selectPair1Button.onClick.AddListener(OnPair1Clicked);
         _selectPair2Button.onClick.AddListener(OnPair2Clicked);
+
+        _deathPanel.SetActive(false);
+
+        _tryAgainButton.onClick.AddListener(RestartRun);
+        _returnToMainMenuButton.onClick.AddListener(ReturnToMainMenu);
     }
 
     void Update()
@@ -143,5 +154,28 @@ public class UIManager : MonoBehaviour
     private void OnPair2Clicked()
     {
         DraftManager.Instance.ResolveDraftChoice(_currentP2Yin, _currentP2Yang);
+    }
+
+    public void ShowDeathScreen()
+    {
+        _deathPanel.SetActive(true);
+    }
+
+    private void RestartRun()
+    {
+        // 1. Tell the RunManager to delete all your drafted cards and stats
+        RunManager.Instance.ResetEntireRun();
+
+        // 2. Reload the current scene. 
+        // (Since RunManager has DontDestroyOnLoad, it survives the reload, but the board is built fresh!)
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    private void ReturnToMainMenu()
+    {
+        // For now, this just quits the game. 
+        // Once you make a Main Menu scene, you can do: SceneManager.LoadScene("MainMenu");
+        Debug.Log("Returning to Main Menu...");
+        Application.Quit(); 
     }
 }
