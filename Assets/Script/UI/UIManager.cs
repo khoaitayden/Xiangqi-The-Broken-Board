@@ -9,9 +9,10 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance { get; private set; }
 
     [Header("Player UI")]
-    [SerializeField] private TextMeshProUGUI ammoText;
-    [SerializeField] private TextMeshProUGUI armorText;
-    [SerializeField] private TextMeshProUGUI weaponStatsText;
+    [SerializeField] private TextMeshProUGUI _ammoText;
+    [SerializeField] private TextMeshProUGUI _weaponStatsText;
+    [SerializeField] private Transform _armorLayoutGroup; 
+    [SerializeField] private GameObject _armorIconPrefab; 
 
     [Header("Enemy Hover UI")]
     [SerializeField] private GameObject enemyPanel; 
@@ -45,6 +46,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _tooltipDescText;
     private List<CardHoverHandler> _yangCardSlots = new List<CardHoverHandler>(); 
     private List<CardHoverHandler> _yinCardSlots = new List<CardHoverHandler>();
+    private List<GameObject> _armorIcons = new List<GameObject>(); 
 
     private CardSO _currentP1Yin, _currentP1Yang, _currentP2Yin, _currentP2Yang;
 
@@ -163,17 +165,40 @@ public class UIManager : MonoBehaviour
 
         if (player != null)
         {
-            ammoText.text = $"Ammo: {player.LoadedAmmo} / {player.MaxAmmo}";
-            armorText.text = $"Armor: {player.CurrentArmor}";
-            
-            // NEW: Show Firepower and Arc
-            weaponStatsText.text = $"Firepower: {player.Firepower} Pellets\nSpread Arc: {player.FireArc}°";
+            _ammoText.text = $"Ammo: {player.LoadedAmmo} / {player.MaxAmmo}";
+            _weaponStatsText.text = $"Firepower: {player.Firepower} Pellets\nSpread Arc: {player.FireArc}°";
+
+            // Update Armor Icons
+            UpdateArmorIcons(player.CurrentArmor);
         }
         else
         {
-            ammoText.text = "Ammo: 0";
-            armorText.text = "Armor: 0";
-            if (weaponStatsText != null) weaponStatsText.text = "";
+            _ammoText.text = "Ammo: 0";
+            if (_weaponStatsText != null) _weaponStatsText.text = "";
+            UpdateArmorIcons(0); // Hide all armor when dead
+        }
+    }
+
+    private void UpdateArmorIcons(int currentArmor)
+    {
+        // 1. If the player somehow got MORE armor than we have icons for, spawn new ones!
+        while (_armorIcons.Count < currentArmor)
+        {
+            GameObject newIcon = Instantiate(_armorIconPrefab, _armorLayoutGroup);
+            _armorIcons.Add(newIcon);
+        }
+
+        // 2. Loop through all our spawned icons and turn them ON or OFF
+        for (int i = 0; i < _armorIcons.Count; i++)
+        {
+            if (i < currentArmor)
+            {
+                _armorIcons[i].SetActive(true); // Player has this armor
+            }
+            else
+            {
+                _armorIcons[i].SetActive(false); // Player lost this armor
+            }
         }
     }
 
