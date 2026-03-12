@@ -246,14 +246,13 @@ public class PlayerActionController : MonoBehaviour
             EnemyGeneral enemyBoss = Object.FindFirstObjectByType<EnemyGeneral>();
             if (enemyBoss != null) enemyBoss.BeginDamageBatch();
 
-            // STANDARD SHOTGUN PELLET SPREAD
             float aimAngle = Mathf.Atan2(currentAimDirection.y, currentAimDirection.x) * Mathf.Rad2Deg;
             float halfArc = player.FireArc / 2f;
 
             for (int i = 0; i < player.Firepower; i++)
             {
                 float randomAngle = Random.Range(aimAngle - halfArc, aimAngle + halfArc);
-                Quaternion bulletRotation = Quaternion.Euler(0, 0, randomAngle);
+                Quaternion bulletRotation = Quaternion.Euler(0, 0, randomAngle-90);
 
                 GameObject bulletObj = Instantiate(projectilePrefab, player.transform.position, bulletRotation);
                 Projectile p = bulletObj.GetComponent<Projectile>();

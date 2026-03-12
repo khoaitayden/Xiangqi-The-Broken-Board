@@ -14,7 +14,7 @@ public class Projectile : MonoBehaviour
     }
     void Update()
     {
-        transform.position += transform.right * speed * Time.deltaTime;
+        transform.position += transform.up * speed * Time.deltaTime;
 
         float distanceTraveled = Vector3.Distance(startPosition, transform.position);
 
