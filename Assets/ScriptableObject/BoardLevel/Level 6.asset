@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ead60b2e486ebab39908db6ecec71647, type: 3}
+  m_Name: Level 6
+  m_EditorClassIdentifier: Assembly-CSharp::BoardLayoutSO
+  levelName: Level 1
+  playerSpawnPosition: {x: 4, y: 0}
+  enemyGeneralSpawnPosition: {x: 4, y: 9}
+  enemyGeneralStartingCooldown: 2
+  enemySpawns:
+  - pieceType: 4
+    position: {x: 3, y: 9}
+    startingCooldown: 1
+  - pieceType: 3
+    position: {x: 1, y: 6}
+    startingCooldown: 1
+  - pieceType: 5
+    position: {x: 5, y: 7}
+    startingCooldown: 3
+  - pieceType: 4
+    position: {x: 5, y: 9}
+    startingCooldown: 3

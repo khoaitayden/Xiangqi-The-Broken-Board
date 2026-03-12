@@ -36,12 +36,15 @@ public class UIManager : MonoBehaviour
     [Header("Active Build UI")]
     [SerializeField] private Transform _yangLayoutGroup; 
     [SerializeField] private GameObject _yangCardPrefab;
+    [SerializeField] private Transform _yinLayoutGroup; 
+    [SerializeField] private GameObject _yinCardPrefab; 
 
     [Header("Card Tooltip UI")]
     [SerializeField] private GameObject _tooltipPanel;
     [SerializeField] private TextMeshProUGUI _tooltipTitleText;
     [SerializeField] private TextMeshProUGUI _tooltipDescText;
     private List<CardHoverHandler> _yangCardSlots = new List<CardHoverHandler>(); 
+    private List<CardHoverHandler> _yinCardSlots = new List<CardHoverHandler>();
 
     private CardSO _currentP1Yin, _currentP1Yang, _currentP2Yin, _currentP2Yang;
 
@@ -73,40 +76,52 @@ public class UIManager : MonoBehaviour
 
     private void InitializeBuildLayout()
     {
+        // 1. Clear both layouts
         foreach (Transform child in _yangLayoutGroup) Destroy(child.gameObject);
+        foreach (Transform child in _yinLayoutGroup) Destroy(child.gameObject); // NEW
+        
         _yangCardSlots.Clear();
+        _yinCardSlots.Clear(); // NEW
 
+        // 2. Spawn 8 empty Yang slots
         for (int i = 0; i < 8; i++)
         {
             GameObject newSlot = Instantiate(_yangCardPrefab, _yangLayoutGroup);
-            
-            // Hide the symbol image inside the prefab
             Image symbolImage = newSlot.transform.GetChild(0).GetComponent<Image>();
             symbolImage.color = new Color(1, 1, 1, 0); 
-            
-            // Get the hover handler we just created
             CardHoverHandler hoverHandler = newSlot.GetComponent<CardHoverHandler>();
-            hoverHandler.assignedCard = null; // Ensure it starts empty
-            
+            hoverHandler.assignedCard = null; 
             _yangCardSlots.Add(hoverHandler);
         }
 
+        // 3. Spawn 8 empty Yin slots 
+        for (int i = 0; i < 8; i++)
+        {
+            GameObject newSlot = Instantiate(_yinCardPrefab, _yinLayoutGroup);
+            Image symbolImage = newSlot.transform.GetChild(0).GetComponent<Image>();
+            symbolImage.color = new Color(1, 1, 1, 0); 
+            CardHoverHandler hoverHandler = newSlot.GetComponent<CardHoverHandler>();
+            hoverHandler.assignedCard = null; 
+            _yinCardSlots.Add(hoverHandler);
+        }
+
+        // 4. Refill cards if we restarted the scene
         if (RunManager.Instance != null)
         {
             foreach (CardSO card in RunManager.Instance.ActiveCards)
             {
                 if (card.alignment == CardAlignment.Yang) AddYangCardToUI(card);
+                else if (card.alignment == CardAlignment.Yin) AddYinCardToUI(card);
             }
         }
         
-        // Hide tooltip at start
         if (_tooltipPanel != null) _tooltipPanel.SetActive(false);
     }
     public void AddYangCardToUI(CardSO card)
     {
         foreach (CardHoverHandler slot in _yangCardSlots)
         {
-            if (slot.assignedCard == null) // Found an empty slot!
+            if (slot.assignedCard == null) 
             {
                 slot.assignedCard = card;
 
@@ -121,6 +136,26 @@ public class UIManager : MonoBehaviour
             }
         }
         Debug.LogWarning("Yang Layout is full!");
+    }
+
+    public void AddYinCardToUI(CardSO card)
+    {
+        foreach (CardHoverHandler slot in _yinCardSlots)
+        {
+            if (slot.assignedCard == null) 
+            {
+                slot.assignedCard = card;
+
+                Image symbolImage = slot.transform.GetChild(0).GetComponent<Image>();
+                if (card.cardIcon != null)
+                {
+                    symbolImage.sprite = card.cardIcon;
+                    symbolImage.color = new Color(1, 1, 1, 1); 
+                }
+                return;
+            }
+        }
+        Debug.LogWarning("Yin Layout is full!");
     }
     private void UpdatePlayerStats()
     {
@@ -249,11 +284,17 @@ public class UIManager : MonoBehaviour
         _tooltipTitleText.text = card.cardName;
         _tooltipDescText.text = card.description;
 
-        _tooltipPanel.transform.position = cardPosition + new Vector3(300, 0, 0);
+        if (card.alignment == CardAlignment.Yin)
+        {
+            _tooltipPanel.transform.position = cardPosition + new Vector3(-300, 0, 0);
+        }
+        else 
+        {
+            _tooltipPanel.transform.position = cardPosition + new Vector3(300, 0, 0);
+        }
 
         _tooltipPanel.SetActive(true);
     }
-
     public void HideCardTooltip()
     {
         if (_tooltipPanel != null) _tooltipPanel.SetActive(false);

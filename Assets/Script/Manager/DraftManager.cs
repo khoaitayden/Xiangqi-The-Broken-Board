@@ -35,13 +35,12 @@ public class DraftManager : MonoBehaviour
         UIManager.Instance.ShowDraftUI(p1Yin, p1Yang, p2Yin, p2Yang);
     }
 
-    // Called by the UIManager when a player clicks a button
     public void ResolveDraftChoice(CardSO selectedYin, CardSO selectedYang)
     {
         RunManager.Instance.ApplyCard(selectedYin);
         RunManager.Instance.ApplyCard(selectedYang);
 
-        // NEW: Tell the UI to put the Yang card in the bottom layout!
+        UIManager.Instance.AddYinCardToUI(selectedYin);
         UIManager.Instance.AddYangCardToUI(selectedYang);
 
         UIManager.Instance.HideDraftUI();

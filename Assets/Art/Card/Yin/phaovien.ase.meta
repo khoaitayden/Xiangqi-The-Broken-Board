@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: d791f8ccd61f409f3b178559282b57d9
+guid: 998357a4d1fd1484a8b77b1fc3a41ba1
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -102,7 +102,7 @@ ScriptedImporter:
     generateIndividualEvents: 1
     generateSpriteAtlas: 1
   importFileNodeState: 1
-  platformSettingsDirtyTick: 639089616676179070
+  platformSettingsDirtyTick: 639089616676182130
   textureAssetName: 
   singleSpriteImportData:
   - name: 
@@ -127,7 +127,7 @@ ScriptedImporter:
     tessellationDetail: 0
     uvTransform: {x: 0, y: 0}
   animatedSpriteImportData:
-  - name: hanhan
+  - name: phaovien
     originalName: 
     pivot: {x: 0.5, y: 0.5}
     alignment: 0
@@ -137,9 +137,9 @@ ScriptedImporter:
       serializedVersion: 2
       x: 4
       y: 4
-      width: 19
+      width: 20
       height: 27
-    spriteID: bede367dc7ef73ce79ed034ce411efed
+    spriteID: 21860dfda962e181285405b4ea15f06b
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -153,25 +153,25 @@ ScriptedImporter:
   asepriteLayers:
   - layerIndex: 0
     uuid:
-      value0: 1168707724
+      value0: 1821377696
       value1: 0
       value2: 0
       value3: 0
     guid: 0
-    name: hanhan
+    name: phaovien
     layerFlags: 0
     layerType: 0
     blendMode: 0
     cells:
-    - name: hanhan
+    - name: phaovien
       frameIndex: 0
       additiveSortOrder: 0
       cellRect:
-        x: 39
-        y: 15
-        width: 19
+        x: 50
+        y: 16
+        width: 20
         height: 27
-      spriteId: bede367dc7ef73ce79ed034ce411efed
+      spriteId: 21860dfda962e181285405b4ea15f06b
     linkedCells: []
     tileCells: []
     tileSetIndex: 0
