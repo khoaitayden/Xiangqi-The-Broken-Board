@@ -83,23 +83,18 @@ public class PlayerActionController : MonoBehaviour
     {
         currentShotMode = SpecialShotMode.None; // Reset
 
-        // IF IT'S A VALID MOVE (Empty, 1 block away)
         if (hoveredNode != null && player.IsValidMove(hoveredNode, gridMan.grid))
         {
             isAimingMode = false;
             foreach (Piece enemy in TurnManager.Instance.enemyPieces) { if(enemy != null) enemy.SetTargeted(false); }
         }
         else
-        {     
-            if(isAimingMode==false)
-            {
-                gridMan.ClearAllHighlights();
-                isAimingMode = true;
-            }
+        {
+            isAimingMode = true;
             currentAimDirection = (mouseWorldPos - (Vector2)player.transform.position).normalized;
             if (currentAimDirection == Vector2.zero) currentAimDirection = Vector2.up; 
 
-            // 1. CHECK FOR CROUCHING TIGER (Hovering an adjacent piece)
+            // Check for Crouching Tiger
             if (hoveredNode != null && RunManager.Instance.CrouchingTigerEnabled)
             {
                 int distX = Mathf.Abs(hoveredNode.x - player.X);
@@ -110,30 +105,38 @@ public class PlayerActionController : MonoBehaviour
                 }
             }
 
-            // 2. CHECK FOR FLYING GENERAL (Same X as Enemy General)
+            // Check for Flying General
             EnemyGeneral enemyBoss = Object.FindFirstObjectByType<EnemyGeneral>();
-            if (enemyBoss != null && hoveredNode != null && hoveredNode.x == player.X && enemyBoss.X == player.X)
+            if (enemyBoss != null && player.X == enemyBoss.X) // Check if we are in the same column
             {
-                // Count pieces between Player and Boss
+                // Count blockers
                 int minY = Mathf.Min(player.Y, enemyBoss.Y);
                 int maxY = Mathf.Max(player.Y, enemyBoss.Y);
                 int blockers = 0;
-
                 for (int y = minY + 1; y < maxY; y++)
                 {
                     if (!gridMan.grid[player.X, y].IsEmpty()) blockers++;
                 }
-
                 int allowedBlockers = RunManager.Instance.MandateOfHeavenEnabled ? 1 : 0;
                 
+                // --- THE FIX: ADD ANGLE CHECK ---
                 if (blockers <= allowedBlockers)
                 {
-                    currentShotMode = SpecialShotMode.FlyingGeneral;
+                    // Calculate the perfect direction to the boss
+                    Vector2 directionToBoss = (enemyBoss.transform.position - player.transform.position).normalized;
+                    
+                    // Check if our mouse aim is close to that perfect direction
+                    float angleDifference = Vector2.Angle(currentAimDirection, directionToBoss);
+                    const float aimTolerance = 30f; // Allow 30 degrees of tolerance
+
+                    if (angleDifference < aimTolerance)
+                    {
+                        currentShotMode = SpecialShotMode.FlyingGeneral;
+                    }
                 }
             }
         }
     }
-
     void DrawAimConeAndHighlightEnemies(TurnManager turnMan, Vector2 mouseWorldPos)
     {
         PlayerGeneral player = turnMan.activePlayer;
@@ -147,11 +150,13 @@ public class PlayerActionController : MonoBehaviour
             EnemyGeneral enemyBoss = Object.FindFirstObjectByType<EnemyGeneral>();
             if (enemyBoss != null && aimVisualizer != null)
             {
-                // Calculate distance to boss for accurate laser length
+                // --- THE FIX: FORCE THE LASER TO BE PERFECT ---
+                // Calculate the perfect direction and distance, ignoring the wobbly mouse aim
+                Vector2 directionToBoss = (enemyBoss.transform.position - playerPos).normalized;
                 float distanceToBoss = Vector3.Distance(playerPos, enemyBoss.transform.position);
 
-                // Call the new DrawLine method!
-                aimVisualizer.DrawLine(playerPos, currentAimDirection, distanceToBoss, 0.2f);
+                // Draw the line using this perfect direction
+                aimVisualizer.DrawLine(playerPos, directionToBoss, distanceToBoss, 0.1f);
 
                 enemyBoss.SetTargeted(true);
             }
