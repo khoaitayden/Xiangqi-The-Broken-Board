@@ -18,3 +18,4 @@ MonoBehaviour:
   alignment: 1
   effectID: 10
   weight: 4
+  cardIcon: {fileID: 7917531468783616595, guid: 0ba65d6f4a502956f87ca32093eabd63, type: 3}

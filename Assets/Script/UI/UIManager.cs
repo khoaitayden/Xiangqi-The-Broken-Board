@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 public class UIManager : MonoBehaviour
 {
@@ -10,7 +11,7 @@ public class UIManager : MonoBehaviour
     [Header("Player UI")]
     [SerializeField] private TextMeshProUGUI ammoText;
     [SerializeField] private TextMeshProUGUI armorText;
-    [SerializeField] private TextMeshProUGUI weaponStatsText; // NEW: Drag your new Text object here
+    [SerializeField] private TextMeshProUGUI weaponStatsText;
 
     [Header("Enemy Hover UI")]
     [SerializeField] private GameObject enemyPanel; 
@@ -32,6 +33,11 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Button _tryAgainButton;
     [SerializeField] private Button _returnToMainMenuButton;
 
+    [Header("Active Build UI")]
+    [SerializeField] private Transform _yangLayoutGroup; 
+    [SerializeField] private GameObject _yangCardPrefab;
+    private List<Image> _yangCardImages = new List<Image>();
+
     private CardSO _currentP1Yin, _currentP1Yang, _currentP2Yin, _currentP2Yang;
 
     private void Awake()
@@ -51,6 +57,7 @@ public class UIManager : MonoBehaviour
 
         _tryAgainButton.onClick.AddListener(RestartRun);
         _returnToMainMenuButton.onClick.AddListener(ReturnToMainMenu);
+        InitializeBuildLayout();
     }
 
     void Update()
@@ -59,6 +66,45 @@ public class UIManager : MonoBehaviour
         UpdateEnemyHoverInfo();
     }
 
+    private void InitializeBuildLayout()
+    {
+        // 1. Clear any existing placeholders in the layout
+        foreach (Transform child in _yangLayoutGroup)
+        {
+            Destroy(child.gameObject);
+        }
+        _yangCardImages.Clear();
+
+        // 2. Spawn exactly 8 empty placeholders
+        for (int i = 0; i < 8; i++)
+        {
+            GameObject newSlot = Instantiate(_yangCardPrefab, _yangLayoutGroup);
+            
+            // Find the child image (YangCardImage) inside the prefab
+            Image symbolImage = newSlot.transform.GetChild(0).GetComponent<Image>();
+            
+            // Hide the symbol by default since it's empty
+            symbolImage.color = new Color(1, 1, 1, 0); 
+            
+            _yangCardImages.Add(symbolImage);
+        }
+    }
+    public void AddYangCardToUI(CardSO card)
+    {
+        foreach (Image symbolImage in _yangCardImages)
+        {
+            if (symbolImage.color.a == 0f)
+            {
+                if (card.cardIcon != null)
+                {
+                    symbolImage.sprite = card.cardIcon;
+                    symbolImage.color = new Color(1, 1, 1, 1); 
+                }
+                return; // Stop looking
+            }
+        }
+        Debug.LogWarning("Yang Layout is full! Cannot display more than 8 cards.");
+    }
     private void UpdatePlayerStats()
     {
         PlayerGeneral player = TurnManager.Instance.activePlayer;

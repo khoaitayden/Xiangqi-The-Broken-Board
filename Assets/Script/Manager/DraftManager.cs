@@ -41,6 +41,9 @@ public class DraftManager : MonoBehaviour
         RunManager.Instance.ApplyCard(selectedYin);
         RunManager.Instance.ApplyCard(selectedYang);
 
+        // NEW: Tell the UI to put the Yang card in the bottom layout!
+        UIManager.Instance.AddYangCardToUI(selectedYang);
+
         UIManager.Instance.HideDraftUI();
         LevelManager.Instance.LoadNextLevel();
     }

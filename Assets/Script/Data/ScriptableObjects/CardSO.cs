@@ -34,5 +34,6 @@ public class CardSO : ScriptableObject
     public CardEffectID effectID;
     
     [Header("Balance")]
-    public int weight; // e.g. -4 for Yin, +3 for Yang
+    public int weight; 
+    public Sprite cardIcon;
 }
