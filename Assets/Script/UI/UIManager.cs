@@ -421,7 +421,6 @@ public class UIManager : MonoBehaviour
 
         _menuSliderContainer.DOAnchorPos(new Vector2(-1920f, -1080f), _tweenDuration).SetEase(Ease.InOutCubic).OnComplete(() =>
         {
-            // Now that the slide is finished, initialize the game
             InitializeBuildLayout(); 
             LevelManager.Instance.StartGame();
         });

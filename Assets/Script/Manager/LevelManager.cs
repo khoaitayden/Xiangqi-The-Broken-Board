@@ -31,6 +31,7 @@ public class LevelManager : MonoBehaviour
     {
         _currentLevelIndex = 0;
         GridManager.Instance.GenerateBoard();
+        RunManager.Instance.ResetEntireRun();
         LoadCurrentLevel();
     }
 
