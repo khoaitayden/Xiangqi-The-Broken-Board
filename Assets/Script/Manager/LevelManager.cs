@@ -27,8 +27,9 @@ public class LevelManager : MonoBehaviour
         else Instance = this;
     }
 
-    void Start()
+    public void StartGame()
     {
+        _currentLevelIndex = 0;
         GridManager.Instance.GenerateBoard();
         LoadCurrentLevel();
     }

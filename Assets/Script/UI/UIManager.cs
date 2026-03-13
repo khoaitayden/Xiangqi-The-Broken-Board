@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using DG.Tweening;
 
 public class UIManager : MonoBehaviour
 {
@@ -13,6 +14,10 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _weaponStatsText;
     [SerializeField] private Transform _armorLayoutGroup; 
     [SerializeField] private GameObject _armorIconPrefab; 
+
+    [Header("Gameplay UI Panels")]
+    [SerializeField] private GameObject _gameplayUIPanel;
+    [SerializeField] private GameObject _cardPanel;
 
     [Header("Enemy Hover UI")]
     [SerializeField] private GameObject enemyPanel; 
@@ -49,6 +54,21 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject _tooltipPanel;
     [SerializeField] private TextMeshProUGUI _tooltipTitleText;
     [SerializeField] private TextMeshProUGUI _tooltipDescText;
+
+    [Header("Sliding Menu UI")]
+    [SerializeField] private RectTransform _menuSliderContainer;
+
+    [Header("Main Menu UI")]
+    [SerializeField] private CanvasGroup _mainMenuPanel;
+    [SerializeField] private CanvasGroup _inputNamePanel;
+    [SerializeField] private Button _startButton;
+    [SerializeField] private Button _settingsButton;
+    [SerializeField] private Button _leaderboardButton;
+    [SerializeField] private Button _exitButton;
+    [SerializeField] private TMP_InputField _nameInputField;
+    [SerializeField] private Button _playButton;
+    [SerializeField] private Button _backButton;
+    [SerializeField] private float _tweenDuration = 0.4f;
     private List<CardHoverHandler> _yangCardSlots = new List<CardHoverHandler>(); 
     private List<CardHoverHandler> _yinCardSlots = new List<CardHoverHandler>();
     private List<GameObject> _armorIcons = new List<GameObject>(); 
@@ -59,22 +79,34 @@ public class UIManager : MonoBehaviour
     {
         if (Instance != null && Instance != this) Destroy(this);
         else Instance = this;
+        
+        DOTween.Init();
     }
 
     private void Start()
     {
         _draftUIPanel.SetActive(false);
+        _deathPanel.SetActive(false);
+
 
         _selectPair1Button.onClick.AddListener(OnPair1Clicked);
         _selectPair2Button.onClick.AddListener(OnPair2Clicked);
-
-        _deathPanel.SetActive(false);
-
         _tryAgainButton.onClick.AddListener(RestartRun);
         _returnToMainMenuButton.onClick.AddListener(ReturnToMainMenu);
-        InitializeBuildLayout();
-    }
 
+        _startButton.onClick.AddListener(OnStartClicked);
+        _exitButton.onClick.AddListener(OnExitClicked);
+        _playButton.onClick.AddListener(OnPlayClicked);
+        _backButton.onClick.AddListener(OnBackClicked);
+
+        //_menuSliderContainer.anchoredPosition = Vector2.zero;
+
+        _mainMenuPanel.interactable = true;
+        _mainMenuPanel.blocksRaycasts = true;
+
+        _inputNamePanel.interactable = false; 
+        _inputNamePanel.blocksRaycasts = false;
+    }
     void Update()
     {
         UpdatePlayerStats();
@@ -316,20 +348,15 @@ public class UIManager : MonoBehaviour
 
     private void RestartRun()
     {
-        // 1. Tell the RunManager to delete all your drafted cards and stats
         RunManager.Instance.ResetEntireRun();
-
-        // 2. Reload the current scene. 
-        // (Since RunManager has DontDestroyOnLoad, it survives the reload, but the board is built fresh!)
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
+
     private void ReturnToMainMenu()
     {
-        // For now, this just quits the game. 
-        // Once you make a Main Menu scene, you can do: SceneManager.LoadScene("MainMenu");
-        Debug.Log("Returning to Main Menu...");
-        Application.Quit(); 
+        RunManager.Instance.ResetEntireRun();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     public void ShowCardTooltip(CardSO card, Vector3 cardPosition)
@@ -353,5 +380,55 @@ public class UIManager : MonoBehaviour
     public void HideCardTooltip()
     {
         if (_tooltipPanel != null) _tooltipPanel.SetActive(false);
+    }
+
+    private void OnStartClicked()
+    {
+        _mainMenuPanel.interactable = false;
+        _mainMenuPanel.blocksRaycasts = false;
+        _inputNamePanel.interactable = true;
+        _inputNamePanel.blocksRaycasts = true;
+
+        _menuSliderContainer.DOAnchorPos(new Vector2(-1920f, 0f), _tweenDuration).SetEase(Ease.InOutBack);
+    }
+
+    private void OnBackClicked()
+    {
+        _inputNamePanel.interactable = false;
+        _inputNamePanel.blocksRaycasts = false;
+        _mainMenuPanel.interactable = true;
+        _mainMenuPanel.blocksRaycasts = true;
+
+        _menuSliderContainer.DOAnchorPos(Vector2.zero, _tweenDuration).SetEase(Ease.InOutBack);
+    }
+
+    private void OnPlayClicked()
+    {
+        string playerName = _nameInputField.text.Trim();
+
+        if (string.IsNullOrEmpty(playerName))
+        {
+            _nameInputField.transform.DOShakePosition(0.3f, new Vector3(10f, 0, 0), 20, 90f);
+            return;
+        }
+
+        PlayerPrefs.SetString("PlayerName", playerName);
+        PlayerPrefs.Save();
+
+        _inputNamePanel.interactable = false;
+        _inputNamePanel.blocksRaycasts = false;
+
+
+        _menuSliderContainer.DOAnchorPos(new Vector2(-1920f, -1080f), _tweenDuration).SetEase(Ease.InOutCubic).OnComplete(() =>
+        {
+            // Now that the slide is finished, initialize the game
+            InitializeBuildLayout(); 
+            LevelManager.Instance.StartGame();
+        });
+    }
+
+    private void OnExitClicked()
+    {
+        Application.Quit();
     }
 }
