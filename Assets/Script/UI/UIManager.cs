@@ -44,6 +44,10 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Button _tryAgainButton;
     [SerializeField] private Button _returnToMainMenuButton;
 
+    [Header("Win UI")]
+    [SerializeField] private GameObject _winPanel;
+    [SerializeField] private Button _winReturnToMenuButton;
+
     [Header("Active Build UI")]
     [SerializeField] private Transform _yangLayoutGroup; 
     [SerializeField] private GameObject _yangCardPrefab;
@@ -65,10 +69,12 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Button _settingsButton;
     [SerializeField] private Button _leaderboardButton;
     [SerializeField] private Button _exitButton;
+
+    [Header("Input Name UI")]
     [SerializeField] private TMP_InputField _nameInputField;
+    [SerializeField] private TMP_InputField _phoneInputField; 
     [SerializeField] private Button _playButton;
-    [SerializeField] private Button _backButton;
-    [SerializeField] private float _tweenDuration = 0.4f;
+    [SerializeField] private Button _backButton;    [SerializeField] private float _tweenDuration = 0.4f;
     private List<CardHoverHandler> _yangCardSlots = new List<CardHoverHandler>(); 
     private List<CardHoverHandler> _yinCardSlots = new List<CardHoverHandler>();
     private List<GameObject> _armorIcons = new List<GameObject>(); 
@@ -93,6 +99,7 @@ public class UIManager : MonoBehaviour
         _selectPair2Button.onClick.AddListener(OnPair2Clicked);
         _tryAgainButton.onClick.AddListener(RestartRun);
         _returnToMainMenuButton.onClick.AddListener(ReturnToMainMenu);
+        _winReturnToMenuButton.onClick.AddListener(ReturnToMainMenuFromWin);
 
         _startButton.onClick.AddListener(OnStartClicked);
         _exitButton.onClick.AddListener(OnExitClicked);
@@ -348,8 +355,12 @@ public class UIManager : MonoBehaviour
 
     private void RestartRun()
     {
+        DataPersistenceManager.Instance.SaveRunData("Defeat");
+
+        _deathPanel.SetActive(false);
+        InitializeBuildLayout(); 
         RunManager.Instance.ResetEntireRun();
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        LevelManager.Instance.StartGame();
     }
 
 
@@ -405,6 +416,7 @@ public class UIManager : MonoBehaviour
     private void OnPlayClicked()
     {
         string playerName = _nameInputField.text.Trim();
+        string playerPhone = _phoneInputField.text.Trim();
 
         if (string.IsNullOrEmpty(playerName))
         {
@@ -413,6 +425,7 @@ public class UIManager : MonoBehaviour
         }
 
         PlayerPrefs.SetString("PlayerName", playerName);
+        PlayerPrefs.SetString("PlayerPhone", playerPhone);
         PlayerPrefs.Save();
 
         _inputNamePanel.interactable = false;
@@ -430,4 +443,19 @@ public class UIManager : MonoBehaviour
     {
         Application.Quit();
     }
+
+    public void ShowWinScreen()
+    {
+        _winPanel.SetActive(true);
+    }
+
+    private void ReturnToMainMenuFromWin()
+    {
+        // 1. SAVE THE DATA
+        DataPersistenceManager.Instance.SaveRunData("Victory");
+
+        // 2. Return to Menu
+        ReturnToMainMenu();
+    }
+
 }

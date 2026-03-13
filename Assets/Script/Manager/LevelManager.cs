@@ -29,9 +29,17 @@ public class LevelManager : MonoBehaviour
 
     public void StartGame()
     {
+        if (GridManager.Instance.grid == null) 
+        {
+            GridManager.Instance.GenerateBoard();
+        }
+
         _currentLevelIndex = 0;
-        GridManager.Instance.GenerateBoard();
-        RunManager.Instance.ResetEntireRun();
+        
+        ClearBoard(); 
+        
+        TurnManager.Instance.ResetTurnCounter();
+        
         LoadCurrentLevel();
     }
 
@@ -46,8 +54,10 @@ public class LevelManager : MonoBehaviour
         }
         else
         {
+            // --- VICTORY STATE ---
             Debug.Log("YOU BEAT THE ENTIRE CAMPAIGN!");
             TurnManager.Instance.CurrentTurn = TurnManager.TurnState.GameOver;
+            UIManager.Instance.ShowWinScreen(); // NEW: Call the Win Screen
         }
     }
 
@@ -55,32 +65,31 @@ public class LevelManager : MonoBehaviour
     {
         TurnManager turnMan = TurnManager.Instance;
 
-        // 1. Destroy all enemies
-        foreach (Piece enemy in turnMan.enemyPieces)
-        {
-            if (enemy != null) Destroy(enemy.gameObject);
-        }
+        // 1. CLEAR LISTS
         turnMan.enemyPieces.Clear();
-
-        // 2. Destroy all corpses
-        foreach (Corpse corpse in turnMan.activeCorpses)
-        {
-            if (corpse != null) Destroy(corpse.gameObject);
-        }
         turnMan.activeCorpses.Clear();
+        turnMan.activePlayer = null;
 
-        // 3. Destroy Player
-        if (turnMan.activePlayer != null)
-        {
-            Destroy(turnMan.activePlayer.gameObject);
-            turnMan.activePlayer = null;
-        }
-
-        // 4. Wipe Grid Data
+        // 2. WIPE GRID DATA
         foreach (BoardNode node in GridManager.Instance.grid)
         {
             node.currentPiece = null;
             node.currentCorpse = null;
+        }
+
+        // 3. NUKE ALL PIECES IN THE SCENE
+        // FindObjectsByType finds EVERYTHING in the scene, even if it is disabled (Inactive)!
+        Piece[] allPieces = FindObjectsByType<Piece>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (Piece p in allPieces)
+        {
+            if (p != null) Destroy(p.gameObject);
+        }
+
+        // 4. NUKE ALL CORPSES IN THE SCENE
+        Corpse[] allCorpses = FindObjectsByType<Corpse>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (Corpse c in allCorpses)
+        {
+            if (c != null) Destroy(c.gameObject);
         }
     }
 

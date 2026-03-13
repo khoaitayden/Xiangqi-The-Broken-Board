@@ -195,4 +195,8 @@ public class TurnManager : MonoBehaviour
         CurrentTurn = TurnState.PlayerTurn;
         CheckForPlayerThreats(); 
     }
+    public void ResetTurnCounter()
+    {
+        CurrentTurnNumber = 1;
+    }
 }
