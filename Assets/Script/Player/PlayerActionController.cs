@@ -87,6 +87,11 @@ public class PlayerActionController : MonoBehaviour
         {
             isAimingMode = false;
             foreach (Piece enemy in TurnManager.Instance.enemyPieces) { if(enemy != null) enemy.SetTargeted(false); }
+
+            if (player.WeaponPivot != null)
+            {
+                player.WeaponPivot.rotation = Quaternion.Lerp(player.WeaponPivot.rotation, Quaternion.Euler(0, 0, 90f), Time.deltaTime * 10f);
+            }
         }
         else
         {
@@ -94,6 +99,13 @@ public class PlayerActionController : MonoBehaviour
             currentAimDirection = (mouseWorldPos - (Vector2)player.transform.position).normalized;
             if (currentAimDirection == Vector2.zero) currentAimDirection = Vector2.up; 
 
+            if (player.WeaponPivot != null)
+            {
+                float angle = Mathf.Atan2(currentAimDirection.y, currentAimDirection.x) * Mathf.Rad2Deg;
+                // Instantly snap the weapon to point at the mouse
+                player.WeaponPivot.rotation = Quaternion.Euler(0, 0, angle);
+            }
+            
             // Check for Crouching Tiger
             if (hoveredNode != null && RunManager.Instance.CrouchingTigerEnabled)
             {

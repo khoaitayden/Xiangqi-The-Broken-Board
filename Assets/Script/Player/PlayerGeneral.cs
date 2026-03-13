@@ -5,6 +5,13 @@ public class PlayerGeneral : Piece
     [Header("Player Stats Data")]
     [SerializeField] private PlayerStatsSO _playerStats;
 
+    [Header("Visuals")]
+    [SerializeField] private Transform _weaponPivot; 
+    public Transform WeaponPivot => _weaponPivot;
+    [SerializeField] private SpriteRenderer _weaponSpriteRenderer;
+    [SerializeField] private Sprite _bowWithArrowSprite;
+    [SerializeField] private Sprite _emptyBowSprite;
+
     public int MaxAmmo => _playerStats.runtimeMaxAmmo;
     public int Firepower => _playerStats.runtimeFirepower;
     public float FireArc => _playerStats.runtimeFireArc;
@@ -13,7 +20,15 @@ public class PlayerGeneral : Piece
     public int MaxArmor => _playerStats.runtimeMaxArmor;
 
     [SerializeField] private int _loadedAmmo;
-    public int LoadedAmmo { get { return _loadedAmmo; } set { _loadedAmmo = value; } }
+    public int LoadedAmmo 
+    { 
+        get { return _loadedAmmo; } 
+        set 
+        { 
+            _loadedAmmo = value; 
+            UpdateWeaponVisuals(); // Instantly change the sprite when ammo changes!
+        } 
+    }
 
     [SerializeField] private int _currentArmor;
     public int CurrentArmor { get { return _currentArmor; } set { _currentArmor = value; } }
@@ -67,6 +82,18 @@ public class PlayerGeneral : Piece
         base.MoveTo(targetNode);
     }
 
-    
-
+    private void UpdateWeaponVisuals()
+    {
+        if (_weaponSpriteRenderer != null)
+        {
+            if (_loadedAmmo > 0)
+            {
+                _weaponSpriteRenderer.sprite = _bowWithArrowSprite;
+            }
+            else
+            {
+                _weaponSpriteRenderer.sprite = _emptyBowSprite;
+            }
+        }
+    }
 }
