@@ -20,6 +20,11 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI enemyHPText;
     [SerializeField] private TextMeshProUGUI enemyCooldownText;
 
+    [Header("Game Info UI")]
+    [SerializeField] private TextMeshProUGUI _levelText;
+    [SerializeField] private TextMeshProUGUI _turnText;
+    [SerializeField] private TextMeshProUGUI _timerText;
+
     [Header("Draft UI")]
     [SerializeField] private GameObject _draftUIPanel;
     [SerializeField] private TextMeshProUGUI _pair1YinText;
@@ -74,8 +79,33 @@ public class UIManager : MonoBehaviour
     {
         UpdatePlayerStats();
         UpdateEnemyHoverInfo();
+        UpdateGameInfo();
     }
+    private void UpdateGameInfo()
+    {
+        // 1. Level Info
+        if (LevelManager.Instance != null)
+        {
+            _levelText.text = $"Floor {LevelManager.Instance.CurrentLevelIndex + 1}";
+        }
 
+        // 2. Turn Info
+        if (TurnManager.Instance != null)
+        {
+            _turnText.text = $"Turn: {TurnManager.Instance.CurrentTurnNumber}";
+        }
+
+        // 3. Timer Info
+        if (RunManager.Instance != null)
+        {
+            float time = RunManager.Instance.TotalRunTime;
+            int minutes = Mathf.FloorToInt(time / 60F);
+            int seconds = Mathf.FloorToInt(time - minutes * 60);
+            
+            // Format as 00:00
+            _timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+        }
+    }
     private void InitializeBuildLayout()
     {
         // 1. Clear both layouts

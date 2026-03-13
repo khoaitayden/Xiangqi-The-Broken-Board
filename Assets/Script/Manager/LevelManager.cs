@@ -19,6 +19,8 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private GameObject enemyChariotPrefab;
     [SerializeField] private GameObject enemyCannonPrefab;
 
+    public int CurrentLevelIndex { get { return _currentLevelIndex; } protected set { _currentLevelIndex = value; } }
+
     private void Awake()
     {
         if (Instance != null && Instance != this) Destroy(this);

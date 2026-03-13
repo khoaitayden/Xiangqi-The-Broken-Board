@@ -19,6 +19,8 @@ public class RunManager : MonoBehaviour
     [SerializeField] private PieceStatsSO cannonStats;
     [SerializeField] private PieceStatsSO enemyGeneralStats;
 
+    public float TotalRunTime { get; private set; }
+
     // --- YIN MODIFIERS ---
     public int BonusStartingPawns { get; private set; }
     public int BonusStartingChariots { get; private set; }
@@ -44,12 +46,20 @@ public class RunManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(this.gameObject);
         ResetEntireRun();
+    }   
+    private void Update()
+    {
+        if (TurnManager.Instance != null && 
+            TurnManager.Instance.CurrentTurn != TurnManager.TurnState.GameOver && 
+            TurnManager.Instance.CurrentTurn != TurnManager.TurnState.Drafting)
+        {
+            TotalRunTime += Time.deltaTime;
+        }
     }
-
     public void ResetEntireRun()
     {
         _activeCards.Clear();
-        
+        TotalRunTime = 0f;
         BonusStartingPawns = 0; BonusStartingChariots = 0; BonusStartingCannons = 0;
         BossLeavesPalace = false; AdvisorsProtectGeneral = false;
         ElephantsCrossRiver = false; PawnsAttackDiagonal = false;

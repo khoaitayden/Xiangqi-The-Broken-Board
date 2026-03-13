@@ -16,7 +16,7 @@ public class TurnManager : MonoBehaviour
         set { _currentTurn = value; } 
     }
     private BoardState previousTurnState;
-    
+    public int CurrentTurnNumber { get; private set; } = 1;
     public PlayerGeneral activePlayer; 
     public List<Piece> enemyPieces = new List<Piece>();
     public List<Corpse> activeCorpses = new List<Corpse>();
@@ -25,16 +25,19 @@ public class TurnManager : MonoBehaviour
         if (Instance != null && Instance != this) Destroy(this);
         else Instance = this;
     }
+    private void Start()
+    {
+        CurrentTurnNumber = 1;
+    }
+
 
     public void StartEnemyPhase()
     {
-        // 1. NEW SAFETY CHECK: If we are Drafting (Boss died) or GameOver, do not start the enemy phase!
-        if (CurrentTurn == TurnState.Drafting || CurrentTurn == TurnState.GameOver) 
-        {
-            return; 
-        }
+        if (CurrentTurn == TurnState.Drafting || CurrentTurn == TurnState.GameOver) return;
 
-        enemyPieces.RemoveAll(e => e == null); // Cleanup dead enemies
+        CurrentTurnNumber++;
+
+        enemyPieces.RemoveAll(e => e == null); 
         CurrentTurn = TurnState.EnemyTurn;
         StartCoroutine(EnemyPhaseCoroutine());
     }
