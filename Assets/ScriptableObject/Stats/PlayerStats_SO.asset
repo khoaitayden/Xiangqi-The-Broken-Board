@@ -18,13 +18,13 @@ MonoBehaviour:
   runtimeMaxCooldown: 3
   baseMaxAmmo: 2
   baseFirepower: 2
-  baseFireArc: 40
+  baseFireArc: 60
   baseRangeX: 2
   baseRangeY: 3.5
   baseMaxArmor: 2
-  runtimeMaxAmmo: 2
+  runtimeMaxAmmo: 3
   runtimeFirepower: 2
-  runtimeFireArc: 40
+  runtimeFireArc: 60
   runtimeRangeX: 2
   runtimeRangeY: 3.5
   runtimeMaxArmor: 2

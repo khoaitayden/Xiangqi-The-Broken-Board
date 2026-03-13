@@ -22,10 +22,10 @@ MonoBehaviour:
     startingCooldown: 1
   - pieceType: 1
     position: {x: 8, y: 9}
-    startingCooldown: 0
+    startingCooldown: 1
   - pieceType: 5
     position: {x: 7, y: 9}
-    startingCooldown: 0
+    startingCooldown: 1
   - pieceType: 3
     position: {x: 2, y: 9}
-    startingCooldown: 0
+    startingCooldown: 1
