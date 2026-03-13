@@ -69,7 +69,7 @@ public class PlayerGeneral : Piece
         }
     }
 
-    public override void MoveTo(BoardNode targetNode)
+    public override Coroutine MoveTo(BoardNode targetNode)
     {
         // CLOUD STEP: Destroy the corpse if we step on it!
         if (RunManager.Instance != null && RunManager.Instance.CloudStepEnabled && targetNode.currentCorpse != null)
@@ -79,7 +79,8 @@ public class PlayerGeneral : Piece
             targetNode.currentCorpse = null;
         }
 
-        base.MoveTo(targetNode);
+        // Now, call the base method and RETURN its Coroutine object.
+        return base.MoveTo(targetNode);
     }
 
     private void UpdateWeaponVisuals()

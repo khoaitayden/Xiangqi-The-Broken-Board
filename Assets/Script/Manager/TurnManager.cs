@@ -48,7 +48,6 @@ public class TurnManager : MonoBehaviour
         yield return new WaitForSeconds(0.25f); 
 
         List<Piece> enemiesToMove = new List<Piece>(enemyPieces);
-        bool playerWasExecuted = false;
 
         foreach (Piece enemy in enemiesToMove)
         {
@@ -62,34 +61,41 @@ public class TurnManager : MonoBehaviour
 
                 if (targetNode != null)
                 {
-                    // DID WE HIT THE PLAYER?
                     if (targetNode.currentPiece == activePlayer)
                     {
                         if (activePlayer.CurrentArmor > 0)
                         {
-                            // Armor saves you! Instant rewind.
                             TriggerArmorRewind();   
                             yield break; 
                         }
                         else
                         {
-                            // NO ARMOR. EXECUTION INITIATED!
-                            playerWasExecuted = true;
+                            // --- RE-ORCHESTRATED DEATH SEQUENCE ---
+                            // 1. Start the enemy's jump and WAIT for it to land.
+                            Coroutine deathJump = enemy.MoveTo(targetNode);
+                            yield return deathJump;
+
+                            // 2. The moment it lands, SHAKE THE SCREEN!
+                            ScreenShakeManager.Instance.ShakeScreen(2f);
+
+                            // 3. NOW, tell the enemy piece to start its fade-out animation.
+                            enemy.StartFadeOut();
+
+                            // 4. Wait for the dust to settle as the enemy fades.
+                            yield return new WaitForSeconds(0.75f);
                             
-                            // Move the enemy onto the player
-                            GridManager.Instance.grid[enemy.X, enemy.Y].currentPiece = null;
-                            enemy.MoveTo(targetNode);
-                            targetNode.currentPiece = enemy;
+                            // 5. Set the game state and show the UI.
+                            CurrentTurn = TurnState.GameOver;
+                            Debug.Log("GAME OVER! You were crushed!");
+                            UIManager.Instance.ShowDeathScreen();
                             
-                            // We break the loop so no other enemies move while the execution happens
-                            break; 
+                            yield break; 
                         }
                     }
 
                     // Normal Move
                     GridManager.Instance.grid[enemy.X, enemy.Y].currentPiece = null;
                     enemy.MoveTo(targetNode);
-                    targetNode.currentPiece = enemy;
                     enemy.CurrentCooldown = enemy.MaxCooldown;
                 }
                 else 
@@ -99,29 +105,21 @@ public class TurnManager : MonoBehaviour
             }
         }
 
+        // --- Standard End-of-Turn Cleanup ---
         for (int i = activeCorpses.Count - 1; i >= 0; i--)
         {
             if (activeCorpses[i] != null)
             {
                 activeCorpses[i].Decay();
-                if (activeCorpses[i] == null) 
-                {
-                    activeCorpses.RemoveAt(i);
-                }
+                if (activeCorpses[i] == null) activeCorpses.RemoveAt(i);
             }
         }
-        if (playerWasExecuted)
-        {
-            CurrentTurn = TurnState.GameOver;
-            Debug.Log("GAME OVER! You were crushed!");
-            UIManager.Instance.ShowDeathScreen();
-        }
-        else if (CurrentTurn == TurnState.EnemyTurn) 
+        
+        if (CurrentTurn == TurnState.EnemyTurn) 
         {
             CurrentTurn = TurnState.PlayerTurn;
             CheckForPlayerThreats();
         }
-
     }
     public void SaveState()
     {

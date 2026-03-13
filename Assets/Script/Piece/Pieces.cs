@@ -104,20 +104,14 @@ public abstract class Piece : MonoBehaviour
 
     // ACTIONS
 
-    public virtual void MoveTo(BoardNode targetNode)
+    public virtual Coroutine MoveTo(BoardNode targetNode)
     {
         if (CurrentNode != null) CurrentNode.currentPiece = null;
-
-        bool killedPlayer = false; // Track if this was an execution
 
         if (targetNode.currentPiece != null && targetNode.currentPiece != this)
         {
             Piece targetPiece = targetNode.currentPiece.GetComponent<Piece>();
-            if (targetPiece != null) 
-            {
-                if (targetPiece.IsPlayer) killedPlayer = true; // We crushed the boss!
-                targetPiece.TakeDamage(999);
-            }
+            if (targetPiece != null) targetPiece.TakeDamage(999);
             else Destroy(targetNode.currentPiece.gameObject);
         }
 
@@ -130,8 +124,9 @@ public abstract class Piece : MonoBehaviour
         
         if (_moveCoroutine != null) StopCoroutine(_moveCoroutine);
         
-        // Pass the killedPlayer flag to the move coroutine
-        _moveCoroutine = StartCoroutine(MoveRoutine(TargetPosition, killedPlayer)); 
+        // We no longer need to tell the MoveRoutine to fade. The TurnManager will handle it.
+        _moveCoroutine = StartCoroutine(MoveRoutine(TargetPosition)); 
+        return _moveCoroutine;
     }
 
 
@@ -158,7 +153,7 @@ public abstract class Piece : MonoBehaviour
 
     // --- COROUTINE ANIMATIONS ---
 
-    private IEnumerator MoveRoutine(Vector3 targetPos, bool shouldFadeAfter = false)
+    private IEnumerator MoveRoutine(Vector3 targetPos)
     {
         _isMoving = true; 
         if (_jiggleCoroutine != null) StopCoroutine(_jiggleCoroutine);
@@ -178,22 +173,8 @@ public abstract class Piece : MonoBehaviour
         transform.position = targetPos;
         _isMoving = false;
         
-        if (shouldFadeAfter)
-        {
-            float fadeTimer = 0f;
-            Color startColor = _spriteRenderer.color;
-            while (fadeTimer < 0.5f) // Half second fade
-            {
-                fadeTimer += Time.deltaTime;
-                float alpha = Mathf.Lerp(1f, 0f, fadeTimer / 0.5f);
-                _spriteRenderer.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
-                yield return null;
-            }
-        }
-        else
-        {
-            EvaluateJiggleState(); 
-        }
+        // The fade logic has been removed from here. We just check for jiggle.
+        EvaluateJiggleState(); 
     }
 
     private void EvaluateJiggleState()
@@ -440,5 +421,24 @@ public abstract class Piece : MonoBehaviour
         }
 
         return bestNode;
+    }
+
+    public void StartFadeOut(float duration = 0.5f)
+    {
+        StartCoroutine(FadeOutRoutine(duration));
+    }
+
+    private IEnumerator FadeOutRoutine(float duration)
+    {
+        float timer = 0f;
+        Color startColor = _spriteRenderer.color;
+
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, timer / duration);
+            _spriteRenderer.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
+            yield return null;
+        }
     }
 }
