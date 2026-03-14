@@ -150,37 +150,40 @@ public class UIManager : MonoBehaviour
     }
     private void InitializeBuildLayout()
     {
-        // 1. Clear both layouts
+        // 1. Destroy ANY existing card UI objects so we start perfectly clean
         foreach (Transform child in _yangLayoutGroup) Destroy(child.gameObject);
-        foreach (Transform child in _yinLayoutGroup) Destroy(child.gameObject); // NEW
+        foreach (Transform child in _yinLayoutGroup) Destroy(child.gameObject);
         
+        // 2. Clear the tracking lists
         _yangCardSlots.Clear();
-        _yinCardSlots.Clear(); // NEW
+        _yinCardSlots.Clear(); 
 
-        // 2. Spawn 8 empty Yang slots
+        // 3. Spawn 8 empty Yang slots
         for (int i = 0; i < 8; i++)
         {
             GameObject newSlot = Instantiate(_yangCardPrefab, _yangLayoutGroup);
             Image symbolImage = newSlot.transform.GetChild(0).GetComponent<Image>();
-            symbolImage.color = new Color(1, 1, 1, 0); 
+            symbolImage.color = new Color(1, 1, 1, 0); // Hide icon
+            
             CardHoverHandler hoverHandler = newSlot.GetComponent<CardHoverHandler>();
-            hoverHandler.assignedCard = null; 
+            hoverHandler.assignedCard = null; // Clear data
             _yangCardSlots.Add(hoverHandler);
         }
 
-        // 3. Spawn 8 empty Yin slots 
+        // 4. Spawn 8 empty Yin slots 
         for (int i = 0; i < 8; i++)
         {
             GameObject newSlot = Instantiate(_yinCardPrefab, _yinLayoutGroup);
             Image symbolImage = newSlot.transform.GetChild(0).GetComponent<Image>();
-            symbolImage.color = new Color(1, 1, 1, 0); 
+            symbolImage.color = new Color(1, 1, 1, 0); // Hide icon
+            
             CardHoverHandler hoverHandler = newSlot.GetComponent<CardHoverHandler>();
-            hoverHandler.assignedCard = null; 
+            hoverHandler.assignedCard = null; // Clear data
             _yinCardSlots.Add(hoverHandler);
         }
 
-        // 4. Refill cards if we restarted the scene
-        if (RunManager.Instance != null)
+        // 5. Refill cards ONLY if the RunManager has active cards (e.g. continuing a saved run)
+        if (RunManager.Instance != null && RunManager.Instance.ActiveCards.Count > 0)
         {
             foreach (CardSO card in RunManager.Instance.ActiveCards)
             {
@@ -189,6 +192,7 @@ public class UIManager : MonoBehaviour
             }
         }
         
+        // Hide tooltip at start
         if (_tooltipPanel != null) _tooltipPanel.SetActive(false);
     }
     public void AddYangCardToUI(CardSO card)
@@ -359,11 +363,13 @@ public class UIManager : MonoBehaviour
     private void RestartRun()
     {
         DataPersistenceManager.Instance.SaveRunData("Defeat");
+        RunManager.Instance.ResetEntireRun();
 
         _deathPanel.SetActive(false);
         InitializeBuildLayout(); 
         LevelManager.Instance.StartGame();
     }
+
 
 
     private void ReturnToMainMenu()
@@ -471,6 +477,7 @@ public class UIManager : MonoBehaviour
         _menuSliderContainer.DOAnchorPos(new Vector2(-3840f, 0f), _tweenDuration).SetEase(Ease.InOutCubic).OnComplete(() =>
         {
             InitializeBuildLayout(); 
+            RunManager.Instance.ResetEntireRun();
             LevelManager.Instance.StartGame();
         });
     }

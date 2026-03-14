@@ -37,7 +37,6 @@ public class LevelManager : MonoBehaviour
         _currentLevelIndex = 0;
         
         ClearBoard(); 
-        RunManager.Instance.ResetEntireRun();
         TurnManager.Instance.ResetTurnCounter();
         
         LoadCurrentLevel();
@@ -57,7 +56,7 @@ public class LevelManager : MonoBehaviour
             // --- VICTORY STATE ---
             Debug.Log("YOU BEAT THE ENTIRE CAMPAIGN!");
             TurnManager.Instance.CurrentTurn = TurnManager.TurnState.GameOver;
-            UIManager.Instance.ShowWinScreen(); // NEW: Call the Win Screen
+            UIManager.Instance.ShowWinScreen();
         }
     }
 
@@ -78,7 +77,6 @@ public class LevelManager : MonoBehaviour
         }
 
         // 3. NUKE ALL PIECES IN THE SCENE
-        // FindObjectsByType finds EVERYTHING in the scene, even if it is disabled (Inactive)!
         Piece[] allPieces = FindObjectsByType<Piece>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (Piece p in allPieces)
         {
@@ -102,7 +100,7 @@ public class LevelManager : MonoBehaviour
         // 1. SPAWN PLAYER
         SpawnPlayer(levelData.playerSpawnPosition.x, levelData.playerSpawnPosition.y);
 
-        // 2. SPAWN ENEMY BOSS (Using the new explicit data)
+        // 2. SPAWN ENEMY BOSS
         SpawnEnemy(enemyGeneralPrefab, levelData.enemyGeneralSpawnPosition.x, levelData.enemyGeneralSpawnPosition.y, levelData.enemyGeneralStartingCooldown);
 
         // 3. SPAWN ENEMY MINIONS
@@ -115,86 +113,57 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        // 4. APPLY RUN MANAGER BUFFS (Conscription - Extra Pawns)
-        if (RunManager.Instance != null && RunManager.Instance.BonusStartingPawns > 0)
+        // 4. APPLY RUN MANAGER BUFFS
+        if (RunManager.Instance != null)
         {
-            // Build the list of safe empty spots ONCE
-            List<BoardNode> emptyTopNodes = new List<BoardNode>();
-            for (int x = 0; x < GridManager.Instance.width; x++)
-            {
-                for (int y = 5; y < GridManager.Instance.height; y++) 
-                {
-                    if (GridManager.Instance.grid[x, y].IsEmpty())
-                        emptyTopNodes.Add(GridManager.Instance.grid[x, y]);
-                }
-            }
-
-            // Spawn the pawns and remove the used spots
+            // Conscription - Extra Pawns
             for (int i = 0; i < RunManager.Instance.BonusStartingPawns; i++)
             {
-                if (emptyTopNodes.Count > 0)
-                {
-                    int randomIndex = Random.Range(0, emptyTopNodes.Count);
-                    BoardNode chosenNode = emptyTopNodes[randomIndex];
-                    SpawnEnemy(enemyPawnPrefab, chosenNode.x, chosenNode.y, 3);
-                    emptyTopNodes.RemoveAt(randomIndex); // FIX: Remove from list!
-                }
-            }
-        }
-
-        // 5. APPLY RUN MANAGER BUFFS (The Vanguard - Extra Chariots)
-        if (RunManager.Instance != null && RunManager.Instance.BonusStartingChariots > 0)
-        {
-            List<BoardNode> emptyBackNodes = new List<BoardNode>();
-            for (int x = 0; x < GridManager.Instance.width; x++)
-            {
-                for (int y = 8; y <= 9; y++) 
-                {
-                    if (GridManager.Instance.grid[x, y].IsEmpty())
-                        emptyBackNodes.Add(GridManager.Instance.grid[x, y]);
-                }
+                SpawnRandomExtraPawn();
             }
 
+            // The Vanguard - Extra Chariots
             for (int i = 0; i < RunManager.Instance.BonusStartingChariots; i++)
             {
-                if (emptyBackNodes.Count > 0)
-                {
-                    int randomIndex = Random.Range(0, emptyBackNodes.Count);
-                    BoardNode chosenNode = emptyBackNodes[randomIndex];
-                    SpawnEnemy(enemyChariotPrefab, chosenNode.x, chosenNode.y, 3);
-                    emptyBackNodes.RemoveAt(randomIndex); // FIX: Remove from list!
-                }
+                SpawnRandomExtraChariot();
+            }
+
+            // Artillery Backup - Extra Cannons
+            for (int i = 0; i < RunManager.Instance.BonusStartingCannons; i++)
+            {
+                SpawnRandomExtraCannon();
             }
         }
 
-        // APPLY RUN MANAGER BUFFS (Artillery Backup)
-        if (RunManager.Instance != null && RunManager.Instance.BonusStartingCannons > 0)
-        {
-            List<BoardNode> emptyMidNodes = new List<BoardNode>();
-            for (int x = 0; x < GridManager.Instance.width; x++)
-            {
-                for (int y = 6; y <= 7; y++) 
-                {
-                    if (GridManager.Instance.grid[x, y].IsEmpty()) emptyMidNodes.Add(GridManager.Instance.grid[x, y]);
-                }
-            }
-            for (int i = 0; i < RunManager.Instance.BonusStartingCannons; i++)
-            {
-                if (emptyMidNodes.Count > 0)
-                {
-                    int randomIndex = Random.Range(0, emptyMidNodes.Count);
-                    BoardNode chosenNode = emptyMidNodes[randomIndex];
-                    SpawnEnemy(enemyCannonPrefab, chosenNode.x, chosenNode.y, 2);
-                    emptyMidNodes.RemoveAt(randomIndex); 
-                }
-            }
-        }
         // Reset Turn to Player
         TurnManager.Instance.CurrentTurn = TurnManager.TurnState.PlayerTurn;
         Debug.Log($"Loaded Level {_currentLevelIndex + 1}: {levelData.levelName}");
     }
 
-    private void SpawnRandomExtraChariot()
+    // --- REINFORCEMENT HELPER METHODS ---
+
+    public void SpawnRandomExtraPawn()
+    {
+        List<BoardNode> emptyTopNodes = new List<BoardNode>();
+        for (int x = 0; x < GridManager.Instance.width; x++)
+        {
+            for (int y = 5; y < GridManager.Instance.height; y++) 
+            {
+                if (GridManager.Instance.grid[x, y].IsEmpty())
+                {
+                    emptyTopNodes.Add(GridManager.Instance.grid[x, y]);
+                }
+            }
+        }
+
+        if (emptyTopNodes.Count > 0)
+        {
+            BoardNode randomNode = emptyTopNodes[Random.Range(0, emptyTopNodes.Count)];
+            SpawnEnemy(enemyPawnPrefab, randomNode.x, randomNode.y, 3);
+        }
+    }
+
+    public void SpawnRandomExtraChariot()
     {
         List<BoardNode> emptyBackNodes = new List<BoardNode>();
         for (int x = 0; x < GridManager.Instance.width; x++)
@@ -215,26 +184,28 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    private void SpawnRandomExtraPawn()
+    public void SpawnRandomExtraCannon()
     {
-        List<BoardNode> emptyTopNodes = new List<BoardNode>();
+        List<BoardNode> emptyMidNodes = new List<BoardNode>();
         for (int x = 0; x < GridManager.Instance.width; x++)
         {
-            for (int y = 5; y < GridManager.Instance.height; y++) 
+            for (int y = 6; y <= 7; y++) 
             {
                 if (GridManager.Instance.grid[x, y].IsEmpty())
                 {
-                    emptyTopNodes.Add(GridManager.Instance.grid[x, y]);
+                    emptyMidNodes.Add(GridManager.Instance.grid[x, y]);
                 }
             }
         }
 
-        if (emptyTopNodes.Count > 0)
+        if (emptyMidNodes.Count > 0)
         {
-            BoardNode randomNode = emptyTopNodes[Random.Range(0, emptyTopNodes.Count)];
-            SpawnEnemy(enemyPawnPrefab, randomNode.x, randomNode.y, 3);
+            BoardNode randomNode = emptyMidNodes[Random.Range(0, emptyMidNodes.Count)];
+            SpawnEnemy(enemyCannonPrefab, randomNode.x, randomNode.y, 2);
         }
     }
+
+    // --- SPAWNING LOGIC ---
 
     void SpawnPlayer(int startX, int startY) 
     {
@@ -270,7 +241,6 @@ public class LevelManager : MonoBehaviour
             case PieceType.Elephant: return enemyElephantPrefab;
             case PieceType.Advisor: return enemyAdvisorPrefab;
             case PieceType.Cannon: return enemyCannonPrefab;
-            // Removed EnemyGeneral from here!
             default: return null;
         }
     }

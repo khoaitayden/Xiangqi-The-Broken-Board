@@ -13,16 +13,27 @@ public class EnemyPawn : Piece
         int dirX = targetNode.x - X;
         int dirY = targetNode.y - Y;
 
+        // Pawns can never move backward
         if (dirY > 0) return false;
-        if (dirX == 0 && dirY == -1) return true; // Forward 1
-        
-        bool hasCrossedRiver = Y <= 4;
-        if (hasCrossedRiver && dirY == 0 && Mathf.Abs(dirX) == 1) return true; 
 
+        // 1. Forward 1 step
+        if (dirX == 0 && dirY == -1)
+        {
+            if (targetNode.IsEmpty() || (targetNode.currentPiece != null && targetNode.currentPiece.IsPlayer)) return true;
+        }
+
+        // 2. Sideways
+        bool hasCrossedRiver = Y <= 4;
+        if (hasCrossedRiver && dirY == 0 && Mathf.Abs(dirX) == 1)
+        {
+            if (targetNode.IsEmpty() || (targetNode.currentPiece != null && targetNode.currentPiece.IsPlayer)) return true;
+        }
+
+        // --- BLOODTHIRSTY PAWNS MOVES ---
         bool bloodthirsty = RunManager.Instance != null && RunManager.Instance.PawnsAttackDiagonal;
         if (bloodthirsty && dirY == -1 && Mathf.Abs(dirX) == 1)
         {
-            if (targetNode.currentPiece != null && targetNode.currentPiece.IsPlayer) return true;
+            if (targetNode.IsEmpty() || (targetNode.currentPiece != null && targetNode.currentPiece.IsPlayer)) return true;
         }
 
         return false;
