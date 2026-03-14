@@ -42,14 +42,22 @@ public class DataPersistenceManager : MonoBehaviour
     {
         if (File.Exists(_saveFilePath))
         {
-            string json = File.ReadAllText(_saveFilePath);
-            RunDatabase db = JsonUtility.FromJson<RunDatabase>(json);
-            if (db != null) return db;
+            try
+            {
+                string json = File.ReadAllText(_saveFilePath);
+                RunDatabase db = JsonUtility.FromJson<RunDatabase>(json);
+                if (db != null) return db;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Save file is corrupted! Creating a new database. Error: {e.Message}");
+                
+                return new RunDatabase();
+            }
         }
-        return new RunDatabase(); // Return empty DB if no file exists yet
+        return new RunDatabase();
     }
 
-    // Helper method for the UI to check if someone is returning
     public bool DoesPlayerExist(string name, string phone)
     {
         RunDatabase db = LoadDatabase();
@@ -77,7 +85,8 @@ public class DataPersistenceManager : MonoBehaviour
                 existingRecord.runResult = result;
                 existingRecord.datePlayed = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 Debug.Log($"Overwrote previous run for {currentName}.");
-            } else Debug.Log($"Existing run for {currentName} is better than the new run. Not overwriting.");
+            } else 
+                Debug.Log($"Existing run for {currentName} is better than the new run. Not overwriting.");
         }
         else
         {
