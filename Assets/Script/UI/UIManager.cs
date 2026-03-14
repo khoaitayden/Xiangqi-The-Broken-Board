@@ -446,13 +446,11 @@ public class UIManager : MonoBehaviour
             _tooltipPanel.transform.position = _phoneInputField.transform.position + new Vector3(0, 100f, 0);
             _tooltipPanel.SetActive(true);
 
-            return; // STOP! Don't let them play.
+            return;
         }
 
-        // Hide tooltip if it was showing from a previous error
         HideCardTooltip(); 
 
-        // 3. CHECK DATABASE (For logging)
         if (DataPersistenceManager.Instance.DoesPlayerExist(playerName, playerPhone))
         {
             Debug.Log($"Welcome back, {playerName}! Overwriting previous run.");

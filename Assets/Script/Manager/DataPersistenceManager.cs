@@ -69,13 +69,15 @@ public class DataPersistenceManager : MonoBehaviour
 
         if (existingRecord != null)
         {
-            // 3a. OVERWRITE their old run data!
-            existingRecord.floorsCleared = LevelManager.Instance.CurrentLevelIndex;
-            existingRecord.totalTurns = TurnManager.Instance.CurrentTurnNumber;
-            existingRecord.totalTimeSeconds = RunManager.Instance.TotalRunTime;
-            existingRecord.runResult = result;
-            existingRecord.datePlayed = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            Debug.Log($"Overwrote previous run for {currentName}.");
+            if(IsNewRunBetter(currentName, currentPhone, LevelManager.Instance.CurrentLevelIndex, TurnManager.Instance.CurrentTurnNumber, RunManager.Instance.TotalRunTime))
+            {
+                existingRecord.floorsCleared = LevelManager.Instance.CurrentLevelIndex;
+                existingRecord.totalTurns = TurnManager.Instance.CurrentTurnNumber;
+                existingRecord.totalTimeSeconds = RunManager.Instance.TotalRunTime;
+                existingRecord.runResult = result;
+                existingRecord.datePlayed = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                Debug.Log($"Overwrote previous run for {currentName}.");
+            } else Debug.Log($"Existing run for {currentName} is better than the new run. Not overwriting.");
         }
         else
         {
@@ -109,6 +111,21 @@ public class DataPersistenceManager : MonoBehaviour
         {
             return true;
         }
+
+        return false;
+    }
+
+    public bool IsNewRunBetter(string inputName, string inputPhone, int newFloors, int newTurns, float newTime)
+    {
+        RunDatabase db = LoadDatabase();
+
+        PlayerRunData existingRecord = db.records.Find(r => r.playerName == inputName && r.phoneNumber == inputPhone);
+
+        if (existingRecord == null) return true;
+
+        if (newFloors > existingRecord.floorsCleared) return true;
+        if (newFloors == existingRecord.floorsCleared && newTurns < existingRecord.totalTurns) return true;
+        if (newFloors == existingRecord.floorsCleared && newTurns == existingRecord.totalTurns && newTime < existingRecord.totalTimeSeconds) return true;
 
         return false;
     }

@@ -111,7 +111,7 @@ public class PlayerActionController : MonoBehaviour
             {
                 int distX = Mathf.Abs(hoveredNode.x - player.X);
                 int distY = Mathf.Abs(hoveredNode.y - player.Y);
-                if (distX <= 1 && distY <= 1 && !hoveredNode.IsEmpty())
+                if (distX <= 1 && distY <= 1 && !hoveredNode.IsEmpty() && distX>=0.2 && distY>=0.2)
                 {
                     currentShotMode = SpecialShotMode.CrouchingTiger;
                 }
@@ -162,30 +162,42 @@ public class PlayerActionController : MonoBehaviour
             EnemyGeneral enemyBoss = Object.FindFirstObjectByType<EnemyGeneral>();
             if (enemyBoss != null && aimVisualizer != null)
             {
-                // --- THE FIX: FORCE THE LASER TO BE PERFECT ---
-                // Calculate the perfect direction and distance, ignoring the wobbly mouse aim
                 Vector2 directionToBoss = (enemyBoss.transform.position - playerPos).normalized;
                 float distanceToBoss = Vector3.Distance(playerPos, enemyBoss.transform.position);
 
-                // Draw the line using this perfect direction
-                aimVisualizer.DrawLine(playerPos, directionToBoss, distanceToBoss, 0.1f);
+                aimVisualizer.DrawLine(playerPos, directionToBoss, distanceToBoss, 0.15f, new Color(1f, 0f, 1f, 0.4f));
 
                 enemyBoss.SetTargeted(true);
             }
         }
         else if (currentShotMode == SpecialShotMode.CrouchingTiger)
         {
-            if (aimVisualizer != null) aimVisualizer.Hide();
-            Debug.DrawRay(playerPos, currentAimDirection * 15f, Color.red); 
             RaycastHit2D[] hits = Physics2D.RaycastAll(playerPos, currentAimDirection, 15f);
+            
+            // Draw the line as long as the raycast length
+            
             int hitCount = 0;
             foreach (var hit in hits)
             {
                 Piece hitPiece = hit.collider.GetComponent<Piece>();
+                
+                // FIX: If we hit something, make sure it's NOT the player before we count it!
                 if (hitPiece != null && !hitPiece.IsPlayer)
                 {
                     hitCount++;
-                    if (hitCount == 2) { hitPiece.SetTargeted(true); break; } 
+                    aimVisualizer.DrawLine(playerPos, currentAimDirection, 15f, 0.1f, new Color(1f, 0.3f, 0f, 0.5f));
+                    
+                    // We found the second enemy in the line!
+                    if (hitCount == 2) 
+                    { 
+                        hitPiece.SetTargeted(true); 
+                        break; 
+                    } 
+                }
+                else if (hit.collider.GetComponent<Corpse>() != null)
+                {
+                    hitCount++;
+                    aimVisualizer.DrawLine(playerPos, currentAimDirection, 15f, 0.1f, new Color(1f, 0.3f, 0f, 0.5f));
                 }
             }
         }
@@ -241,18 +253,26 @@ public class PlayerActionController : MonoBehaviour
             // RAYCAST BEAM (Hits the 2nd target for 3 Damage)
             Debug.Log("CROUCHING TIGER BEAM!");
             RaycastHit2D[] hits = Physics2D.RaycastAll(player.transform.position, currentAimDirection, 15f);
+            
             int hitCount = 0;
             foreach (var hit in hits)
             {
                 Piece hitPiece = hit.collider.GetComponent<Piece>();
+                
+                // FIX: Ignore player
                 if (hitPiece != null && !hitPiece.IsPlayer)
                 {
                     hitCount++;
-                    if (hitCount == 2) // Jumps over the first adjacent piece!
+                    if (hitCount == 2) 
                     { 
-                        hitPiece.TakeDamage(3); 
+                        hitPiece.TakeDamage(3);
                         break; 
                     } 
+                }
+                else if (hit.collider.GetComponent<Corpse>() != null)
+                {
+                    // FIX: Count Corpses as the first blocker so we can shoot through them!
+                    hitCount++;
                 }
             }
             yield return new WaitForSeconds(0.5f);
