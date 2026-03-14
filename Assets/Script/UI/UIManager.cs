@@ -468,7 +468,7 @@ public class UIManager : MonoBehaviour
         _inputNamePanel.interactable = false;
         _inputNamePanel.blocksRaycasts = false;
 
-        _menuSliderContainer.DOAnchorPos(new Vector2(-1920f, -1080f), _tweenDuration).SetEase(Ease.InOutCubic).OnComplete(() =>
+        _menuSliderContainer.DOAnchorPos(new Vector2(-3840f, 0f), _tweenDuration).SetEase(Ease.InOutCubic).OnComplete(() =>
         {
             InitializeBuildLayout(); 
             LevelManager.Instance.StartGame();
