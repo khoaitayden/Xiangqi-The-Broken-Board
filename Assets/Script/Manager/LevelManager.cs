@@ -37,7 +37,7 @@ public class LevelManager : MonoBehaviour
         _currentLevelIndex = 0;
         
         ClearBoard(); 
-        
+        RunManager.Instance.ResetEntireRun();
         TurnManager.Instance.ResetTurnCounter();
         
         LoadCurrentLevel();

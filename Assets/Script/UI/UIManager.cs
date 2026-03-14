@@ -113,6 +113,9 @@ public class UIManager : MonoBehaviour
 
         _inputNamePanel.interactable = false; 
         _inputNamePanel.blocksRaycasts = false;
+
+        _phoneInputField.onSelect.AddListener((string text) => { HideCardTooltip(); });
+        _nameInputField.onSelect.AddListener((string text) => { HideCardTooltip(); });
     }
     void Update()
     {
@@ -359,14 +362,13 @@ public class UIManager : MonoBehaviour
 
         _deathPanel.SetActive(false);
         InitializeBuildLayout(); 
-        RunManager.Instance.ResetEntireRun();
         LevelManager.Instance.StartGame();
     }
 
 
     private void ReturnToMainMenu()
     {
-        RunManager.Instance.ResetEntireRun();
+        DataPersistenceManager.Instance.SaveRunData("Defeat");
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
@@ -418,19 +420,55 @@ public class UIManager : MonoBehaviour
         string playerName = _nameInputField.text.Trim();
         string playerPhone = _phoneInputField.text.Trim();
 
-        if (string.IsNullOrEmpty(playerName))
+        // 1. BASIC VALIDATION: Empty fields
+        if (string.IsNullOrEmpty(playerName) || string.IsNullOrEmpty(playerPhone))
         {
-            _nameInputField.transform.DOShakePosition(0.3f, new Vector3(10f, 0, 0), 20, 90f);
-            return;
+            if (string.IsNullOrEmpty(playerName)) 
+                _nameInputField.transform.DOShakePosition(0.3f, new Vector3(10f, 0, 0), 20, 90f);
+            
+            if (string.IsNullOrEmpty(playerPhone)) 
+                _phoneInputField.transform.DOShakePosition(0.3f, new Vector3(10f, 0, 0), 20, 90f);
+            
+            return; 
         }
 
+        // 2. SECURITY VALIDATION: Is this phone number taken by someone else?
+        if (DataPersistenceManager.Instance.IsPhoneStolen(playerName, playerPhone))
+        {
+            // Shake the phone field
+            _phoneInputField.transform.DOShakePosition(0.3f, new Vector3(10f, 0, 0), 20, 90f);
+
+            // Show the Tooltip Warning right above the Phone Input Field!
+            _tooltipTitleText.text = "INVALID LOGIN";
+            _tooltipDescText.text = "This phone number is already registered to a different name.";
+            
+            // Position tooltip slightly above the Phone input box
+            _tooltipPanel.transform.position = _phoneInputField.transform.position + new Vector3(0, 100f, 0);
+            _tooltipPanel.SetActive(true);
+
+            return; // STOP! Don't let them play.
+        }
+
+        // Hide tooltip if it was showing from a previous error
+        HideCardTooltip(); 
+
+        // 3. CHECK DATABASE (For logging)
+        if (DataPersistenceManager.Instance.DoesPlayerExist(playerName, playerPhone))
+        {
+            Debug.Log($"Welcome back, {playerName}! Overwriting previous run.");
+        }
+        else
+        {
+            Debug.Log($"Welcome, {playerName}! New profile created.");
+        }
+
+        // 4. SAVE TO PREFS & START
         PlayerPrefs.SetString("PlayerName", playerName);
         PlayerPrefs.SetString("PlayerPhone", playerPhone);
         PlayerPrefs.Save();
 
         _inputNamePanel.interactable = false;
         _inputNamePanel.blocksRaycasts = false;
-
 
         _menuSliderContainer.DOAnchorPos(new Vector2(-1920f, -1080f), _tweenDuration).SetEase(Ease.InOutCubic).OnComplete(() =>
         {
@@ -451,10 +489,8 @@ public class UIManager : MonoBehaviour
 
     private void ReturnToMainMenuFromWin()
     {
-        // 1. SAVE THE DATA
         DataPersistenceManager.Instance.SaveRunData("Victory");
 
-        // 2. Return to Menu
         ReturnToMainMenu();
     }
 

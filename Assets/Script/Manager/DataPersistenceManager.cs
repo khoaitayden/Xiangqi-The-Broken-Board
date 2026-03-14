@@ -1,7 +1,9 @@
 using UnityEngine;
-using System.IO; // Required for File reading/writing
+using System.IO;
+using System.Collections.Generic;
 using System;
 
+// The individual player data
 [Serializable]
 public class PlayerRunData
 {
@@ -10,8 +12,15 @@ public class PlayerRunData
     public int floorsCleared;
     public int totalTurns;
     public float totalTimeSeconds;
-    public string runResult; // "Won" or "Died"
+    public string runResult; 
     public string datePlayed;
+}
+
+// NEW: A wrapper class so Unity can serialize a List to JSON
+[Serializable]
+public class RunDatabase
+{
+    public List<PlayerRunData> records = new List<PlayerRunData>();
 }
 
 public class DataPersistenceManager : MonoBehaviour
@@ -25,31 +34,82 @@ public class DataPersistenceManager : MonoBehaviour
         if (Instance != null && Instance != this) Destroy(this);
         else Instance = this;
 
-        // Saves to the persistent data path (AppData/LocalLow on Windows, valid on Mobile too)
         _saveFilePath = Application.persistentDataPath + "/PlayerRunHistory.json";
+    }
+
+    // Helper method to load the current JSON file
+    public RunDatabase LoadDatabase()
+    {
+        if (File.Exists(_saveFilePath))
+        {
+            string json = File.ReadAllText(_saveFilePath);
+            RunDatabase db = JsonUtility.FromJson<RunDatabase>(json);
+            if (db != null) return db;
+        }
+        return new RunDatabase(); // Return empty DB if no file exists yet
+    }
+
+    // Helper method for the UI to check if someone is returning
+    public bool DoesPlayerExist(string name, string phone)
+    {
+        RunDatabase db = LoadDatabase();
+        return db.records.Exists(r => r.playerName == name && r.phoneNumber == phone);
     }
 
     public void SaveRunData(string result)
     {
-        // 1. Gather all the data
-        PlayerRunData newData = new PlayerRunData
+        // 1. Load existing records
+        RunDatabase db = LoadDatabase();
+
+        string currentName = PlayerPrefs.GetString("PlayerName", "Unknown");
+        string currentPhone = PlayerPrefs.GetString("PlayerPhone", "Unknown");
+
+        // 2. Look for this exact player in the database
+        PlayerRunData existingRecord = db.records.Find(r => r.playerName == currentName && r.phoneNumber == currentPhone);
+
+        if (existingRecord != null)
         {
-            playerName = PlayerPrefs.GetString("PlayerName", "Unknown"),
-            phoneNumber = PlayerPrefs.GetString("PlayerPhone", "Unknown"),
-            floorsCleared = LevelManager.Instance.CurrentLevelIndex,
-            totalTurns = TurnManager.Instance.CurrentTurnNumber,
-            totalTimeSeconds = RunManager.Instance.TotalRunTime,
-            runResult = result,
-            datePlayed = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
-        };
+            // 3a. OVERWRITE their old run data!
+            existingRecord.floorsCleared = LevelManager.Instance.CurrentLevelIndex;
+            existingRecord.totalTurns = TurnManager.Instance.CurrentTurnNumber;
+            existingRecord.totalTimeSeconds = RunManager.Instance.TotalRunTime;
+            existingRecord.runResult = result;
+            existingRecord.datePlayed = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            Debug.Log($"Overwrote previous run for {currentName}.");
+        }
+        else
+        {
+            // 3b. Create a brand new record if they don't exist
+            PlayerRunData newRecord = new PlayerRunData
+            {
+                playerName = currentName,
+                phoneNumber = currentPhone,
+                floorsCleared = LevelManager.Instance.CurrentLevelIndex,
+                totalTurns = TurnManager.Instance.CurrentTurnNumber,
+                totalTimeSeconds = RunManager.Instance.TotalRunTime,
+                runResult = result,
+                datePlayed = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+            };
+            db.records.Add(newRecord);
+            Debug.Log($"Created new record for {currentName}.");
+        }
 
-        // 2. Convert to JSON
-        string json = JsonUtility.ToJson(newData, true);
+        // 4. Save the entire database back to the file
+        string newJson = JsonUtility.ToJson(db, true);
+        File.WriteAllText(_saveFilePath, newJson); // WriteAllText OVERWRITES the whole file
+    }
 
-        // 3. Append to the file (so we keep a history of ALL runs)
-        // If you only want to save the most recent run, use File.WriteAllText instead.
-        File.AppendAllText(_saveFilePath, json + "\n,\n");
+    public bool IsPhoneStolen(string inputName, string inputPhone)
+    {
+        RunDatabase db = LoadDatabase();
 
-        Debug.Log($"Run Saved to: {_saveFilePath}");
+        PlayerRunData recordWithThisPhone = db.records.Find(r => r.phoneNumber == inputPhone);
+
+        if (recordWithThisPhone != null && recordWithThisPhone.playerName != inputName)
+        {
+            return true;
+        }
+
+        return false;
     }
 }
