@@ -16,7 +16,7 @@ public class SystemUI : MonoBehaviour
     [SerializeField] private GameObject _deathPanel;
     [SerializeField] private GameObject _winPanel;
     [SerializeField] private GameObject _draftUIPanel;
-    [SerializeField] private Button _tryAgainButton, _winReturnButton;
+    [SerializeField] private Button _tryAgainButton, _winReturnButton, _loseReturnButton;
     [SerializeField] private Button _selectPair1Button, _selectPair2Button;
     [SerializeField] private TextMeshProUGUI _p1Yin, _p1Yang, _p2Yin, _p2Yang;
 
@@ -38,6 +38,8 @@ public class SystemUI : MonoBehaviour
         _tryAgainButton.onClick.AddListener(RestartRun);
         _returnToMenuButton.onClick.AddListener(ReturnToMenu);
         _winReturnButton.onClick.AddListener(ReturnToMenu);
+        _loseReturnButton.onClick.AddListener(ReturnToMenu);
+
 
         _selectPair1Button.onClick.AddListener(() => DraftManager.Instance.ResolveDraftChoice(_cP1Yin, _cP1Yang));
         _selectPair2Button.onClick.AddListener(() => DraftManager.Instance.ResolveDraftChoice(_cP2Yin, _cP2Yang));
