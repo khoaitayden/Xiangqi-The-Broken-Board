@@ -81,6 +81,19 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Transform _leaderboardContent; 
     [SerializeField] private GameObject _leaderboardEntryPrefab;
     [SerializeField] private Button _closeLeaderboardButton;
+
+    [Header("Pause UI")]
+    [SerializeField] private CanvasGroup _escPanel;
+    [SerializeField] private Button _resumeButton;
+    [SerializeField] private Button _escSettingsButton;
+    [SerializeField] private Button _restartButton;
+    [SerializeField] private Button _escReturnToMenuButton;
+
+
+    [Header("Settings UI")]
+    [SerializeField] private CanvasGroup _settingsPanel;
+    [SerializeField] private Button _closeSettingsButton;
+
     private List<CardHoverHandler> _yangCardSlots = new List<CardHoverHandler>(); 
     private List<CardHoverHandler> _yinCardSlots = new List<CardHoverHandler>();
     private List<GameObject> _armorIcons = new List<GameObject>(); 
@@ -121,6 +134,19 @@ public class UIManager : MonoBehaviour
         _inputNamePanel.interactable = false; 
         _inputNamePanel.blocksRaycasts = false;
 
+       _resumeButton.onClick.AddListener(OnResumeClicked);
+        _escSettingsButton.onClick.AddListener(OnSettingsClicked);
+        _restartButton.onClick.AddListener(RestartRun);
+        _escReturnToMenuButton.onClick.AddListener(ReturnToMainMenu);
+
+        // Bind Settings Panel Buttons
+        _settingsButton.onClick.AddListener(OnSettingsClicked); // Main Menu Settings Button
+        _closeSettingsButton.onClick.AddListener(OnCloseSettingsClicked);
+
+        // Hide Panels
+        HidePanelInstant(_escPanel);
+        HidePanelInstant(_settingsPanel);
+
         _phoneInputField.onSelect.AddListener((string text) => { HideCardTooltip(); });
         _nameInputField.onSelect.AddListener((string text) => { HideCardTooltip(); });
     }
@@ -129,6 +155,11 @@ public class UIManager : MonoBehaviour
         UpdatePlayerStats();
         UpdateEnemyHoverInfo();
         UpdateGameInfo();
+
+        if (InputHandler.Instance.IsPauseTriggered)
+        {
+            TogglePauseMenu();
+        }
     }
     private void UpdateGameInfo()
     {
@@ -545,6 +576,100 @@ public class UIManager : MonoBehaviour
         DataPersistenceManager.Instance.SaveRunData("Victory");
 
         ReturnToMainMenu();
+    }
+
+    private void HidePanelInstant(CanvasGroup panel)
+    {
+        panel.alpha = 0;
+        panel.interactable = false;
+        panel.blocksRaycasts = false;
+        panel.transform.localScale = Vector3.one * 0.8f;
+        panel.gameObject.SetActive(false);
+    }
+
+    private void TogglePauseMenu()
+    {
+        TurnManager.TurnState state = TurnManager.Instance.CurrentTurn;
+        if (state == TurnManager.TurnState.MainMenu || state == TurnManager.TurnState.GameOver || state == TurnManager.TurnState.Drafting) return;
+
+        if (_settingsPanel.gameObject.activeSelf)
+        {
+            HidePanel(_settingsPanel);
+            return;
+        }
+
+        if (_escPanel.gameObject.activeSelf)
+        {
+            OnResumeClicked();
+        }
+        else
+        {
+            TurnManager.Instance.PauseGame(); 
+            
+            RectTransform escRect = _escPanel.GetComponent<RectTransform>();
+            if (escRect != null) escRect.anchoredPosition = _menuSliderContainer.anchoredPosition;
+
+            ShowPanel(_escPanel);
+        }
+    }
+
+
+    private void OnResumeClicked()
+    {
+        HidePanel(_escPanel);
+        TurnManager.Instance.ResumeGame(); 
+    }
+
+    private void OnSettingsClicked()
+    {
+        RectTransform settingsRect = _settingsPanel.GetComponent<RectTransform>();
+        if (settingsRect != null) settingsRect.anchoredPosition = _menuSliderContainer.anchoredPosition;
+
+        ShowPanel(_settingsPanel);
+    }
+
+    private void OnCloseSettingsClicked()
+    {
+        HidePanel(_settingsPanel);
+    }
+
+    private void ShowPanel(CanvasGroup panel)
+    {
+        panel.gameObject.SetActive(true);
+        
+        // Kill any existing tweens on this panel so they don't overlap
+        panel.DOKill();
+        panel.transform.DOKill();
+
+        // Fade in
+        panel.DOFade(1f, _tweenDuration);
+        
+        // Pop scale from 0.8 to 1 using Ease.OutBack (gives a nice little bounce)
+        panel.transform.DOScale(Vector3.one, _tweenDuration).SetEase(Ease.OutBack).OnComplete(() =>
+        {
+            // Re-enable interactions only AFTER the animation finishes
+            panel.interactable = true;
+            panel.blocksRaycasts = true;
+        });
+    }
+
+    private void HidePanel(CanvasGroup panel)
+    {
+        // Disable interactions immediately so the player can't click while it's fading
+        panel.interactable = false;
+        panel.blocksRaycasts = false;
+
+        panel.DOKill();
+        panel.transform.DOKill();
+
+        // Fade out
+        panel.DOFade(0f, _tweenDuration);
+
+        // Shrink scale from 1 down to 0.8 using Ease.InBack
+        panel.transform.DOScale(Vector3.one * 0.8f, _tweenDuration).SetEase(Ease.InBack).OnComplete(() =>
+        {
+            panel.gameObject.SetActive(false);
+        });
     }
 
 }

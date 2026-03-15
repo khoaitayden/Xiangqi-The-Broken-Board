@@ -11,6 +11,7 @@ public class InputHandler : MonoBehaviour
     // Public properties
     public Vector2 MouseWorldPosition { get; private set; }
     public bool IsClickTriggered { get; private set; }
+    public bool IsPauseTriggered { get; private set; }
 
     private void Awake()
     {
@@ -35,12 +36,11 @@ public class InputHandler : MonoBehaviour
     private void Update()
     {
         if (controls == null) return;
-
-        // Constantly update the mouse world position
+        
         Vector2 screenPosition = controls.Board.PointerPosition.ReadValue<Vector2>();
         MouseWorldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
-
-        // Track if the click was triggered exactly on this frame
+        
         IsClickTriggered = controls.Board.Click.triggered;
+        IsPauseTriggered = controls.Board.Pause.triggered; // NEW
     }
 }

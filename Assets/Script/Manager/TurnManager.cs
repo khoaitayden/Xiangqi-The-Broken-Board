@@ -6,7 +6,7 @@ public class TurnManager : MonoBehaviour
 {
     public static TurnManager Instance { get; private set; }
 
-    public enum TurnState { MainMenu, PlayerTurn, EnemyTurn, GameOver, Drafting } 
+    public enum TurnState { MainMenu, PlayerTurn, EnemyTurn, GameOver, Drafting, Paused } 
     
     [Header("Game State")]
     [SerializeField] private TurnState _currentTurn = TurnState.MainMenu; 
@@ -15,7 +15,7 @@ public class TurnManager : MonoBehaviour
         get { return _currentTurn; } 
         set { _currentTurn = value; } 
     }
-    
+    private TurnState _stateBeforePause; 
     private BoardState previousTurnState;
     public int CurrentTurnNumber { get; private set; } = 1;
     public PlayerGeneral activePlayer; 
@@ -198,5 +198,20 @@ public class TurnManager : MonoBehaviour
     public void ResetTurnCounter()
     {
         CurrentTurnNumber = 1;
+    }
+    public void PauseGame()
+    {
+        if (CurrentTurn == TurnState.Paused || CurrentTurn == TurnState.MainMenu) return;
+        
+        _stateBeforePause = CurrentTurn;
+        CurrentTurn = TurnState.Paused;
+    }
+
+    public void ResumeGame()
+    {
+        if (CurrentTurn == TurnState.Paused)
+        {
+            CurrentTurn = _stateBeforePause;
+        }
     }
 }

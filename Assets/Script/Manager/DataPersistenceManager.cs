@@ -16,7 +16,7 @@ public class PlayerRunData
     public string datePlayed;
 }
 
-// NEW: A wrapper class so Unity can serialize a List to JSON
+// A wrapper class so Unity can serialize a List to JSON
 [Serializable]
 public class RunDatabase
 {
@@ -51,7 +51,6 @@ public class DataPersistenceManager : MonoBehaviour
             catch (Exception e)
             {
                 Debug.LogError($"Save file is corrupted! Creating a new database. Error: {e.Message}");
-                
                 return new RunDatabase();
             }
         }
@@ -85,12 +84,11 @@ public class DataPersistenceManager : MonoBehaviour
                 existingRecord.runResult = result;
                 existingRecord.datePlayed = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 Debug.Log($"Overwrote previous run for {currentName}.");
-            } else 
-                Debug.Log($"Existing run for {currentName} is better than the new run. Not overwriting.");
+            } 
         }
         else
         {
-            // 3b. Create a brand new record if they don't exist
+            // 3. Create a brand new record if they don't exist
             PlayerRunData newRecord = new PlayerRunData
             {
                 playerName = currentName,
@@ -105,9 +103,12 @@ public class DataPersistenceManager : MonoBehaviour
             Debug.Log($"Created new record for {currentName}.");
         }
 
-        // 4. Save the entire database back to the file
+        // 4. NEW: Sort the records before saving them to disk
+        SortRecords(db.records);
+
+        // 5. Save the entire database back to the file
         string newJson = JsonUtility.ToJson(db, true);
-        File.WriteAllText(_saveFilePath, newJson); // WriteAllText OVERWRITES the whole file
+        File.WriteAllText(_saveFilePath, newJson); 
     }
 
     public bool IsPhoneStolen(string inputName, string inputPhone)
@@ -142,9 +143,17 @@ public class DataPersistenceManager : MonoBehaviour
     public List<PlayerRunData> GetLeaderboard()
     {
         RunDatabase db = LoadDatabase();
+        
+        // Use the shared sorting logic
+        SortRecords(db.records);
 
-        // Sort the records!
-        db.records.Sort((a, b) => 
+        return db.records;
+    }
+
+    // NEW HELPER METHOD: Keeps your sorting logic in exactly one place
+    private void SortRecords(List<PlayerRunData> recordsToSort)
+    {
+        recordsToSort.Sort((a, b) => 
         {
             // 1. Highest Floors Cleared
             int floorCompare = b.floorsCleared.CompareTo(a.floorsCleared);
@@ -157,7 +166,5 @@ public class DataPersistenceManager : MonoBehaviour
             // 3. Tie-breaker: Fastest Time (Ascending)
             return a.totalTimeSeconds.CompareTo(b.totalTimeSeconds);
         });
-
-        return db.records;
     }
 }
