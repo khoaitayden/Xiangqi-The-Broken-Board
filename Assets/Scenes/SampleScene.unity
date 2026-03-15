@@ -1276,9 +1276,9 @@ RectTransform:
   - {fileID: 1632855145}
   m_Father: {fileID: 208079479}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 960, y: -430}
   m_SizeDelta: {x: 500, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &181048734
@@ -1540,7 +1540,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 3840, y: 0}
+  m_AnchoredPosition: {x: -0.000030517578, y: 0}
   m_SizeDelta: {x: 1820, y: 980}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!225 &208079480
@@ -2091,7 +2091,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &299961991
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2125,7 +2125,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.392}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2196,9 +2196,9 @@ RectTransform:
   - {fileID: 183328085}
   m_Father: {fileID: 208079479}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 960, y: -650}
   m_SizeDelta: {x: 500, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &333576115
@@ -3200,7 +3200,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 3840, y: 0}
+  m_AnchoredPosition: {x: -0.00073242, y: 0}
   m_SizeDelta: {x: 1820, y: 980}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &488034052
@@ -3381,7 +3381,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 2930.0002, y: 490}
+  m_AnchoredPosition: {x: -910.00024, y: 490}
   m_SizeDelta: {x: 1820, y: 980}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &498851290
@@ -5194,7 +5194,7 @@ GameObject:
   - component: {fileID: 715602609}
   - component: {fileID: 715602611}
   m_Layer: 5
-  m_Name: ReturnToMainMenuButton
+  m_Name: WinReturnToMainMenuButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6077,9 +6077,9 @@ RectTransform:
   - {fileID: 164585957}
   m_Father: {fileID: 208079479}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 960, y: -870}
   m_SizeDelta: {x: 500, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &801675075
@@ -7790,7 +7790,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 3840, y: 0}
+  m_AnchoredPosition: {x: -0.00048828, y: 0}
   m_SizeDelta: {x: 1820, y: 980}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1085149264
@@ -9436,6 +9436,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1642103839}
+  - component: {fileID: 1642103840}
   m_Layer: 5
   m_Name: GameplayContainer
   m_TagString: Untagged
@@ -9464,6 +9465,36 @@ RectTransform:
   m_AnchoredPosition: {x: 3840, y: 0}
   m_SizeDelta: {x: 1920, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1642103840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1642103838}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf7f7253e6e125b4e8c4e989b6ee36f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameplayHUD
+  _ammoText: {fileID: 430796597}
+  _weaponStatsText: {fileID: 1538713653}
+  _levelText: {fileID: 953862680}
+  _turnText: {fileID: 84141774}
+  _timerText: {fileID: 749765666}
+  _armorLayoutGroup: {fileID: 799707880}
+  _armorIconPrefab: {fileID: 2833569381513237959, guid: 0eb92158f55faa89e8778fe6e22da65c, type: 3}
+  _enemyPanel: {fileID: 1587757749}
+  _enemyNameText: {fileID: 167186495}
+  _enemyHPText: {fileID: 643426817}
+  _enemyCooldownText: {fileID: 787734192}
+  _yangLayoutGroup: {fileID: 717250153}
+  _yinLayoutGroup: {fileID: 1016363557}
+  _yangCardPrefab: {fileID: 196879075316422897, guid: 1f66a2ca71c7c568597a42cd3a3b699b, type: 3}
+  _yinCardPrefab: {fileID: 5267143733382465944, guid: 265a09a76059b3675bb0eafd31858ab2, type: 3}
+  _tooltipPanel: {fileID: 965049143}
+  _tooltipTitleText: {fileID: 135941879}
+  _tooltipDescText: {fileID: 1483040019}
 --- !u!1 &1685127236
 GameObject:
   m_ObjectHideFlags: 0
@@ -9881,6 +9912,7 @@ GameObject:
   - component: {fileID: 1748271601}
   - component: {fileID: 1748271600}
   - component: {fileID: 1748271604}
+  - component: {fileID: 1748271605}
   m_Layer: 5
   m_Name: UIManager
   m_TagString: Untagged
@@ -9984,61 +10016,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e3b6ccb65ac969bcac78748199fe6d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
-  _ammoText: {fileID: 430796597}
-  _weaponStatsText: {fileID: 1538713653}
-  _armorLayoutGroup: {fileID: 799707880}
-  _armorIconPrefab: {fileID: 2833569381513237959, guid: 0eb92158f55faa89e8778fe6e22da65c, type: 3}
-  _gameplayUIPanel: {fileID: 1080350411}
-  _cardPanel: {fileID: 982595610}
-  enemyPanel: {fileID: 1587757749}
-  enemyNameText: {fileID: 167186495}
-  enemyHPText: {fileID: 643426817}
-  enemyCooldownText: {fileID: 787734192}
-  _levelText: {fileID: 953862680}
-  _turnText: {fileID: 84141774}
-  _timerText: {fileID: 749765666}
-  _draftUIPanel: {fileID: 498851287}
-  _pair1YinText: {fileID: 834691999}
-  _pair1YangText: {fileID: 1716321786}
-  _selectPair1Button: {fileID: 1572718094}
-  _pair2YinText: {fileID: 1783079824}
-  _pair2YangText: {fileID: 501532105}
-  _selectPair2Button: {fileID: 2109193792}
-  _deathPanel: {fileID: 1085149262}
-  _tryAgainButton: {fileID: 621674174}
-  _returnToMainMenuButton: {fileID: 547171954}
-  _winPanel: {fileID: 488034050}
-  _winReturnToMenuButton: {fileID: 715602611}
-  _yangLayoutGroup: {fileID: 717250153}
-  _yangCardPrefab: {fileID: 196879075316422897, guid: 1f66a2ca71c7c568597a42cd3a3b699b, type: 3}
-  _yinLayoutGroup: {fileID: 1016363557}
-  _yinCardPrefab: {fileID: 5267143733382465944, guid: 265a09a76059b3675bb0eafd31858ab2, type: 3}
-  _tooltipPanel: {fileID: 965049143}
-  _tooltipTitleText: {fileID: 135941879}
-  _tooltipDescText: {fileID: 1483040019}
-  _menuSliderContainer: {fileID: 180031609}
-  _mainMenuPanel: {fileID: 622162243}
-  _inputNamePanel: {fileID: 2136197960}
-  _startButton: {fileID: 606852520}
-  _settingsButton: {fileID: 253738269}
-  _leaderboardButton: {fileID: 248886914}
-  _exitButton: {fileID: 400085626}
-  _nameInputField: {fileID: 1303358602}
-  _phoneInputField: {fileID: 513245522}
-  _playButton: {fileID: 621240820}
-  _backButton: {fileID: 22912440}
-  _tweenDuration: 0.4
-  _leaderboardPanel: {fileID: 1248434412}
-  _leaderboardContent: {fileID: 159019570}
-  _leaderboardEntryPrefab: {fileID: 7492587158838560222, guid: 9ab2cc08cb217b77ebf4036228ba21c5, type: 3}
-  _closeLeaderboardButton: {fileID: 499682734}
+  menuSliderContainer: {fileID: 180031609}
+  tweenDuration: 0.4
+--- !u!114 &1748271605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1748271599}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b504ffe976acf633a758e8055ce833d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SystemUI
   _escPanel: {fileID: 208079480}
-  _resumeButton: {fileID: 1986871545}
-  _escSettingsButton: {fileID: 181048734}
-  _restartButton: {fileID: 333576115}
-  _escReturnToMenuButton: {fileID: 801675075}
   _settingsPanel: {fileID: 299961994}
+  _resumeButton: {fileID: 1986871545}
+  _settingsButtonMenu: {fileID: 253738269}
+  _settingsButtonEsc: {fileID: 181048734}
   _closeSettingsButton: {fileID: 1897096883}
+  _restartButton: {fileID: 333576115}
+  _returnToMenuButton: {fileID: 801675075}
+  _deathPanel: {fileID: 1085149262}
+  _winPanel: {fileID: 488034050}
+  _draftUIPanel: {fileID: 498851287}
+  _tryAgainButton: {fileID: 621674174}
+  _winReturnButton: {fileID: 715602611}
+  _selectPair1Button: {fileID: 1572718094}
+  _selectPair2Button: {fileID: 2109193792}
+  _p1Yin: {fileID: 834691999}
+  _p1Yang: {fileID: 1716321786}
+  _p2Yin: {fileID: 1783079824}
+  _p2Yang: {fileID: 501532105}
 --- !u!1 &1765913340
 GameObject:
   m_ObjectHideFlags: 0
@@ -10971,9 +10981,9 @@ RectTransform:
   - {fileID: 1789750893}
   m_Father: {fileID: 208079479}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 960, y: -210}
   m_SizeDelta: {x: 500, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1986871545
@@ -11067,6 +11077,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1988952060}
+  - component: {fileID: 1988952061}
   m_Layer: 5
   m_Name: MainMenuContainer
   m_TagString: Untagged
@@ -11095,6 +11106,31 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 1920, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1988952061
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1988952059}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e2b977ebe75bd0c5875ae67f9b18109, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MenuUI
+  _mainMenuPanel: {fileID: 622162243}
+  _inputNamePanel: {fileID: 2136197960}
+  _leaderboardPanel: {fileID: 1248434412}
+  _leaderboardContent: {fileID: 159019570}
+  _leaderboardEntryPrefab: {fileID: 7492587158838560222, guid: 9ab2cc08cb217b77ebf4036228ba21c5, type: 3}
+  _startButton: {fileID: 606852520}
+  _leaderboardButton: {fileID: 248886914}
+  _closeLeaderboardButton: {fileID: 499682734}
+  _exitButton: {fileID: 400085626}
+  _playButton: {fileID: 621240820}
+  _backButton: {fileID: 22912440}
+  _nameInputField: {fileID: 1303358602}
+  _phoneInputField: {fileID: 513245522}
 --- !u!1 &2023608806
 GameObject:
   m_ObjectHideFlags: 0

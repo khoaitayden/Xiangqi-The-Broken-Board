@@ -16,6 +16,13 @@ public class PlayerRunData
     public string datePlayed;
 }
 
+public enum ValidationResult
+{
+    Success,
+    NameTaken,
+    PhoneTaken
+}
+
 // A wrapper class so Unity can serialize a List to JSON
 [Serializable]
 public class RunDatabase
@@ -166,5 +173,27 @@ public class DataPersistenceManager : MonoBehaviour
             // 3. Tie-breaker: Fastest Time (Ascending)
             return a.totalTimeSeconds.CompareTo(b.totalTimeSeconds);
         });
+    }
+
+    public ValidationResult ValidateLogin(string inputName, string inputPhone)
+    {
+        RunDatabase db = LoadDatabase();
+
+        // 1. Check if this name exists, but with a DIFFERENT phone number
+        PlayerRunData recordWithThisName = db.records.Find(r => r.playerName == inputName);
+        if (recordWithThisName != null && recordWithThisName.phoneNumber != inputPhone)
+        {
+            return ValidationResult.NameTaken;
+        }
+
+        // 2. Check if this phone number exists, but with a DIFFERENT name
+        PlayerRunData recordWithThisPhone = db.records.Find(r => r.phoneNumber == inputPhone);
+        if (recordWithThisPhone != null && recordWithThisPhone.playerName != inputName)
+        {
+            return ValidationResult.PhoneTaken;
+        }
+
+        // 3. If neither of the above are true, the login is valid!
+        return ValidationResult.Success;
     }
 }

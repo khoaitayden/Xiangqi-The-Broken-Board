@@ -49,9 +49,13 @@ public class RunManager : MonoBehaviour
     }   
     private void Update()
     {
+        // Only tick time if we are actively playing 
+        // (Not in Main Menu, not Drafting, not Dead, and NOT PAUSED)
         if (TurnManager.Instance != null && 
             TurnManager.Instance.CurrentTurn != TurnManager.TurnState.GameOver && 
-            TurnManager.Instance.CurrentTurn != TurnManager.TurnState.Drafting)
+            TurnManager.Instance.CurrentTurn != TurnManager.TurnState.Drafting &&
+            TurnManager.Instance.CurrentTurn != TurnManager.TurnState.MainMenu && 
+            TurnManager.Instance.CurrentTurn != TurnManager.TurnState.Paused) 
         {
             TotalRunTime += Time.deltaTime;
         }
