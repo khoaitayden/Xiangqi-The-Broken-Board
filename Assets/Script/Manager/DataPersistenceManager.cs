@@ -138,4 +138,26 @@ public class DataPersistenceManager : MonoBehaviour
 
         return false;
     }
+
+    public List<PlayerRunData> GetLeaderboard()
+    {
+        RunDatabase db = LoadDatabase();
+
+        // Sort the records!
+        db.records.Sort((a, b) => 
+        {
+            // 1. Highest Floors Cleared
+            int floorCompare = b.floorsCleared.CompareTo(a.floorsCleared);
+            if (floorCompare != 0) return floorCompare;
+
+            // 2. Tie-breaker: Fewest Total Turns (Ascending)
+            int turnCompare = a.totalTurns.CompareTo(b.totalTurns);
+            if (turnCompare != 0) return turnCompare;
+
+            // 3. Tie-breaker: Fastest Time (Ascending)
+            return a.totalTimeSeconds.CompareTo(b.totalTimeSeconds);
+        });
+
+        return db.records;
+    }
 }

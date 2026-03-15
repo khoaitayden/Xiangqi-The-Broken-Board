@@ -75,6 +75,12 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TMP_InputField _phoneInputField; 
     [SerializeField] private Button _playButton;
     [SerializeField] private Button _backButton;    [SerializeField] private float _tweenDuration = 0.4f;
+
+    [Header("Leaderboard UI")]
+    [SerializeField] private CanvasGroup _leaderboardPanel;
+    [SerializeField] private Transform _leaderboardContent; 
+    [SerializeField] private GameObject _leaderboardEntryPrefab;
+    [SerializeField] private Button _closeLeaderboardButton;
     private List<CardHoverHandler> _yangCardSlots = new List<CardHoverHandler>(); 
     private List<CardHoverHandler> _yinCardSlots = new List<CardHoverHandler>();
     private List<GameObject> _armorIcons = new List<GameObject>(); 
@@ -106,7 +112,8 @@ public class UIManager : MonoBehaviour
         _playButton.onClick.AddListener(OnPlayClicked);
         _backButton.onClick.AddListener(OnBackClicked);
 
-        //_menuSliderContainer.anchoredPosition = Vector2.zero;
+        _leaderboardButton.onClick.AddListener(OnLeaderboardClicked);
+        _closeLeaderboardButton.onClick.AddListener(OnCloseLeaderboardClicked);
 
         _mainMenuPanel.interactable = true;
         _mainMenuPanel.blocksRaycasts = true;
@@ -401,6 +408,47 @@ public class UIManager : MonoBehaviour
         if (_tooltipPanel != null) _tooltipPanel.SetActive(false);
     }
 
+    private void OnLeaderboardClicked()
+    {
+        // 1. Temporarily disable the main menu buttons so you can't click "Start" behind the leaderboard
+        _mainMenuPanel.interactable = false;
+
+        // 2. Clear old entries
+        foreach (Transform child in _leaderboardContent) Destroy(child.gameObject);
+
+        // 3. Fetch Data and Spawn Entries
+        List<PlayerRunData> topPlayers = DataPersistenceManager.Instance.GetLeaderboard();
+        
+        for (int i = 0; i < topPlayers.Count; i++)
+        {
+            GameObject entryObj = Instantiate(_leaderboardEntryPrefab, _leaderboardContent);
+            LeaderboardEntryUI entryUI = entryObj.GetComponent<LeaderboardEntryUI>();
+            if (entryUI != null) entryUI.Setup(i + 1, topPlayers[i]);
+        }
+
+        // 4. Tween Animate In!
+        _leaderboardPanel.gameObject.SetActive(true);
+        _leaderboardPanel.DOFade(1f, _tweenDuration);
+        _leaderboardPanel.transform.DOScale(Vector3.one, _tweenDuration).SetEase(Ease.OutBack).OnComplete(() =>
+        {
+            _leaderboardPanel.interactable = true;
+            _leaderboardPanel.blocksRaycasts = true;
+        });
+    }
+
+    private void OnCloseLeaderboardClicked()
+    {
+        _leaderboardPanel.interactable = false;
+        _leaderboardPanel.blocksRaycasts = false;
+
+        // Tween Animate Out!
+        _leaderboardPanel.DOFade(0f, _tweenDuration);
+        _leaderboardPanel.transform.DOScale(Vector3.one * 0.8f, _tweenDuration).SetEase(Ease.InBack).OnComplete(() =>
+        {
+            _leaderboardPanel.gameObject.SetActive(false);
+            _mainMenuPanel.interactable = true; // Re-enable Main Menu buttons!
+        });
+    }
     private void OnStartClicked()
     {
         _mainMenuPanel.interactable = false;
