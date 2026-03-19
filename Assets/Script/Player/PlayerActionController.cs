@@ -59,7 +59,8 @@ public class PlayerActionController : MonoBehaviour
             bool artOfWarReady = RunManager.Instance.ArtOfWarEnabled && !RunManager.Instance.ArtOfWarUsedThisFloor;
             bool canShoot = hasAmmo || artOfWarReady;
 
-            if (!isAimingMode && hoveredNode != null)
+            // THE FIX: Add a final check to make sure the move is valid before executing it!
+            if (!isAimingMode && hoveredNode != null && turnMan.activePlayer.IsValidMove(hoveredNode, gridMan.grid))
             {
                 ExecuteMove(hoveredNode, turnMan);
             }
@@ -79,39 +80,50 @@ public class PlayerActionController : MonoBehaviour
             }
         }
     }
+
     void DetermineInputContext(Vector2 mouseWorldPos, BoardNode hoveredNode, PlayerGeneral player, GridManager gridMan)
     {
         currentShotMode = SpecialShotMode.None; // Reset
 
+        // ALWAYS make the weapon follow the mouse
+        currentAimDirection = (mouseWorldPos - (Vector2)player.transform.position).normalized;
+        if (currentAimDirection == Vector2.zero) currentAimDirection = Vector2.up; 
+        if (player.WeaponPivot != null)
+        {
+            float angle = Mathf.Atan2(currentAimDirection.y, currentAimDirection.x) * Mathf.Rad2Deg;
+            player.WeaponPivot.rotation = Quaternion.Euler(0, 0, angle);
+        }
+
+        // --- THE FIX: Check for the INVALID ADJACENT CORPSE case first ---
+        int distX = Mathf.Abs(hoveredNode.x - player.X);
+        int distY = Mathf.Abs(hoveredNode.y - player.Y);
+        bool isAdjacent = distX <= 1 && distY <= 1 && (distX > 0 || distY > 0);
+        bool hasCorpse = hoveredNode.currentCorpse != null;
+        bool canStepOnCorpse = RunManager.Instance.CloudStepEnabled;
+
+        if (isAdjacent && hasCorpse && !canStepOnCorpse)
+        {
+            // This is an invalid tile! We can't move or shoot.
+            isAimingMode = false;
+            foreach (Piece enemy in TurnManager.Instance.enemyPieces) { if(enemy != null) enemy.SetTargeted(false); }
+            return; // Exit the function early so we don't do any other logic.
+        }
+
+        // --- Now, determine if we are moving or aiming ---
         if (hoveredNode != null && player.IsValidMove(hoveredNode, gridMan.grid))
         {
             isAimingMode = false;
             foreach (Piece enemy in TurnManager.Instance.enemyPieces) { if(enemy != null) enemy.SetTargeted(false); }
-
-            if (player.WeaponPivot != null)
-            {
-                player.WeaponPivot.rotation = Quaternion.Lerp(player.WeaponPivot.rotation, Quaternion.Euler(0, 0, 90f), Time.deltaTime * 10f);
-            }
         }
         else
         {
             isAimingMode = true;
-            currentAimDirection = (mouseWorldPos - (Vector2)player.transform.position).normalized;
-            if (currentAimDirection == Vector2.zero) currentAimDirection = Vector2.up; 
-
-            if (player.WeaponPivot != null)
-            {
-                float angle = Mathf.Atan2(currentAimDirection.y, currentAimDirection.x) * Mathf.Rad2Deg;
-                // Instantly snap the weapon to point at the mouse
-                player.WeaponPivot.rotation = Quaternion.Euler(0, 0, angle);
-            }
             
             // Check for Crouching Tiger
             if (hoveredNode != null && RunManager.Instance.CrouchingTigerEnabled)
             {
-                int distX = Mathf.Abs(hoveredNode.x - player.X);
-                int distY = Mathf.Abs(hoveredNode.y - player.Y);
-                if (distX <= 1 && distY <= 1 && !hoveredNode.IsEmpty() && distX>=0.2 && distY>=0.2)
+                // Note: We already checked for adjacent corpses above, so this will only trigger on adjacent enemies.
+                if (isAdjacent && hoveredNode.currentPiece != null)
                 {
                     currentShotMode = SpecialShotMode.CrouchingTiger;
                 }
@@ -119,9 +131,8 @@ public class PlayerActionController : MonoBehaviour
 
             // Check for Flying General
             EnemyGeneral enemyBoss = Object.FindFirstObjectByType<EnemyGeneral>();
-            if (enemyBoss != null && player.X == enemyBoss.X) // Check if we are in the same column
+            if (enemyBoss != null && player.X == enemyBoss.X) 
             {
-                // Count blockers
                 int minY = Mathf.Min(player.Y, enemyBoss.Y);
                 int maxY = Mathf.Max(player.Y, enemyBoss.Y);
                 int blockers = 0;
@@ -131,15 +142,11 @@ public class PlayerActionController : MonoBehaviour
                 }
                 int allowedBlockers = RunManager.Instance.MandateOfHeavenEnabled ? 1 : 0;
                 
-                // --- THE FIX: ADD ANGLE CHECK ---
                 if (blockers <= allowedBlockers)
                 {
-                    // Calculate the perfect direction to the boss
                     Vector2 directionToBoss = (enemyBoss.transform.position - player.transform.position).normalized;
-                    
-                    // Check if our mouse aim is close to that perfect direction
                     float angleDifference = Vector2.Angle(currentAimDirection, directionToBoss);
-                    const float aimTolerance = 30f; // Allow 30 degrees of tolerance
+                    const float aimTolerance = 30f; 
 
                     if (angleDifference < aimTolerance)
                     {
@@ -149,12 +156,12 @@ public class PlayerActionController : MonoBehaviour
             }
         }
     }
+
     void DrawAimConeAndHighlightEnemies(TurnManager turnMan, Vector2 mouseWorldPos)
     {
         PlayerGeneral player = turnMan.activePlayer;
         Vector3 playerPos = player.transform.position;
         
-        // Un-highlight all enemies
         foreach (Piece enemy in turnMan.enemyPieces) { if (enemy != null) enemy.SetTargeted(false); }
 
         if (currentShotMode == SpecialShotMode.FlyingGeneral)
@@ -164,9 +171,7 @@ public class PlayerActionController : MonoBehaviour
             {
                 Vector2 directionToBoss = (enemyBoss.transform.position - playerPos).normalized;
                 float distanceToBoss = Vector3.Distance(playerPos, enemyBoss.transform.position);
-
                 aimVisualizer.DrawLine(playerPos, directionToBoss, distanceToBoss, 0.15f, new Color(1f, 0f, 1f, 0.4f));
-
                 enemyBoss.SetTargeted(true);
             }
         }
@@ -174,25 +179,16 @@ public class PlayerActionController : MonoBehaviour
         {
             RaycastHit2D[] hits = Physics2D.RaycastAll(playerPos, currentAimDirection, 15f);
             
-            // Draw the line as long as the raycast length
-            
             int hitCount = 0;
             foreach (var hit in hits)
             {
                 Piece hitPiece = hit.collider.GetComponent<Piece>();
                 
-                // FIX: If we hit something, make sure it's NOT the player before we count it!
                 if (hitPiece != null && !hitPiece.IsPlayer)
                 {
                     hitCount++;
                     aimVisualizer.DrawLine(playerPos, currentAimDirection, 15f, 0.1f, new Color(1f, 0.3f, 0f, 0.5f));
-                    
-                    // We found the second enemy in the line!
-                    if (hitCount == 2) 
-                    { 
-                        hitPiece.SetTargeted(true); 
-                        break; 
-                    } 
+                    if (hitCount == 2) { hitPiece.SetTargeted(true); break; } 
                 }
                 else if (hit.collider.GetComponent<Corpse>() != null)
                 {
@@ -203,20 +199,14 @@ public class PlayerActionController : MonoBehaviour
         }
         else 
         {
-
             float distanceToMouse = Vector2.Distance(playerPos, mouseWorldPos);
-
             float currentRangeX = Mathf.Min(distanceToMouse, player.RangeX);
-            
-
             float currentRangeY = Mathf.Max(currentRangeX, Mathf.Min(distanceToMouse, player.RangeY));
 
-            // --- RENDER CONE ---
             if (aimVisualizer != null)
             {
                 aimVisualizer.DrawCone(playerPos, currentAimDirection, player.FireArc, currentRangeX, currentRangeY);
             }
-
 
             float aimAngle = Mathf.Atan2(currentAimDirection.y, currentAimDirection.x) * Mathf.Rad2Deg;
             float halfArc = player.FireArc / 2f;
@@ -242,7 +232,6 @@ public class PlayerActionController : MonoBehaviour
 
         if (currentShotMode == SpecialShotMode.FlyingGeneral)
         {
-            // INSTANT KILL THE BOSS
             Debug.Log("FLYING GENERAL EXECUTION!");
             EnemyGeneral enemyBoss = Object.FindFirstObjectByType<EnemyGeneral>();
             if (enemyBoss != null) enemyBoss.TakeDamage(999);
@@ -250,7 +239,6 @@ public class PlayerActionController : MonoBehaviour
         }
         else if (currentShotMode == SpecialShotMode.CrouchingTiger)
         {
-            // RAYCAST BEAM (Hits the 2nd target for 3 Damage)
             Debug.Log("CROUCHING TIGER BEAM!");
             RaycastHit2D[] hits = Physics2D.RaycastAll(player.transform.position, currentAimDirection, 15f);
             
@@ -259,19 +247,13 @@ public class PlayerActionController : MonoBehaviour
             {
                 Piece hitPiece = hit.collider.GetComponent<Piece>();
                 
-                // FIX: Ignore player
                 if (hitPiece != null && !hitPiece.IsPlayer)
                 {
                     hitCount++;
-                    if (hitCount == 2) 
-                    { 
-                        hitPiece.TakeDamage(3);
-                        break; 
-                    } 
+                    if (hitCount == 2) { hitPiece.TakeDamage(3); break; } 
                 }
                 else if (hit.collider.GetComponent<Corpse>() != null)
                 {
-                    // FIX: Count Corpses as the first blocker so we can shoot through them!
                     hitCount++;
                 }
             }
@@ -279,7 +261,6 @@ public class PlayerActionController : MonoBehaviour
         }
         else
         {
-            // Find boss and start batching BEFORE bullets spawn
             EnemyGeneral enemyBoss = Object.FindFirstObjectByType<EnemyGeneral>();
             if (enemyBoss != null) enemyBoss.BeginDamageBatch();
 
@@ -290,7 +271,6 @@ public class PlayerActionController : MonoBehaviour
             {
                 float randomAngle = Random.Range(aimAngle - halfArc, aimAngle + halfArc);
                 Quaternion bulletRotation = Quaternion.Euler(0, 0, randomAngle-90);
-
                 GameObject bulletObj = Instantiate(projectilePrefab, player.transform.position, bulletRotation);
                 Projectile p = bulletObj.GetComponent<Projectile>();
                 p.rangeX = player.RangeX;
@@ -298,14 +278,13 @@ public class PlayerActionController : MonoBehaviour
             }
 
             yield return new WaitUntil(() => FindObjectsByType<Projectile>(FindObjectsSortMode.None).Length == 0);
-
             if (enemyBoss != null) enemyBoss.EndDamageBatch();
         }
 
-        // --- MISSING CODE ADDED BACK HERE ---
         isExecutingAction = false;
         turnMan.StartEnemyPhase();
     }
+
     void ExecuteMove(BoardNode targetNode, TurnManager turnMan)
     {
         turnMan.SaveState();

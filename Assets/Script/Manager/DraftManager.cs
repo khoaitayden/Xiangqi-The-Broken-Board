@@ -71,14 +71,17 @@ public class DraftManager : MonoBehaviour
 
     public void ResolveDraftChoice(CardSO selectedYin, CardSO selectedYang)
     {
-        // Give the cards to the RunManager (which adds them to the ActiveCards list)
+        // Give the cards to the RunManager 
         RunManager.Instance.ApplyCard(selectedYin);
         RunManager.Instance.ApplyCard(selectedYang);
 
+        // Update the HUD
         UIManager.Instance.AddYinCardToUI(selectedYin);
         UIManager.Instance.AddYangCardToUI(selectedYang);
 
-        UIManager.Instance.HideDraftUI();
+        // REMOVED: UIManager.Instance.HideDraftUI(); (SystemUI handles this now!)
+
+        // Load the next floor
         LevelManager.Instance.LoadNextLevel();
     }
 

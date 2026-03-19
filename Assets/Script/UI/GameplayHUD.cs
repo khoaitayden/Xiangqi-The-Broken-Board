@@ -8,14 +8,17 @@ public class GameplayHUD : MonoBehaviour
     public static GameplayHUD Instance { get; private set; }
 
     [Header("Player & Game Info")]
-    [SerializeField] private TextMeshProUGUI _ammoText;
     [SerializeField] private TextMeshProUGUI _weaponStatsText; 
     [SerializeField] private TextMeshProUGUI _levelText;
     [SerializeField] private TextMeshProUGUI _turnText;
     [SerializeField] private TextMeshProUGUI _timerText;
     [SerializeField] private Transform _armorLayoutGroup;
     [SerializeField] private GameObject _armorIconPrefab;
+    [SerializeField] private Transform _arrowLayoutGroup;
+    [SerializeField] private GameObject _arrowIconPrefab;
+
     private List<GameObject> _armorIcons = new List<GameObject>();
+    private List<GameObject> _arrowIcons = new List<GameObject>();
 
     [Header("Enemy Hover")]
     [SerializeField] private GameObject _enemyPanel;
@@ -57,13 +60,13 @@ public class GameplayHUD : MonoBehaviour
         PlayerGeneral player = TurnManager.Instance.activePlayer;
         if (player != null)
         {
-            _ammoText.text = $"Ammo: {player.LoadedAmmo} / {player.MaxAmmo}";
+            UpdateArrowIcons(player.LoadedAmmo);
             _weaponStatsText.text = $"Firepower: {player.Firepower} Pellets\nSpread Arc: {player.FireArc}°";
             UpdateArmorIcons(player.CurrentArmor);
         }
         else
         {
-            _ammoText.text = "Ammo: 0"; _weaponStatsText.text = ""; UpdateArmorIcons(0);
+            UpdateArrowIcons(player.LoadedAmmo); _weaponStatsText.text = ""; UpdateArmorIcons(0);
         }
     }
 
@@ -71,6 +74,12 @@ public class GameplayHUD : MonoBehaviour
     {
         while (_armorIcons.Count < currentArmor) _armorIcons.Add(Instantiate(_armorIconPrefab, _armorLayoutGroup));
         for (int i = 0; i < _armorIcons.Count; i++) _armorIcons[i].SetActive(i < currentArmor);
+    }
+
+    private void UpdateArrowIcons(int currentArrow)
+    {
+        while (_arrowIcons.Count < currentArrow) _arrowIcons.Add(Instantiate(_arrowIconPrefab, _arrowLayoutGroup));
+        for (int i = 0; i < _arrowIcons.Count; i++) _arrowIcons[i].SetActive(i < currentArrow);
     }
 
     private void UpdateEnemyHoverInfo()
