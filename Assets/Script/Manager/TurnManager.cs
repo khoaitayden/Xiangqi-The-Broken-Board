@@ -134,19 +134,27 @@ public class TurnManager : MonoBehaviour
         bool isPlayerInCheck = false;
         BoardNode playerNode = GridManager.Instance.grid[activePlayer.X, activePlayer.Y];
 
+        // First, reset ALL enemies to their normal (non-threat) state.
+        foreach (Piece enemy in enemyPieces)
+        {
+            if (enemy != null && !enemy.IsDead && enemy.gameObject.activeInHierarchy) enemy.SetThreat(false);
+        }
+
+        // Now, find the ones that are actively checking the player.
         foreach (Piece enemy in enemyPieces)
         {
             if (enemy == null || enemy.IsDead || !enemy.gameObject.activeInHierarchy) continue;
 
-            // If ANY enemy can legally move to the player's tile right now, the player is in danger!
             if (enemy.IsValidMove(playerNode, GridManager.Instance.grid))
             {
                 isPlayerInCheck = true;
-                break; // Stop checking, one threat is enough to trigger the warning
+                
+                // Tell THIS specific enemy to use the aggressive "Threat" pulse!
+                enemy.SetThreat(true); 
             }
         }
 
-        // Tell the player piece to turn its outline on or off
+        // Tell the player to glow if they are in check.
         activePlayer.SetTargeted(isPlayerInCheck);
     }
     public void TriggerArmorRewind()

@@ -33,7 +33,7 @@ public abstract class Piece : MonoBehaviour
         set 
         { 
             _currentCooldown = value; 
-            EvaluateJiggleState(); // Event-driven: check if we should start jiggling!
+            EvaluateJiggleState();
         }
     }
 
@@ -45,7 +45,8 @@ public abstract class Piece : MonoBehaviour
 
     [Header("Targeting Outline")]
     [SerializeField] private GameObject _outlinePrefab;
-    [SerializeField] private Color _outlineColor = Color.red;
+    [SerializeField] private Color _outlineColor = Color.red;      
+    [SerializeField] private Color _threatColor = Color.yellow;   
     [SerializeField] private float _pulseSpeed = 6f;
     [SerializeField] private float _minPulseScale = 1.1f;
     [SerializeField] private float _maxPulseScale = 1.2f;
@@ -57,9 +58,12 @@ public abstract class Piece : MonoBehaviour
 
     // --- State & Coroutines ---
     protected bool _isDead = false;
-    private bool _isTargeted = false;
     public bool IsDead => _isDead;
     private bool _isMoving;
+    
+    // THE FIX: Two separate state variables to track targeting and threats independently.
+    private bool _isTargetedByPlayer = false;
+    private bool _isThreateningPlayer = false;
 
     private Coroutine _moveCoroutine;
     private Coroutine _jiggleCoroutine;
@@ -76,8 +80,6 @@ public abstract class Piece : MonoBehaviour
 
         CreateOutline();
     }
-
-    // NO MORE UPDATE LOOP! 
 
     // INITIALIZATION
 
@@ -97,7 +99,7 @@ public abstract class Piece : MonoBehaviour
     public void ForceSetStats(int hp, int cooldown)
     {
         CurrentHp = hp;
-        CurrentCooldown = cooldown; // This triggers EvaluateJiggleState() automatically
+        CurrentCooldown = cooldown;
         _isDead = false;
         gameObject.SetActive(true);
     }
@@ -124,7 +126,6 @@ public abstract class Piece : MonoBehaviour
         
         if (_moveCoroutine != null) StopCoroutine(_moveCoroutine);
         
-        // We no longer need to tell the MoveRoutine to fade. The TurnManager will handle it.
         _moveCoroutine = StartCoroutine(MoveRoutine(TargetPosition)); 
         return _moveCoroutine;
     }
@@ -142,7 +143,7 @@ public abstract class Piece : MonoBehaviour
         if (_isDead) return;
         _isDead = true;
 
-        StopAllCoroutines(); // Instantly stop moving/jiggling/pulsing
+        StopAllCoroutines();
 
         if (CurrentNode != null) CurrentNode.currentPiece = null;
         if (!_isPlayer) TurnManager.Instance.enemyPieces.Remove(this);
@@ -173,7 +174,6 @@ public abstract class Piece : MonoBehaviour
         transform.position = targetPos;
         _isMoving = false;
         
-        // The fade logic has been removed from here. We just check for jiggle.
         EvaluateJiggleState(); 
     }
 
@@ -181,7 +181,6 @@ public abstract class Piece : MonoBehaviour
     {
         if (_jiggleCoroutine != null) StopCoroutine(_jiggleCoroutine);
 
-        // THE FIX: Add '!_isMoving' to ensure we don't start jiggling mid-air!
         if (!_isPlayer && _currentCooldown <= 1 && gameObject.activeInHierarchy && !_isMoving)
         {
             _jiggleCoroutine = StartCoroutine(JiggleRoutine());
@@ -209,37 +208,78 @@ public abstract class Piece : MonoBehaviour
 
     private void CreateOutline()
     {
-
         _outlineRenderer = _outlinePrefab.GetComponent<SpriteRenderer>();
-        
         _outlineRenderer.color = _outlineColor;
         _outlinePrefab.SetActive(false);
     }
 
+    // THE FIX: SetTargeted now just updates the state and calls our new master function.
     public void SetTargeted(bool isTargeted)
     {
-        if (isTargeted && !_isTargeted)
+        if (_isTargetedByPlayer == isTargeted) return;
+        _isTargetedByPlayer = isTargeted;
+        UpdateOutlineVisuals();
+    }
+
+    // THE FIX: SetThreat also just updates its state and calls the master function.
+    public void SetThreat(bool isThreat)
+    {
+        _isThreateningPlayer = isThreat;
+        UpdateOutlineVisuals();
+    }
+
+    // THE FIX: A single function to rule them all! This looks at both states to decide visuals.
+    private void UpdateOutlineVisuals()
+    {
+        bool shouldBeActive = _isTargetedByPlayer || _isThreateningPlayer;
+        _outlinePrefab.SetActive(shouldBeActive);
+
+        if (shouldBeActive)
         {
-            _isTargeted = true;
-            _outlinePrefab.SetActive(true);
+            // --- Determine Color ---
+            // The player's aim always takes priority for color.
+            if (_isTargetedByPlayer)
+            {
+                _outlineRenderer.color = _outlineColor; // Red for aimed at
+            }
+            else // Must be a threat, but not aimed at
+            {
+                _outlineRenderer.color = _threatColor; // Yellow for threat
+            }
+
+            // Stop any existing pulse to restart it with the correct parameters
             if (_pulseCoroutine != null) StopCoroutine(_pulseCoroutine);
-            _pulseCoroutine = StartCoroutine(PulseRoutine());
+
+            // --- Determine Pulse Style ---
+            // Threatening pieces always get the more aggressive pulse.
+            if (_isThreateningPlayer)
+            {
+                _pulseCoroutine = StartCoroutine(PulseRoutine(9f, 1.15f, 1.3f)); // Aggressive
+            }
+            else // Must just be targeted, not a threat
+            {
+                _pulseCoroutine = StartCoroutine(PulseRoutine()); // Normal
+            }
         }
-        else if (!isTargeted && _isTargeted)
+        else // Neither targeted nor a threat
         {
-            _isTargeted = false;
-            _outlinePrefab.SetActive(false);
             if (_pulseCoroutine != null) StopCoroutine(_pulseCoroutine);
+            _pulseCoroutine = null;
         }
     }
 
     private IEnumerator PulseRoutine()
     {
+        yield return PulseRoutine(_pulseSpeed, _minPulseScale, _maxPulseScale);
+    }
+
+    private IEnumerator PulseRoutine(float speed, float minScale, float maxScale)
+    {
         while (true)
         {
-            float sineWave = Mathf.Sin(Time.time * _pulseSpeed); 
-            float scaleRange = _maxPulseScale - _minPulseScale;
-            float midPoint = (_minPulseScale + _maxPulseScale) / 2f;
+            float sineWave = Mathf.Sin(Time.time * speed); 
+            float scaleRange = maxScale - minScale;
+            float midPoint = (minScale + maxScale) / 2f;
             float targetScale = midPoint + (sineWave * (scaleRange / 2f));
 
             _outlinePrefab.transform.localScale = new Vector3(targetScale, targetScale, 1f);
@@ -248,7 +288,7 @@ public abstract class Piece : MonoBehaviour
     }
 
     // ABSTRACT / VIRTUAL (AI & MOVEMENT VALIDATION)
-
+    // ... (rest of your script is perfect and doesn't need to be changed) ...
     public abstract bool IsValidMove(BoardNode targetNode, BoardNode[,] grid);
     
     public virtual List<BoardNode> GetValidMoves(BoardNode[,] grid)
@@ -293,14 +333,13 @@ public abstract class Piece : MonoBehaviour
     }
     protected BoardNode EvaluateAndPickBestMove(List<BoardNode> validMoves, BoardNode[,] grid)
     {
-                // --- AI PERSONALITY CONSTANTS ---
-        const int SURVIVAL_PENALTY = -5000; // Penalty for Boss staying in the Flying General file
-        const int SURVIVAL_BONUS = 500;     // Bonus for Boss stepping out of the file
-        const int BODYGUARD_BONUS = 1000;   // Bonus for a minion to jump in front of the bullet
-        const int CHECK_BONUS = 100;        // Bonus for putting the player in "check"
-        const int AREA_DENIAL_MULTIPLIER = 15; // Score per escape route cut off
-        const int DISTANCE_PENALTY = -2;    // Score penalty per tile away from the player (for minions)
-        const int DISTANCE_BONUS = 5;       // Score bonus per tile away (for Boss, to make it flee)
+        const int SURVIVAL_PENALTY = -5000;
+        const int SURVIVAL_BONUS = 500;    
+        const int BODYGUARD_BONUS = 1000;  
+        const int CHECK_BONUS = 100;       
+        const int AREA_DENIAL_MULTIPLIER = 15;
+        const int DISTANCE_PENALTY = -2;   
+        const int DISTANCE_BONUS = 5;      
         if (validMoves.Count == 0) return null;
 
         PlayerGeneral player = TurnManager.Instance.activePlayer;
@@ -311,7 +350,6 @@ public abstract class Piece : MonoBehaviour
         BoardNode bestNode = null;
         int bestScore = int.MinValue;
 
-        // NEW: Figure out how many blockers the player is allowed to shoot through
         int allowedBlockers = (RunManager.Instance != null && RunManager.Instance.MandateOfHeavenEnabled) ? 1 : 0;
 
         foreach (BoardNode testNode in validMoves)
@@ -353,7 +391,6 @@ public abstract class Piece : MonoBehaviour
             }
             else 
             {
-                // If this is a normal piece (like an Advisor or Pawn)
                 EnemyGeneral boss = Object.FindFirstObjectByType<EnemyGeneral>();
                 if (boss != null && boss.X == player.X) 
                 {
@@ -365,13 +402,11 @@ public abstract class Piece : MonoBehaviour
             }
 
 
-            // 1-STEP LOOKAHEAD: "CHECK" (Can I attack the player next turn?)
             if (IsValidMove(playerNode, grid))
             {
                 score += CHECK_BONUS; 
             }
 
-            // 2-STEP LOOKAHEAD: "AREA DENIAL" (Surrounding the player)
             int restrictedEscapeRoutes = 0;
             for (int dx = -1; dx <= 1; dx++)
             {
@@ -394,25 +429,20 @@ public abstract class Piece : MonoBehaviour
             }
             score += restrictedEscapeRoutes * AREA_DENIAL_MULTIPLIER;
 
-            // 3. DISTANCE HEURISTIC (March toward the player)
             int distX = Mathf.Abs(testNode.x - player.X);
             int distY = Mathf.Abs(testNode.y - player.Y);
             int distanceToPlayer = distX + distY; 
             
-            // If it's the Boss, we actually want them to stay away from the player (hide in the back)
             if (this is EnemyGeneral) score += distanceToPlayer * DISTANCE_BONUS; 
             else score += distanceToPlayer * DISTANCE_PENALTY; 
 
-            // Tie-breaker randomness
             score += Random.Range(0, 5);
 
-            // --- REVERT THE SIMULATION ---
             grid[oldX, oldY].currentPiece = this;
             testNode.currentPiece = null;
             X = oldX;
             Y = oldY;
 
-            // SAVE THE BEST SCORE
             if (score > bestScore)
             {
                 bestScore = score;
