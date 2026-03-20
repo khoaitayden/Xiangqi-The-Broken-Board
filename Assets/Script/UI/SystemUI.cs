@@ -14,8 +14,9 @@ public class SystemUI : MonoBehaviour
     [SerializeField] private Button _resumeButton, _settingsButtonMenu, _settingsButtonEsc, _closeSettingsButton, _restartButton, _returnToMenuButton;
 
     [Header("Post-Game & Draft")]
-    [SerializeField] private GameObject _deathPanel;
-    [SerializeField] private GameObject _winPanel;
+    // THE FIX: Changed to CanvasGroup so we can animate the alpha fade
+    [SerializeField] private CanvasGroup _deathPanelCanvasGroup; 
+    [SerializeField] private CanvasGroup _winPanelCanvasGroup; 
     [SerializeField] private RectTransform _draftUIPanel;
     [SerializeField] private Button _tryAgainButton, _winReturnButton, _loseReturnButton;
     [SerializeField] private CanvasGroup _pair1Group; // Upper Pair
@@ -38,7 +39,11 @@ public class SystemUI : MonoBehaviour
 
         UIManager.Instance.HidePanelInstant(_escPanel);
         UIManager.Instance.HidePanelInstant(_settingsPanel);
-        _deathPanel.SetActive(false); _winPanel.SetActive(false); _draftUIPanel.gameObject.SetActive(false);
+
+        // Make sure both post-game panels are off at the start
+        _deathPanelCanvasGroup.gameObject.SetActive(false);
+        _winPanelCanvasGroup.gameObject.SetActive(false); 
+        _draftUIPanel.gameObject.SetActive(false);
 
         _resumeButton.onClick.AddListener(OnResumeClicked);
         _settingsButtonMenu.onClick.AddListener(() => UIManager.Instance.ShowPanel(_settingsPanel));
@@ -80,8 +85,59 @@ public class SystemUI : MonoBehaviour
         TurnManager.Instance.ResumeGame();
     }
 
-    public void ShowDeathScreen() => _deathPanel.SetActive(true);
-    public void ShowWinScreen() => _winPanel.SetActive(true);
+    // THE FIX: Added a smooth, dramatic 1-second fade in for the Death Screen
+    public void ShowDeathScreen()
+    {
+        _deathPanelCanvasGroup.DOKill(); // Stop any existing animations
+
+        // 1. Setup initial hidden state
+        _deathPanelCanvasGroup.alpha = 0f;
+        _deathPanelCanvasGroup.interactable = false;
+        _deathPanelCanvasGroup.blocksRaycasts = false;
+        _deathPanelCanvasGroup.gameObject.SetActive(true);
+
+        // 2. Fade in slowly (1 second) for dramatic effect
+        _deathPanelCanvasGroup.DOFade(1f, 1f).SetEase(Ease.InOutQuad).OnComplete(() =>
+        {
+            // 3. Make buttons clickable once fully visible
+            _deathPanelCanvasGroup.interactable = true;
+            _deathPanelCanvasGroup.blocksRaycasts = true;
+        });
+    }
+
+    public void ShowWinScreen()
+    {
+        RectTransform panelRect = _winPanelCanvasGroup.GetComponent<RectTransform>();
+
+        // Kill any old tweens just in case something went wrong
+        panelRect.DOKill();
+        _winPanelCanvasGroup.DOKill();
+
+        // 1. Set the initial "hidden" state
+        _winPanelCanvasGroup.alpha = 0f;
+        _winPanelCanvasGroup.interactable = false;
+        _winPanelCanvasGroup.blocksRaycasts = false;
+        panelRect.localScale = Vector3.one * 0.7f; // Start at 70% size
+
+        // 2. Make the panel's GameObject active
+        _winPanelCanvasGroup.gameObject.SetActive(true);
+
+        // 3. Create and run the animation sequence
+        Sequence popupAnim = DOTween.Sequence();
+        
+        // Scale up to full size with a nice bouncy effect
+        popupAnim.Append(panelRect.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack));
+        
+        // Fade in at the same time as the scaling
+        popupAnim.Join(_winPanelCanvasGroup.DOFade(1f, 0.3f));
+
+        // 4. Once the animation is complete, make the buttons clickable
+        popupAnim.OnComplete(() =>
+        {
+            _winPanelCanvasGroup.interactable = true;
+            _winPanelCanvasGroup.blocksRaycasts = true;
+        });
+    }
 
     public void ShowDraftUI(CardSO p1Yin, CardSO p1Yang, CardSO p2Yin, CardSO p2Yang)
     {
@@ -92,41 +148,28 @@ public class SystemUI : MonoBehaviour
         _p2Yin.text = $"{p2Yin.cardName}\n{p2Yin.description}";
         _p2Yang.text = $"{p2Yang.cardName}\n{p2Yang.description}";
 
-        // 1. Show the panel so Unity can calculate layout math
         _draftUIPanel.gameObject.SetActive(true);
-
-        // 2. Turn ON Layout Group and force a UI update so they snap to their correct Y positions instantly in the background
         if (_draftLayoutGroup != null) _draftLayoutGroup.enabled = true;
         Canvas.ForceUpdateCanvases(); 
-
-        // 3. Turn OFF Layout Group so we can freely animate their X positions
         if (_draftLayoutGroup != null) _draftLayoutGroup.enabled = false;
 
         RectTransform rect1 = _pair1Group.GetComponent<RectTransform>();
         RectTransform rect2 = _pair2Group.GetComponent<RectTransform>();
-
-        // Kill any leftover tweens just in case
         rect1.DOKill();
         rect2.DOKill();
-
-        // 4. Teleport them off-screen instantly
         rect1.anchoredPosition = new Vector2(-1500f, rect1.anchoredPosition.y);
         rect2.anchoredPosition = new Vector2(1500f, rect2.anchoredPosition.y);
 
-        // 5. Ensure they are fully visible but NOT clickable while flying in
         _pair1Group.alpha = 1; _pair1Group.interactable = false; _pair1Group.blocksRaycasts = false;
         _pair2Group.alpha = 1; _pair2Group.interactable = false; _pair2Group.blocksRaycasts = false;
 
-        // 6. Animate them sliding into the center (X = 0)
         Sequence slideInAnim = DOTween.Sequence();
         slideInAnim.Append(rect1.DOAnchorPosX(0f, 0.5f).SetEase(Ease.OutBack));
         slideInAnim.Join(rect2.DOAnchorPosX(0f, 0.5f).SetEase(Ease.OutBack));
 
-        // 7. Once they arrive, make them clickable and turn the layout group back on
         slideInAnim.OnComplete(() => 
         {
             if (_draftLayoutGroup != null) _draftLayoutGroup.enabled = true;
-
             _pair1Group.interactable = true; _pair1Group.blocksRaycasts = true;
             _pair2Group.interactable = true; _pair2Group.blocksRaycasts = true;
         });
@@ -134,25 +177,18 @@ public class SystemUI : MonoBehaviour
 
     private void OnDraftChoiceSelected(int chosenPair)
     {
-        // Prevent double clicking
         _pair1Group.interactable = false; _pair1Group.blocksRaycasts = false;
         _pair2Group.interactable = false; _pair2Group.blocksRaycasts = false;
 
         RectTransform rect1 = _pair1Group.GetComponent<RectTransform>();
         RectTransform rect2 = _pair2Group.GetComponent<RectTransform>();
 
-        // Turn off the layout group so we can freely animate their positions sideways
         if (_draftLayoutGroup != null) _draftLayoutGroup.enabled = false;
 
         Sequence draftAnim = DOTween.Sequence();
-
-        // Upper Card Pair slides off to the Left
         draftAnim.Append(rect1.DOAnchorPosX(-1500f, 0.5f).SetEase(Ease.InBack));
-        
-        // Lower Card Pair slides off to the Right (happens at the exact same time)
         draftAnim.Join(rect2.DOAnchorPosX(1500f, 0.5f).SetEase(Ease.InBack));
 
-        // Once they are both off-screen, resolve the draft and hide the UI
         draftAnim.OnComplete(() => 
         {
             _draftUIPanel.gameObject.SetActive(false);
@@ -168,7 +204,10 @@ public class SystemUI : MonoBehaviour
     {
         DataPersistenceManager.Instance.SaveRunData("Defeat");
         RunManager.Instance.ResetEntireRun();
-        _deathPanel.SetActive(false);
+        
+        // THE FIX: Resetting the Death panel properly
+        _deathPanelCanvasGroup.gameObject.SetActive(false);
+        
         UIManager.Instance.HidePanel(_escPanel);
         GameplayHUD.Instance.InitializeBuildLayout();
         LevelManager.Instance.StartGame();
