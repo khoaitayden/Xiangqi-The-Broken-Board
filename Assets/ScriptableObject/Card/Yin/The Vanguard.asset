@@ -16,5 +16,5 @@ MonoBehaviour:
   description: "(Ti\xEAn Phong)\n +1 Chariot (Xe) spawns at the start of every floor."
   alignment: 0
   effectID: 2
-  weight: -5
+  weight: -4
   cardIcon: {fileID: 8792060393328439323, guid: 165bdfba2abd50837bb9465a0dcdbb61, type: 3}

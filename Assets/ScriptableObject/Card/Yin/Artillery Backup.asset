@@ -17,5 +17,5 @@ MonoBehaviour:
     every floor."
   alignment: 0
   effectID: 3
-  weight: -4
+  weight: -3
   cardIcon: {fileID: -7610361289377340093, guid: 998357a4d1fd1484a8b77b1fc3a41ba1, type: 3}

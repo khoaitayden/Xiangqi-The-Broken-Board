@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c8060c15d389ba17a6663187031ca3c, type: 3}
   m_Name: ElephantStats(Tuong)_SO
   m_EditorClassIdentifier: Assembly-CSharp::PieceStatsSO
-  baseMaxHp: 3
-  baseMaxCooldown: 3
+  baseMaxHp: 4
+  baseMaxCooldown: 5
   runtimeMaxHp: 0
   runtimeMaxCooldown: 0

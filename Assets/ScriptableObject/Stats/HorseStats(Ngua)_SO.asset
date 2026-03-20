@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: HorseStats(Ngua)_SO
   m_EditorClassIdentifier: Assembly-CSharp::PieceStatsSO
   baseMaxHp: 2
-  baseMaxCooldown: 1
+  baseMaxCooldown: 3
   runtimeMaxHp: 0
   runtimeMaxCooldown: 0

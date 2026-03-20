@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: ChariotStats(Xe)_SO
   m_EditorClassIdentifier: Assembly-CSharp::PieceStatsSO
   baseMaxHp: 3
-  baseMaxCooldown: 3
+  baseMaxCooldown: 4
   runtimeMaxHp: 0
   runtimeMaxCooldown: 0

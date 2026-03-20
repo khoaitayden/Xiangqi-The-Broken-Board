@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c8060c15d389ba17a6663187031ca3c, type: 3}
   m_Name: EnemyGeneralStats_SO
   m_EditorClassIdentifier: Assembly-CSharp::PieceStatsSO
-  baseMaxHp: 5
-  baseMaxCooldown: 2
-  runtimeMaxHp: 0
-  runtimeMaxCooldown: 0
+  baseMaxHp: 6
+  baseMaxCooldown: 1
+  runtimeMaxHp: 6
+  runtimeMaxCooldown: 1

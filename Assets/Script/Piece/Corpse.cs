@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Corpse : MonoBehaviour
 {
-    public int turnsRemaining=3; 
+    public int turnsRemaining=7; 
     private BoardNode currentNode;
 
     public void Init(BoardNode node)

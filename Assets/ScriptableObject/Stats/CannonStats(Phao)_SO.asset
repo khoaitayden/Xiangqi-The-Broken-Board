@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c8060c15d389ba17a6663187031ca3c, type: 3}
   m_Name: CannonStats(Phao)_SO
   m_EditorClassIdentifier: Assembly-CSharp::PieceStatsSO
-  baseMaxHp: 2
-  baseMaxCooldown: 2
-  runtimeMaxHp: 2
-  runtimeMaxCooldown: 2
+  baseMaxHp: 3
+  baseMaxCooldown: 3
+  runtimeMaxHp: 3
+  runtimeMaxCooldown: 4

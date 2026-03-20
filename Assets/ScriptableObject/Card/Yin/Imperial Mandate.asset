@@ -17,5 +17,5 @@ MonoBehaviour:
     damage intake as long as they are alive."
   alignment: 0
   effectID: 4
-  weight: -3
+  weight: -5
   cardIcon: {fileID: -6841921709194881272, guid: 30803e9f5199c1fb79ac935f6ee99456, type: 3}

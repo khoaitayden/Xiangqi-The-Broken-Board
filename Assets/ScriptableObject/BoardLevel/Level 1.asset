@@ -13,19 +13,19 @@ MonoBehaviour:
   m_Name: Level 1
   m_EditorClassIdentifier: Assembly-CSharp::BoardLayoutSO
   levelName: Level 1
-  playerSpawnPosition: {x: 4, y: 0}
+  playerSpawnPosition: {x: 0, y: 0}
   enemyGeneralSpawnPosition: {x: 4, y: 9}
   enemyGeneralStartingCooldown: 2
   enemySpawns:
   - pieceType: 0
     position: {x: 4, y: 6}
     startingCooldown: 1
+  - pieceType: 0
+    position: {x: 5, y: 7}
+    startingCooldown: 2
   - pieceType: 1
     position: {x: 8, y: 9}
-    startingCooldown: 1
+    startingCooldown: 3
   - pieceType: 5
     position: {x: 7, y: 9}
-    startingCooldown: 1
-  - pieceType: 3
-    position: {x: 2, y: 9}
-    startingCooldown: 1
+    startingCooldown: 3
