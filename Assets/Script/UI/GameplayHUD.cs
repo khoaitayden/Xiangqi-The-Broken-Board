@@ -86,7 +86,7 @@ public class GameplayHUD : MonoBehaviour
     {
         if (TurnManager.Instance.CurrentTurn != TurnManager.TurnState.PlayerTurn) { _enemyPanel.SetActive(false); return; }
         
-        BoardNode hoveredNode = GridManager.Instance.GetNodeAtPosition(InputHandler.Instance.MouseWorldPosition);
+        BoardNode hoveredNode = GridManager.Instance.GetNodeAtPosition(InputHandler.Instance.PointerWorldPosition);
         if (hoveredNode == null) { _enemyPanel.SetActive(false); return; }
 
         if (hoveredNode.currentPiece != null && !hoveredNode.currentPiece.IsPlayer)

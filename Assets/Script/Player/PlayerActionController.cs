@@ -20,30 +20,40 @@ public class PlayerActionController : MonoBehaviour
         TurnManager turnMan = TurnManager.Instance;
         GridManager gridMan = GridManager.Instance;
 
+        // Early exit if it's not our turn
         if (turnMan.CurrentTurn != TurnManager.TurnState.PlayerTurn || isExecutingAction || turnMan.activePlayer == null)
         {
-            if (aimVisualizer != null) aimVisualizer.Hide();
-            gridMan.ClearAllHighlights(); 
+            ClearVisuals(gridMan);
             return;
         }
 
-        Vector2 worldPosition = InputHandler.Instance.MouseWorldPosition;
-        BoardNode hoveredNode = gridMan.GetNodeAtPosition(worldPosition);
-
+        // 1. READ ABSTRACTED INPUT
+        Vector2 pointerPos = InputHandler.Instance.PointerWorldPosition;
+        bool shouldExecute = InputHandler.Instance.IsExecuteTriggered; // This works for PC click-up AND Mobile finger-lift
+        
+        BoardNode hoveredNode = gridMan.GetNodeAtPosition(pointerPos);
         if (hoveredNode == null)
         {
-            if (aimVisualizer != null) aimVisualizer.Hide();
-            gridMan.ClearAllHighlights();
+            ClearVisuals(gridMan);
             return; 
         }
 
-        // --- DETERMINE CONTEXT ---
-        DetermineInputContext(worldPosition, hoveredNode, turnMan.activePlayer, gridMan);
+        // 2. PROCESS PREVIEW (Always runs to show aiming/movement)
+        UpdatePreview(pointerPos, hoveredNode, turnMan, gridMan);
 
-        // --- HANDLE VISUALS BASED ON CONTEXT ---
+        // 3. PROCESS EXECUTION (Only runs when user confirms)
+        if (shouldExecute) 
+        {
+            TryExecuteAction(hoveredNode, turnMan, gridMan);
+        }
+    }
+    private void UpdatePreview(Vector2 pointerPos, BoardNode hoveredNode, TurnManager turnMan, GridManager gridMan)
+    {
+        DetermineInputContext(pointerPos, hoveredNode, turnMan.activePlayer, gridMan);
+
         if (isAimingMode)
         {
-            DrawAimConeAndHighlightEnemies(turnMan, worldPosition);
+            DrawAimConeAndHighlightEnemies(turnMan, pointerPos);
             gridMan.UpdateHoverHighlight(hoveredNode);
         }
         else
@@ -51,34 +61,39 @@ public class PlayerActionController : MonoBehaviour
             if (aimVisualizer != null) aimVisualizer.Hide();
             gridMan.UpdatePlayerMoveHighlight(turnMan.activePlayer); 
         }
+    }
 
-        // --- HANDLE CLICKS ---
-        if (InputHandler.Instance.IsClickTriggered) 
+    // --- ABSTRACTION: EXECUTION LOGIC ---
+    private void TryExecuteAction(BoardNode hoveredNode, TurnManager turnMan, GridManager gridMan)
+    {
+        bool hasAmmo = turnMan.activePlayer.LoadedAmmo > 0;
+        bool artOfWarReady = RunManager.Instance.ArtOfWarEnabled && !RunManager.Instance.ArtOfWarUsedThisFloor;
+        bool canShoot = hasAmmo || artOfWarReady;
+
+        if (!isAimingMode && hoveredNode != null && turnMan.activePlayer.IsValidMove(hoveredNode, gridMan.grid))
         {
-            bool hasAmmo = turnMan.activePlayer.LoadedAmmo > 0;
-            bool artOfWarReady = RunManager.Instance.ArtOfWarEnabled && !RunManager.Instance.ArtOfWarUsedThisFloor;
-            bool canShoot = hasAmmo || artOfWarReady;
-
-            // THE FIX: Add a final check to make sure the move is valid before executing it!
-            if (!isAimingMode && hoveredNode != null && turnMan.activePlayer.IsValidMove(hoveredNode, gridMan.grid))
-            {
-                ExecuteMove(hoveredNode, turnMan);
-            }
-            else if (isAimingMode && canShoot)
-            {
-                if (!hasAmmo && artOfWarReady)
-                {
-                    RunManager.Instance.ArtOfWarUsedThisFloor = true;
-                    Debug.Log("Art of War used! Fired with 0 Ammo!");
-                }
-                else
-                {
-                    turnMan.activePlayer.LoadedAmmo--; 
-                }
-
-                StartCoroutine(ExecuteShootCoroutine(turnMan));
-            }
+            ExecuteMove(hoveredNode, turnMan);
         }
+        else if (isAimingMode && canShoot)
+        {
+            if (!hasAmmo && artOfWarReady)
+            {
+                RunManager.Instance.ArtOfWarUsedThisFloor = true;
+                Debug.Log("Art of War used! Fired with 0 Ammo!");
+            }
+            else
+            {
+                turnMan.activePlayer.LoadedAmmo--; 
+            }
+
+            StartCoroutine(ExecuteShootCoroutine(turnMan));
+        }
+    }
+
+    private void ClearVisuals(GridManager gridMan)
+    {
+        if (aimVisualizer != null) aimVisualizer.Hide();
+        gridMan.ClearAllHighlights(); 
     }
 
     void DetermineInputContext(Vector2 mouseWorldPos, BoardNode hoveredNode, PlayerGeneral player, GridManager gridMan)
@@ -103,13 +118,11 @@ public class PlayerActionController : MonoBehaviour
 
         if (isAdjacent && hasCorpse && !canStepOnCorpse)
         {
-            // This is an invalid tile! We can't move or shoot.
             isAimingMode = false;
             foreach (Piece enemy in TurnManager.Instance.enemyPieces) { if(enemy != null) enemy.SetTargeted(false); }
-            return; // Exit the function early so we don't do any other logic.
+            return; 
         }
 
-        // --- Now, determine if we are moving or aiming ---
         if (hoveredNode != null && player.IsValidMove(hoveredNode, gridMan.grid))
         {
             isAimingMode = false;
@@ -119,17 +132,14 @@ public class PlayerActionController : MonoBehaviour
         {
             isAimingMode = true;
             
-            // Check for Crouching Tiger
             if (hoveredNode != null && RunManager.Instance.CrouchingTigerEnabled)
             {
-                // Note: We already checked for adjacent corpses above, so this will only trigger on adjacent enemies.
                 if (isAdjacent && hoveredNode.currentPiece != null)
                 {
                     currentShotMode = SpecialShotMode.CrouchingTiger;
                 }
             }
 
-            // Check for Flying General
             EnemyGeneral enemyBoss = Object.FindAnyObjectByType<EnemyGeneral>();
             if (enemyBoss != null && player.X == enemyBoss.X) 
             {
