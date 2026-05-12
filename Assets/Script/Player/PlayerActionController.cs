@@ -130,7 +130,7 @@ public class PlayerActionController : MonoBehaviour
             }
 
             // Check for Flying General
-            EnemyGeneral enemyBoss = Object.FindFirstObjectByType<EnemyGeneral>();
+            EnemyGeneral enemyBoss = Object.FindAnyObjectByType<EnemyGeneral>();
             if (enemyBoss != null && player.X == enemyBoss.X) 
             {
                 int minY = Mathf.Min(player.Y, enemyBoss.Y);
@@ -166,7 +166,7 @@ public class PlayerActionController : MonoBehaviour
 
         if (currentShotMode == SpecialShotMode.FlyingGeneral)
         {
-            EnemyGeneral enemyBoss = Object.FindFirstObjectByType<EnemyGeneral>();
+            EnemyGeneral enemyBoss = Object.FindAnyObjectByType<EnemyGeneral>();
             if (enemyBoss != null && aimVisualizer != null)
             {
                 Vector2 directionToBoss = (enemyBoss.transform.position - playerPos).normalized;
@@ -233,7 +233,7 @@ public class PlayerActionController : MonoBehaviour
         if (currentShotMode == SpecialShotMode.FlyingGeneral)
         {
             Debug.Log("FLYING GENERAL EXECUTION!");
-            EnemyGeneral enemyBoss = Object.FindFirstObjectByType<EnemyGeneral>();
+            EnemyGeneral enemyBoss = Object.FindAnyObjectByType<EnemyGeneral>();
             if (enemyBoss != null) enemyBoss.TakeDamage(999);
             yield return new WaitForSeconds(0.5f);
         }
@@ -261,7 +261,7 @@ public class PlayerActionController : MonoBehaviour
         }
         else
         {
-            EnemyGeneral enemyBoss = Object.FindFirstObjectByType<EnemyGeneral>();
+            EnemyGeneral enemyBoss = Object.FindAnyObjectByType<EnemyGeneral>();
             if (enemyBoss != null) enemyBoss.BeginDamageBatch();
 
             float aimAngle = Mathf.Atan2(currentAimDirection.y, currentAimDirection.x) * Mathf.Rad2Deg;

@@ -48,8 +48,30 @@
                 },
                 {
                     "name": "",
+                    "id": "2d9cfc03-8f57-4856-8824-8b72bf7f2c38",
+                    "path": "<Touchscreen>/Press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Click",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "b244dca9-37f8-4328-8697-f171d308c59d",
                     "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PointerPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "69a35184-26d7-4a1f-a5c7-c226bb288ddc",
+                    "path": "<Touchscreen>/position",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
