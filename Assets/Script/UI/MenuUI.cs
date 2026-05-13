@@ -51,7 +51,7 @@ public class MenuUI : MonoBehaviour
 
     private void OnStartClicked()
     {
-        float screenWidth = _canvasRect.rect.width;  // actual scaled width
+        float screenWidth = _canvasRect.rect.width;  
 
         _mainMenuPanel.interactable = false; _mainMenuPanel.blocksRaycasts = false;
         _inputNamePanel.interactable = true; _inputNamePanel.blocksRaycasts = true;
