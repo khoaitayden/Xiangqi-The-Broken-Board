@@ -46,8 +46,8 @@ public class GameplayHUD : MonoBehaviour
 
     private void UpdateGameInfo()
     {
-        if (LevelManager.Instance != null) _levelText.text = $"Floor {LevelManager.Instance.CurrentLevelIndex + 1}";
-        if (TurnManager.Instance != null) _turnText.text = $"Turn: {TurnManager.Instance.CurrentTurnNumber}";
+        if (LevelManager.Instance != null) _levelText.text = $"Floor\n{LevelManager.Instance.CurrentLevelIndex + 1}";
+        if (TurnManager.Instance != null) _turnText.text = $"Turn\n{TurnManager.Instance.CurrentTurnNumber}";
         if (RunManager.Instance != null)
         {
             float time = RunManager.Instance.TotalRunTime;
@@ -61,7 +61,7 @@ public class GameplayHUD : MonoBehaviour
         if (player != null)
         {
             UpdateArrowIcons(player.LoadedAmmo);
-            _weaponStatsText.text = $"Firepower: {player.Firepower} Pellets\nSpread Arc: {player.FireArc}°";
+            _weaponStatsText.text = $"Firepower\n{player.Firepower} \nArc: {player.FireArc}°";
             UpdateArmorIcons(player.CurrentArmor);
         }
         else
@@ -92,9 +92,11 @@ public class GameplayHUD : MonoBehaviour
         if (hoveredNode.currentPiece != null && !hoveredNode.currentPiece.IsPlayer)
         {
             Piece enemy = hoveredNode.currentPiece;
-            _enemyNameText.text = enemy.gameObject.name.Replace("Enemy", "").Replace("(Clone)", "").ToUpper();
-            _enemyHPText.text = $"HP: {enemy.CurrentHp} / {enemy.MaxHp}";
-            _enemyCooldownText.text = $"Cooldown: {enemy.CurrentCooldown}";
+            string rawName = enemy.gameObject.name.Replace("Enemy", "").Replace("(Clone)", ""); 
+            string formattedName = rawName.Replace("(", " \n ").Replace(")", "");
+            _enemyNameText.text = formattedName;
+            _enemyHPText.text = $"HP\n{enemy.CurrentHp} / {enemy.MaxHp}";
+            _enemyCooldownText.text = $"CD\n{enemy.CurrentCooldown}";
             _enemyPanel.SetActive(true);
         }
         else if (hoveredNode.currentCorpse != null)
