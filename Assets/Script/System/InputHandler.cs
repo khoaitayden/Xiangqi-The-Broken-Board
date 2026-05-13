@@ -27,15 +27,25 @@ public class InputHandler : MonoBehaviour
     private void Update()
     {
         if (controls == null) return;
+
         Vector2 screenPosition = controls.Board.PointerPosition.ReadValue<Vector2>();
-        
-        if (screenPosition != Vector2.zero) 
+
+        if (IsValidScreenPosition(screenPosition))
         {
-            PointerWorldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
+            PointerWorldPosition = Camera.main.ScreenToWorldPoint(new Vector3(screenPosition.x, screenPosition.y, Camera.main.nearClipPlane));
         }
-        IsPointerDown = controls.Board.Click.IsPressed(); 
-        IsExecuteTriggered = controls.Board.Click.WasReleasedThisFrame(); 
-        
-        IsPauseTriggered = controls.Board.Pause.triggered; 
+
+        IsPointerDown = controls.Board.Click.IsPressed();
+        IsExecuteTriggered = controls.Board.Click.WasReleasedThisFrame();
+        IsPauseTriggered = controls.Board.Pause.triggered;
+    }
+    private bool IsValidScreenPosition(Vector2 pos)
+    {
+        if (!float.IsFinite(pos.x) || !float.IsFinite(pos.y)) return false;
+        if (pos == Vector2.zero) return false;
+
+        // Must be within actual screen bounds
+        return pos.x >= 0 && pos.x <= Screen.width &&
+            pos.y >= 0 && pos.y <= Screen.height;
     }
 }

@@ -24,6 +24,12 @@ public class MenuUI : MonoBehaviour
     [Header("Inputs")]
     [SerializeField] private TMP_InputField _nameInputField;
     [SerializeField] private TMP_InputField _phoneInputField;
+    private RectTransform _canvasRect;
+
+    private void Awake()
+    {
+        _canvasRect = GetComponentInParent<Canvas>().GetComponent<RectTransform>();
+    }
 
     private void Start()
     {
@@ -45,9 +51,13 @@ public class MenuUI : MonoBehaviour
 
     private void OnStartClicked()
     {
+        float screenWidth = _canvasRect.rect.width;  // actual scaled width
+
         _mainMenuPanel.interactable = false; _mainMenuPanel.blocksRaycasts = false;
         _inputNamePanel.interactable = true; _inputNamePanel.blocksRaycasts = true;
-        UIManager.Instance.menuSliderContainer.DOAnchorPos(new Vector2(-1920f, 0f), UIManager.Instance.tweenDuration).SetEase(Ease.InOutBack);
+        UIManager.Instance.menuSliderContainer
+            .DOAnchorPos(new Vector2(-screenWidth, 0f), UIManager.Instance.tweenDuration)
+            .SetEase(Ease.InOutBack);
     }
 
     private void OnBackClicked()
@@ -97,8 +107,8 @@ public class MenuUI : MonoBehaviour
         // PlayerPrefs.Save();
 
         // _inputNamePanel.interactable = false; _inputNamePanel.blocksRaycasts = false;
-
-        UIManager.Instance.menuSliderContainer.DOAnchorPos(new Vector2(-3840, 0), UIManager.Instance.tweenDuration).SetEase(Ease.InOutCubic).OnComplete(() =>
+        float screenWidth = _canvasRect.rect.width;
+        UIManager.Instance.menuSliderContainer.DOAnchorPos(new Vector2(-screenWidth * 2f, 0), UIManager.Instance.tweenDuration).SetEase(Ease.InOutCubic).OnComplete(() =>
         {
             GameplayHUD.Instance.InitializeBuildLayout();
             RunManager.Instance.ResetEntireRun();
