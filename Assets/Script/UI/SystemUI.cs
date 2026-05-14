@@ -64,7 +64,7 @@ public class SystemUI : MonoBehaviour
         if (InputHandler.Instance.IsPauseTriggered) TogglePauseMenu();
     }
 
-    private void TogglePauseMenu()
+    public void TogglePauseMenu()
     {
         TurnManager.TurnState state = TurnManager.Instance.CurrentTurn;
         if (state == TurnManager.TurnState.MainMenu || state == TurnManager.TurnState.GameOver || state == TurnManager.TurnState.Drafting) return;

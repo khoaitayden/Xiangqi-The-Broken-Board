@@ -20,6 +20,9 @@ public class GameplayHUD : MonoBehaviour
     private List<GameObject> _armorIcons = new List<GameObject>();
     private List<GameObject> _arrowIcons = new List<GameObject>();
 
+    [Header("Button")]
+    [SerializeField] private Button pauseButton;
+
     [Header("Enemy Hover")]
     [SerializeField] private GameObject _enemyPanel;
     [SerializeField] private TextMeshProUGUI _enemyNameText, _enemyHPText, _enemyCooldownText;
@@ -35,6 +38,10 @@ public class GameplayHUD : MonoBehaviour
     private List<CardHoverHandler> _yinCardSlots = new List<CardHoverHandler>();
 
     private void Awake() { Instance = this; }
+    private void Start()
+    {
+        pauseButton.onClick.AddListener(OnPausedClicked);
+    }
 
     private void Update()
     {
@@ -46,13 +53,17 @@ public class GameplayHUD : MonoBehaviour
 
     private void UpdateGameInfo()
     {
-        if (LevelManager.Instance != null) _levelText.text = $"Floor\n{LevelManager.Instance.CurrentLevelIndex + 1}";
-        if (TurnManager.Instance != null) _turnText.text = $"Turn\n{TurnManager.Instance.CurrentTurnNumber}";
+        if (LevelManager.Instance != null) _levelText.text = $"Floor: {LevelManager.Instance.CurrentLevelIndex + 1}";
+        if (TurnManager.Instance != null) _turnText.text = $"Turn: {TurnManager.Instance.CurrentTurnNumber}";
         if (RunManager.Instance != null)
         {
             float time = RunManager.Instance.TotalRunTime;
             _timerText.text = string.Format("{0:00}:{1:00}", Mathf.FloorToInt(time / 60F), Mathf.FloorToInt(time % 60));
         }
+    }
+    private void OnPausedClicked()
+    {
+        SystemUI.Instance.TogglePauseMenu();
     }
 
     private void UpdatePlayerStats()
