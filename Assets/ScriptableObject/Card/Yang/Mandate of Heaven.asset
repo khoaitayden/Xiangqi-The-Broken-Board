@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: Mandate of Heaven
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
   cardName: Mandate of Heaven
-  description: "(Thi\xEAn M\u1EC7nh)\nThe \"Flying General\" Ultimate can now be
-    triggered even if there is exactly one piece (Corpse or living) between you and
-    the Enemy Boss.\n"
+  description: 'The "Flying General" Ultimate can now be triggered even if there
+    is exactly one piece (Corpse or living) between you and the Enemy Boss.
+
+'
   alignment: 1
   effectID: 14
   weight: 5

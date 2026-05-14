@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: Conscription
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
   cardName: Conscription
-  description: "(L\u1EC7nh B\u1EAFt L\xEDnh)\n+2 Pawns spawn at the start of every
-    floor."
+  description: +2 Pawns spawn at the start of every floor.
   alignment: 0
   effectID: 0
   weight: -2

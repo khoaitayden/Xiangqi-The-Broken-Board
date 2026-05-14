@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: Cloud Step
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
   cardName: Cloud Step
-  description: "(Khinh C\xF4ng)\nYour movement ignores Corpses. You can step onto
-    or through a node occupied by a Corpse without being blocked.\n"
+  description: 'Your movement ignores Corpses. You can step onto or through a node
+    occupied by a Corpse without being blocked.
+
+'
   alignment: 1
   effectID: 10
   weight: 4

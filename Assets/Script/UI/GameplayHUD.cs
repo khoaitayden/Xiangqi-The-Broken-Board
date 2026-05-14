@@ -2,7 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections.Generic;
-
+using System.Text.RegularExpressions;
 public class GameplayHUD : MonoBehaviour
 {
     public static GameplayHUD Instance { get; private set; }
@@ -93,7 +93,7 @@ public class GameplayHUD : MonoBehaviour
         {
             Piece enemy = hoveredNode.currentPiece;
             string rawName = enemy.gameObject.name.Replace("Enemy", "").Replace("(Clone)", ""); 
-            string formattedName = rawName.Replace("(", " \n ").Replace(")", "");
+            string formattedName = Regex.Replace(rawName, @"\s*\(.*?\)", "").Trim();
             _enemyNameText.text = formattedName;
             _enemyHPText.text = $"HP\n{enemy.CurrentHp} / {enemy.MaxHp}";
             _enemyCooldownText.text = $"CD\n{enemy.CurrentCooldown}";
@@ -159,7 +159,7 @@ public class GameplayHUD : MonoBehaviour
     {
         if (_tooltipPanel == null) return;
         _tooltipTitleText.text = card.cardName; _tooltipDescText.text = card.description;
-        // _tooltipPanel.transform.position = pos + new Vector3(card.alignment == CardAlignment.Yin ? -300 : 300, 0, 0);
+        _tooltipPanel.transform.position = pos + new Vector3(600, -50, 0);
         _tooltipPanel.SetActive(true);
     }
 

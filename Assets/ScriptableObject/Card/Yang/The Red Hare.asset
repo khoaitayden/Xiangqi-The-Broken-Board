@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: The Red Hare
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
   cardName: The Red Hare
-  description: "(Ng\u1EF1a X\xEDch Th\u1ED1)\nMoving diagonally now reloads 2 Ammo
-    instead of 1. Orthogonal movement still reloads 1.\n"
+  description: 'Moving diagonally now reloads 2 Ammo instead of 1. Orthogonal movement
+    still reloads 1.
+
+'
   alignment: 1
   effectID: 9
   weight: 3

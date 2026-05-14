@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Art of War
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
   cardName: Art of War
-  description: "(T\xF4n T\u1EED Binh Ph\xE1p)\nOnce per floor, if your Ammo is 0,
-    your next shot costs 0 Ammo.\n"
+  description: 'Once per floor, if your Ammo is 0, your next shot costs 0 Ammo.
+
+'
   alignment: 1
   effectID: 15
   weight: 2

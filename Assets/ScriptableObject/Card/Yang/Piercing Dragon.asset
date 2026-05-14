@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: Piercing Dragon
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
   cardName: Piercing Dragon
-  description: "(Xuy\xEAn T\xE2m Th\u01B0\u01A1ng)\nPoint-blank shots (Range 1) pierce
-    the first target and deal 1 Damage to the enemy immediately behind them.\n"
+  description: 'Point-blank shots (Range 1) pierce the first target and deal 1 Damage
+    to the enemy immediately behind them.
+
+'
   alignment: 1
   effectID: 11
   weight: 3

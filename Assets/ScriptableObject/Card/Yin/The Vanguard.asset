@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: The Vanguard
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
   cardName: The Vanguard
-  description: "(Ti\xEAn Phong)\n +1 Chariot (Xe) spawns at the start of every floor."
+  description: +1 Chariot spawns at the start of every floor.
   alignment: 0
   effectID: 2
   weight: -4
