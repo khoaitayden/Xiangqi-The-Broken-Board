@@ -159,7 +159,7 @@ public class GameplayHUD : MonoBehaviour
     {
         if (_tooltipPanel == null) return;
         _tooltipTitleText.text = card.cardName; _tooltipDescText.text = card.description;
-        _tooltipPanel.transform.position = pos + new Vector3(card.alignment == CardAlignment.Yin ? -300 : 300, 0, 0);
+        // _tooltipPanel.transform.position = pos + new Vector3(card.alignment == CardAlignment.Yin ? -300 : 300, 0, 0);
         _tooltipPanel.SetActive(true);
     }
 
