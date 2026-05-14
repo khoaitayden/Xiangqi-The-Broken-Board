@@ -72,7 +72,7 @@ public class GameplayHUD : MonoBehaviour
         if (player != null)
         {
             UpdateArrowIcons(player.LoadedAmmo);
-            _weaponStatsText.text = $"Firepower\n{player.Firepower} \nArc: {player.FireArc}°";
+            _weaponStatsText.text = $"Firepower: {player.Firepower} \nFire Arc: {player.FireArc}°";
             UpdateArmorIcons(player.CurrentArmor);
         }
         else
@@ -106,8 +106,8 @@ public class GameplayHUD : MonoBehaviour
             string rawName = enemy.gameObject.name.Replace("Enemy", "").Replace("(Clone)", ""); 
             string formattedName = Regex.Replace(rawName, @"\s*\(.*?\)", "").Trim();
             _enemyNameText.text = formattedName;
-            _enemyHPText.text = $"HP\n{enemy.CurrentHp} / {enemy.MaxHp}";
-            _enemyCooldownText.text = $"CD\n{enemy.CurrentCooldown}";
+            _enemyHPText.text = $"HP: {enemy.CurrentHp} / {enemy.MaxHp}";
+            _enemyCooldownText.text = $"Cooldown: {enemy.CurrentCooldown}";
             _enemyPanel.SetActive(true);
         }
         else if (hoveredNode.currentCorpse != null)
@@ -143,7 +143,7 @@ public class GameplayHUD : MonoBehaviour
     private CardHoverHandler CreateSlot(GameObject prefab, Transform parent)
     {
         GameObject newSlot = Instantiate(prefab, parent);
-        newSlot.transform.GetChild(0).GetComponent<Image>().color = new Color(1, 1, 1, 0);
+        //newSlot.transform.GetChild(0).GetComponent<Image>().color = new Color(1, 1, 1, 0);
         CardHoverHandler handler = newSlot.GetComponent<CardHoverHandler>();
         handler.assignedCard = null;
         return handler;
