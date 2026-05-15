@@ -9,9 +9,7 @@ public class GameplayHUD : MonoBehaviour
 
     [Header("Player & Game Info")]
     [SerializeField] private TextMeshProUGUI _weaponStatsText; 
-    [SerializeField] private TextMeshProUGUI _levelText;
-    [SerializeField] private TextMeshProUGUI _turnText;
-    [SerializeField] private TextMeshProUGUI _timerText;
+    [SerializeField] private TextMeshProUGUI _enemyAndGameInfoText;
     [SerializeField] private Transform _armorLayoutGroup;
     [SerializeField] private GameObject _armorIconPrefab;
     [SerializeField] private Transform _arrowLayoutGroup;
@@ -25,7 +23,6 @@ public class GameplayHUD : MonoBehaviour
 
     [Header("Enemy Hover")]
     [SerializeField] private GameObject _enemyPanel;
-    [SerializeField] private TextMeshProUGUI _enemyNameText, _enemyHPText, _enemyCooldownText;
 
     [Header("Build Layout & Tooltip")]
     [SerializeField] private Transform _yangLayoutGroup;
@@ -53,12 +50,10 @@ public class GameplayHUD : MonoBehaviour
 
     private void UpdateGameInfo()
     {
-        if (LevelManager.Instance != null) _levelText.text = $"Floor: {LevelManager.Instance.CurrentLevelIndex + 1}";
-        if (TurnManager.Instance != null) _turnText.text = $"Turn: {TurnManager.Instance.CurrentTurnNumber}";
-        if (RunManager.Instance != null)
+        if (_enemyAndGameInfoText != null && !UpdateEnemyHoverInfo())
         {
             float time = RunManager.Instance.TotalRunTime;
-            _timerText.text = string.Format("{0:00}:{1:00}", Mathf.FloorToInt(time / 60F), Mathf.FloorToInt(time % 60));
+            _enemyAndGameInfoText.text = $"Floor: {LevelManager.Instance.CurrentLevelIndex + 1}\nTurn: {TurnManager.Instance.CurrentTurnNumber}\n{string.Format("{0:00}:{1:00}", Mathf.FloorToInt(time / 60F), Mathf.FloorToInt(time % 60))}";
         }
     }
     private void OnPausedClicked()
@@ -93,31 +88,28 @@ public class GameplayHUD : MonoBehaviour
         for (int i = 0; i < _arrowIcons.Count; i++) _arrowIcons[i].SetActive(i < currentArrow);
     }
 
-    private void UpdateEnemyHoverInfo()
+    private bool UpdateEnemyHoverInfo()
     {
-        if (TurnManager.Instance.CurrentTurn != TurnManager.TurnState.PlayerTurn) { _enemyPanel.SetActive(false); return; }
+        if (TurnManager.Instance.CurrentTurn != TurnManager.TurnState.PlayerTurn) { _enemyPanel.SetActive(false); return false; }
         
         BoardNode hoveredNode = GridManager.Instance.GetNodeAtPosition(InputHandler.Instance.PointerWorldPosition);
-        if (hoveredNode == null) { _enemyPanel.SetActive(false); return; }
+        if (hoveredNode == null) { _enemyPanel.SetActive(false); return false; }
 
         if (hoveredNode.currentPiece != null && !hoveredNode.currentPiece.IsPlayer)
         {
             Piece enemy = hoveredNode.currentPiece;
             string rawName = enemy.gameObject.name.Replace("Enemy", "").Replace("(Clone)", ""); 
             string formattedName = Regex.Replace(rawName, @"\s*\(.*?\)", "").Trim();
-            _enemyNameText.text = formattedName;
-            _enemyHPText.text = $"HP: {enemy.CurrentHp} / {enemy.MaxHp}";
-            _enemyCooldownText.text = $"Cooldown: {enemy.CurrentCooldown}";
-            _enemyPanel.SetActive(true);
+            _enemyAndGameInfoText.text=$"{formattedName}\n{enemy.CurrentHp} / {enemy.MaxHp}\n Cooldown: {enemy.CurrentCooldown}";
+            //_enemyPanel.SetActive(true);
         }
         else if (hoveredNode.currentCorpse != null)
         {
-            _enemyNameText.text = "CORPSE";
-            _enemyHPText.text = $"Fades in: {hoveredNode.currentCorpse.turnsRemaining} turns";
-            _enemyCooldownText.text = ""; 
-            _enemyPanel.SetActive(true);
+            _enemyAndGameInfoText.text=$"CORPSE\nFades in: {hoveredNode.currentCorpse.turnsRemaining} turns";
+            //_enemyPanel.SetActive(true);
         }
         else _enemyPanel.SetActive(false);
+        return true;
     }
 
     public void InitializeBuildLayout()
