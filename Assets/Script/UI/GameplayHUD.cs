@@ -21,9 +21,6 @@ public class GameplayHUD : MonoBehaviour
     [Header("Button")]
     [SerializeField] private Button pauseButton;
 
-    [Header("Enemy Hover")]
-    [SerializeField] private GameObject _enemyPanel;
-
     [Header("Build Layout & Tooltip")]
     [SerializeField] private Transform _yangLayoutGroup;
     [SerializeField] private Transform _yinLayoutGroup;
@@ -90,10 +87,10 @@ public class GameplayHUD : MonoBehaviour
 
     private bool UpdateEnemyHoverInfo()
     {
-        if (TurnManager.Instance.CurrentTurn != TurnManager.TurnState.PlayerTurn) { _enemyPanel.SetActive(false); return false; }
+        if (TurnManager.Instance.CurrentTurn != TurnManager.TurnState.PlayerTurn) {return false;}
         
         BoardNode hoveredNode = GridManager.Instance.GetNodeAtPosition(InputHandler.Instance.PointerWorldPosition);
-        if (hoveredNode == null) { _enemyPanel.SetActive(false); return false; }
+        if (hoveredNode == null) {return false; }
 
         if (hoveredNode.currentPiece != null && !hoveredNode.currentPiece.IsPlayer)
         {
@@ -101,15 +98,14 @@ public class GameplayHUD : MonoBehaviour
             string rawName = enemy.gameObject.name.Replace("Enemy", "").Replace("(Clone)", ""); 
             string formattedName = Regex.Replace(rawName, @"\s*\(.*?\)", "").Trim();
             _enemyAndGameInfoText.text=$"{formattedName}\n{enemy.CurrentHp} / {enemy.MaxHp}\n Cooldown: {enemy.CurrentCooldown}";
-            //_enemyPanel.SetActive(true);
+            return true;
         }
         else if (hoveredNode.currentCorpse != null)
         {
             _enemyAndGameInfoText.text=$"CORPSE\nFades in: {hoveredNode.currentCorpse.turnsRemaining} turns";
-            //_enemyPanel.SetActive(true);
+            return true;
         }
-        else _enemyPanel.SetActive(false);
-        return true;
+        else {return false;}
     }
 
     public void InitializeBuildLayout()
