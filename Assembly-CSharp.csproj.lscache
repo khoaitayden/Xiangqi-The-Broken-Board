@@ -86,6 +86,7 @@ Assets/
   System/InputHandler.cs
   UI/
    AimVisualizer.cs
+   BoardUI.cs
    CardHoverHandler.cs
    GameplayHUD.cs
    LeaderboardEntryUI.cs
