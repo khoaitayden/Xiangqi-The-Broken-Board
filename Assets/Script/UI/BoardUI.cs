@@ -8,6 +8,10 @@ public class SyncLayoutWidthToHeight : MonoBehaviour
     private LayoutElement layoutElement;
     private RectTransform rectTransform;
 
+    [Header("Aspect Ratio Settings")]
+    [Tooltip("Calculated as Width / Height. For 576x640, this is 0.9")]
+    [SerializeField] private float widthToHeightRatio = 576f / 640f; 
+
     void Awake()
     {
         layoutElement = GetComponent<LayoutElement>();
@@ -20,11 +24,12 @@ public class SyncLayoutWidthToHeight : MonoBehaviour
         if (layoutElement == null || rectTransform == null) return;
 
         float currentHeight = rectTransform.rect.height;
+        
+        float targetWidth = currentHeight * widthToHeightRatio;
 
-        // Only update if the value changed to prevent infinite layout loops
-        if (Mathf.Abs(layoutElement.preferredWidth - currentHeight) > 0.1f)
+        if (Mathf.Abs(layoutElement.preferredWidth - targetWidth) > 0.1f)
         {
-            layoutElement.preferredWidth = currentHeight;
+            layoutElement.preferredWidth = targetWidth;
         }
     }
 }

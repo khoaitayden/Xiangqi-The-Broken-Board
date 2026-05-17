@@ -8,9 +8,11 @@ public class InputHandler : MonoBehaviour
     private PlayerControls controls;
     
     public Vector2 PointerWorldPosition { get; private set; }
-    public bool IsPointerDown { get; private set; }
-    public bool IsExecuteTriggered { get; private set; } 
     
+    // Abstracted Input Triggers
+    public bool IsPointerDownThisFrame { get; private set; } // NEW: Detects initial touch/click
+    public bool IsPointerDown { get; private set; }          // Held down
+    public bool IsExecuteTriggered { get; private set; }     // Released
     public bool IsPauseTriggered { get; private set; } 
 
     private void Awake()
@@ -27,25 +29,16 @@ public class InputHandler : MonoBehaviour
     private void Update()
     {
         if (controls == null) return;
-
+        
         Vector2 screenPosition = controls.Board.PointerPosition.ReadValue<Vector2>();
-
-        if (IsValidScreenPosition(screenPosition))
+        if (screenPosition != Vector2.zero) 
         {
-            PointerWorldPosition = Camera.main.ScreenToWorldPoint(new Vector3(screenPosition.x, screenPosition.y, Camera.main.nearClipPlane));
+            PointerWorldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
         }
-
-        IsPointerDown = controls.Board.Click.IsPressed();
-        IsExecuteTriggered = controls.Board.Click.WasReleasedThisFrame();
-        IsPauseTriggered = controls.Board.Pause.triggered;
-    }
-    private bool IsValidScreenPosition(Vector2 pos)
-    {
-        if (!float.IsFinite(pos.x) || !float.IsFinite(pos.y)) return false;
-        if (pos == Vector2.zero) return false;
-
-        // Must be within actual screen bounds
-        return pos.x >= 0 && pos.x <= Screen.width &&
-            pos.y >= 0 && pos.y <= Screen.height;
+        
+        IsPointerDownThisFrame = controls.Board.Click.WasPressedThisFrame(); // Initial Touch
+        IsPointerDown = controls.Board.Click.IsPressed();                    // Dragging/Holding
+        IsExecuteTriggered = controls.Board.Click.WasReleasedThisFrame();    // Lifting finger
+        IsPauseTriggered = controls.Board.Pause.triggered; 
     }
 }

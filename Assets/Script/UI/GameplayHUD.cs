@@ -82,25 +82,29 @@ public class GameplayHUD : MonoBehaviour
 
     private bool UpdateEnemyHoverInfo()
     {
-        if (TurnManager.Instance.CurrentTurn != TurnManager.TurnState.PlayerTurn) {return false;}
+        if (TurnManager.Instance.CurrentTurn != TurnManager.TurnState.PlayerTurn) { return false; }
         
-        BoardNode hoveredNode = GridManager.Instance.GetNodeAtPosition(InputHandler.Instance.PointerWorldPosition);
-        if (hoveredNode == null) {return false; }
+        if (PlayerActionController.Instance == null) return false;
+        
+        BoardNode selectedNode = PlayerActionController.Instance.SelectedEnemyNode;
+        
+        if (selectedNode == null) { return false; }
 
-        if (hoveredNode.currentPiece != null && !hoveredNode.currentPiece.IsPlayer)
+        if (selectedNode.currentPiece != null && !selectedNode.currentPiece.IsPlayer)
         {
-            Piece enemy = hoveredNode.currentPiece;
+            Piece enemy = selectedNode.currentPiece;
             string rawName = enemy.gameObject.name.Replace("Enemy", "").Replace("(Clone)", ""); 
             string formattedName = Regex.Replace(rawName, @"\s*\(.*?\)", "").Trim();
-            _enemyAndGameInfoText.text=$"{formattedName}\n{enemy.CurrentHp} / {enemy.MaxHp}\n Cooldown: {enemy.CurrentCooldown}";
+            _enemyAndGameInfoText.text = $"{formattedName}\n{enemy.CurrentHp} / {enemy.MaxHp}\n Cooldown: {enemy.CurrentCooldown}";
             return true;
         }
-        else if (hoveredNode.currentCorpse != null)
+        else if (selectedNode.currentCorpse != null)
         {
-            _enemyAndGameInfoText.text=$"CORPSE\nFades in: {hoveredNode.currentCorpse.turnsRemaining} turns";
+            _enemyAndGameInfoText.text = $"CORPSE\nFades in: {selectedNode.currentCorpse.turnsRemaining} turns";
             return true;
         }
-        else {return false;}
+        
+        return false;
     }
 
     public void InitializeBuildLayout()
@@ -149,12 +153,16 @@ public class GameplayHUD : MonoBehaviour
     }
 
     public void ShowCardTooltip(CardSO card, Vector3 pos)
-    {
-        if (_tooltipPanel == null) return;
-        _tooltipTitleText.text = card.cardName; _tooltipDescText.text = card.description;
-        _tooltipPanel.transform.position = pos + new Vector3(600, -50, 0);
-        _tooltipPanel.SetActive(true);
-    }
+        {
+            if (_tooltipPanel == null) return;
+            
+            _tooltipTitleText.text = card.cardName; 
+            _tooltipDescText.text = card.description;
+            
+            _tooltipPanel.transform.position = new Vector3(Screen.width / 2f, Screen.height / 2f, 0f);
+            
+            _tooltipPanel.SetActive(true);
+        }
 
     public void HideCardTooltip() { if (_tooltipPanel != null) _tooltipPanel.SetActive(false); }
 

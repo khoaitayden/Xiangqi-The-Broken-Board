@@ -1,80 +1,231 @@
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
+using UnityEngine.EventSystems; 
 
 public class PlayerActionController : MonoBehaviour
 {
+    public static PlayerActionController Instance { get; private set; }
+
     [Header("Aiming & Shooting")]
     public GameObject projectilePrefab; 
     public AimVisualizer aimVisualizer;
+    public float dragThreshold = 0.5f; 
     
-    private bool isAimingMode = false;
+    public float cancelAimThreshold = 1.0f; 
+    
     private Vector2 currentAimDirection;
     private bool isExecutingAction = false; 
 
+    // --- INPUT STATE TRACKING ---
+    private Vector2 _pointerDownPos;
+    private bool _isDraggingToAim = false;
+    private bool _isPlayerSelectedForMove = false;
+    private bool _startedClickOnUI = false; 
+    
+    // THE FIX: Track if the current drag is outside the cancel zone
+    private bool _isValidAim = false; 
+
+    public BoardNode SelectedEnemyNode { get; private set; } 
+
     private enum SpecialShotMode { None, CrouchingTiger, FlyingGeneral }
     private SpecialShotMode currentShotMode = SpecialShotMode.None;
+
+    private void Awake() { Instance = this; }
 
     void Update()
     {
         TurnManager turnMan = TurnManager.Instance;
         GridManager gridMan = GridManager.Instance;
 
-        // Early exit if it's not our turn
-        if (turnMan.CurrentTurn != TurnManager.TurnState.PlayerTurn || isExecutingAction || turnMan.activePlayer == null)
+        // 1. EARLY EXIT & RESET
+        if (turnMan.CurrentTurn != TurnManager.TurnState.PlayerTurn || isExecutingAction || turnMan.activePlayer == null || Time.timeScale == 0f)
         {
+            _isDraggingToAim = false;
+            _isPlayerSelectedForMove = false;
+            _startedClickOnUI = false;
+            _isValidAim = false; // Reset aim validity
+            
             ClearVisuals(gridMan);
             return;
         }
 
-        // 1. READ ABSTRACTED INPUT
         Vector2 pointerPos = InputHandler.Instance.PointerWorldPosition;
-        bool shouldExecute = InputHandler.Instance.IsExecuteTriggered; // This works for PC click-up AND Mobile finger-lift
-        
         BoardNode hoveredNode = gridMan.GetNodeAtPosition(pointerPos);
-        if (hoveredNode == null)
+
+        // 2. DETECT INITIAL TOUCH
+        if (InputHandler.Instance.IsPointerDownThisFrame)
         {
-            ClearVisuals(gridMan);
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                _startedClickOnUI = true; 
+            }
+            else
+            {
+                _startedClickOnUI = false;
+                _pointerDownPos = pointerPos;
+            }
+        }
+
+        if (_startedClickOnUI)
+        {
+            if (InputHandler.Instance.IsExecuteTriggered) _startedClickOnUI = false;
             return; 
         }
 
-        // 2. PROCESS PREVIEW (Always runs to show aiming/movement)
-        UpdatePreview(pointerPos, hoveredNode, turnMan, gridMan);
-
-        // 3. PROCESS EXECUTION (Only runs when user confirms)
-        if (shouldExecute) 
+        // 3. DETECT DRAGGING
+        if (InputHandler.Instance.IsPointerDown)
         {
-            TryExecuteAction(hoveredNode, turnMan, gridMan);
+            if (!_isDraggingToAim && Vector2.Distance(_pointerDownPos, pointerPos) > dragThreshold)
+            {
+                _isDraggingToAim = true;
+                _isPlayerSelectedForMove = false; 
+            }
+        }
+
+        // 4. UPDATE VISUALS & CHECK CANCEL ZONE
+        ClearVisuals(gridMan);
+        if (_isDraggingToAim)
+        {
+            // THE FIX: Check how close the pointer is to the player
+            float distanceToPlayer = Vector2.Distance(pointerPos, turnMan.activePlayer.transform.position);
+
+            if (distanceToPlayer < cancelAimThreshold)
+            {
+                // We dragged back to the player! Hide visuals and mark aim as invalid.
+                _isValidAim = false; 
+            }
+            else
+            {
+                // We are aiming normally.
+                _isValidAim = true;
+                UpdateAimPreview(pointerPos, turnMan, gridMan);
+            }
+        }
+        else if (_isPlayerSelectedForMove)
+        {
+            gridMan.UpdatePlayerMoveHighlight(turnMan.activePlayer);
+        }
+        
+        if (SelectedEnemyNode != null) gridMan.UpdateHoverHighlight(SelectedEnemyNode);
+
+        // 5. DETECT RELEASE (EXECUTE)
+        if (InputHandler.Instance.IsExecuteTriggered)
+        {
+            if (_isDraggingToAim)
+            {
+                // THE FIX: Only shoot if we didn't drag back to cancel!
+                if (_isValidAim) 
+                {
+                    TryExecuteShoot(turnMan);
+                }
+
+                // Reset drag states regardless of whether we shot or cancelled
+                _isDraggingToAim = false;
+                _isValidAim = false;
+            }
+            else
+            {
+                HandleQuickClick(hoveredNode, turnMan, gridMan);
+            }
         }
     }
-    private void UpdatePreview(Vector2 pointerPos, BoardNode hoveredNode, TurnManager turnMan, GridManager gridMan)
-    {
-        DetermineInputContext(pointerPos, hoveredNode, turnMan.activePlayer, gridMan);
 
-        if (isAimingMode)
+    private void HandleQuickClick(BoardNode clickedNode, TurnManager turnMan, GridManager gridMan)
+    {
+        if (clickedNode == null) 
         {
-            DrawAimConeAndHighlightEnemies(turnMan, pointerPos);
-            gridMan.UpdateHoverHighlight(hoveredNode);
+            _isPlayerSelectedForMove = false;
+            SelectedEnemyNode = null;
+            return;
+        }
+
+        if (_isPlayerSelectedForMove && turnMan.activePlayer.IsValidMove(clickedNode, gridMan.grid))
+        {
+            ExecuteMove(clickedNode, turnMan);
+            _isPlayerSelectedForMove = false;
+            SelectedEnemyNode = null;
+            return;
+        }
+
+        if (clickedNode.currentPiece != null)
+        {
+            if (clickedNode.currentPiece.IsPlayer)
+            {
+                _isPlayerSelectedForMove = true;
+                SelectedEnemyNode = null; 
+            }
+            else
+            {
+                _isPlayerSelectedForMove = false;
+                SelectedEnemyNode = clickedNode; 
+            }
+        }
+        else if (clickedNode.currentCorpse != null)
+        {
+            _isPlayerSelectedForMove = false;
+            SelectedEnemyNode = clickedNode; 
         }
         else
         {
-            if (aimVisualizer != null) aimVisualizer.Hide();
-            gridMan.UpdatePlayerMoveHighlight(turnMan.activePlayer); 
+            _isPlayerSelectedForMove = false;
+            SelectedEnemyNode = null;
         }
     }
 
-    // --- ABSTRACTION: EXECUTION LOGIC ---
-    private void TryExecuteAction(BoardNode hoveredNode, TurnManager turnMan, GridManager gridMan)
+    private void UpdateAimPreview(Vector2 pointerPos, TurnManager turnMan, GridManager gridMan)
     {
-        bool hasAmmo = turnMan.activePlayer.LoadedAmmo > 0;
-        bool artOfWarReady = RunManager.Instance.ArtOfWarEnabled && !RunManager.Instance.ArtOfWarUsedThisFloor;
-        bool canShoot = hasAmmo || artOfWarReady;
+        PlayerGeneral player = turnMan.activePlayer;
+        currentShotMode = SpecialShotMode.None;
 
-        if (!isAimingMode && hoveredNode != null && turnMan.activePlayer.IsValidMove(hoveredNode, gridMan.grid))
+        currentAimDirection = (pointerPos - (Vector2)player.transform.position).normalized;
+        if (currentAimDirection == Vector2.zero) currentAimDirection = Vector2.up; 
+        
+        if (player.WeaponPivot != null)
         {
-            ExecuteMove(hoveredNode, turnMan);
+            float angle = Mathf.Atan2(currentAimDirection.y, currentAimDirection.x) * Mathf.Rad2Deg;
+            player.WeaponPivot.rotation = Quaternion.Euler(0, 0, angle);
         }
-        else if (isAimingMode && canShoot)
+
+        DetermineSpecialShots(player, gridMan);
+        DrawAimConeAndHighlightEnemies(turnMan, pointerPos);
+    }
+
+    private void DetermineSpecialShots(PlayerGeneral player, GridManager gridMan)
+    {
+        EnemyGeneral enemyBoss = Object.FindAnyObjectByType<EnemyGeneral>();
+        if (enemyBoss != null && player.X == enemyBoss.X) 
+        {
+            int minY = Mathf.Min(player.Y, enemyBoss.Y);
+            int maxY = Mathf.Max(player.Y, enemyBoss.Y);
+            int blockers = 0;
+            for (int y = minY + 1; y < maxY; y++) if (!gridMan.grid[player.X, y].IsEmpty()) blockers++;
+            int allowedBlockers = RunManager.Instance.MandateOfHeavenEnabled ? 1 : 0;
+            
+            if (blockers <= allowedBlockers)
+            {
+                Vector2 directionToBoss = (enemyBoss.transform.position - player.transform.position).normalized;
+                if (Vector2.Angle(currentAimDirection, directionToBoss) < 30f) currentShotMode = SpecialShotMode.FlyingGeneral;
+            }
+        }
+
+        if (RunManager.Instance.CrouchingTigerEnabled && currentShotMode == SpecialShotMode.None)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(player.transform.position, currentAimDirection, 1.5f);
+            if (hit.collider != null)
+            {
+                Piece hitPiece = hit.collider.GetComponent<Piece>();
+                if (hitPiece != null && !hitPiece.IsPlayer) currentShotMode = SpecialShotMode.CrouchingTiger;
+            }
+        }
+    }
+
+    private void TryExecuteShoot(TurnManager turnMan)
+    {
+        PlayerGeneral player = turnMan.activePlayer;
+        bool hasAmmo = player.LoadedAmmo > 0;
+        bool artOfWarReady = RunManager.Instance.ArtOfWarEnabled && !RunManager.Instance.ArtOfWarUsedThisFloor;
+
+        if (hasAmmo || artOfWarReady)
         {
             if (!hasAmmo && artOfWarReady)
             {
@@ -83,9 +234,8 @@ public class PlayerActionController : MonoBehaviour
             }
             else
             {
-                turnMan.activePlayer.LoadedAmmo--; 
+                player.LoadedAmmo--; 
             }
-
             StartCoroutine(ExecuteShootCoroutine(turnMan));
         }
     }
@@ -94,77 +244,6 @@ public class PlayerActionController : MonoBehaviour
     {
         if (aimVisualizer != null) aimVisualizer.Hide();
         gridMan.ClearAllHighlights(); 
-    }
-
-    void DetermineInputContext(Vector2 mouseWorldPos, BoardNode hoveredNode, PlayerGeneral player, GridManager gridMan)
-    {
-        currentShotMode = SpecialShotMode.None; // Reset
-
-        // ALWAYS make the weapon follow the mouse
-        currentAimDirection = (mouseWorldPos - (Vector2)player.transform.position).normalized;
-        if (currentAimDirection == Vector2.zero) currentAimDirection = Vector2.up; 
-        if (player.WeaponPivot != null)
-        {
-            float angle = Mathf.Atan2(currentAimDirection.y, currentAimDirection.x) * Mathf.Rad2Deg;
-            player.WeaponPivot.rotation = Quaternion.Euler(0, 0, angle);
-        }
-
-        // --- THE FIX: Check for the INVALID ADJACENT CORPSE case first ---
-        int distX = Mathf.Abs(hoveredNode.x - player.X);
-        int distY = Mathf.Abs(hoveredNode.y - player.Y);
-        bool isAdjacent = distX <= 1 && distY <= 1 && (distX > 0 || distY > 0);
-        bool hasCorpse = hoveredNode.currentCorpse != null;
-        bool canStepOnCorpse = RunManager.Instance.CloudStepEnabled;
-
-        if (isAdjacent && hasCorpse && !canStepOnCorpse)
-        {
-            isAimingMode = false;
-            foreach (Piece enemy in TurnManager.Instance.enemyPieces) { if(enemy != null) enemy.SetTargeted(false); }
-            return; 
-        }
-
-        if (hoveredNode != null && player.IsValidMove(hoveredNode, gridMan.grid))
-        {
-            isAimingMode = false;
-            foreach (Piece enemy in TurnManager.Instance.enemyPieces) { if(enemy != null) enemy.SetTargeted(false); }
-        }
-        else
-        {
-            isAimingMode = true;
-            
-            if (hoveredNode != null && RunManager.Instance.CrouchingTigerEnabled)
-            {
-                if (isAdjacent && hoveredNode.currentPiece != null)
-                {
-                    currentShotMode = SpecialShotMode.CrouchingTiger;
-                }
-            }
-
-            EnemyGeneral enemyBoss = Object.FindAnyObjectByType<EnemyGeneral>();
-            if (enemyBoss != null && player.X == enemyBoss.X) 
-            {
-                int minY = Mathf.Min(player.Y, enemyBoss.Y);
-                int maxY = Mathf.Max(player.Y, enemyBoss.Y);
-                int blockers = 0;
-                for (int y = minY + 1; y < maxY; y++)
-                {
-                    if (!gridMan.grid[player.X, y].IsEmpty()) blockers++;
-                }
-                int allowedBlockers = RunManager.Instance.MandateOfHeavenEnabled ? 1 : 0;
-                
-                if (blockers <= allowedBlockers)
-                {
-                    Vector2 directionToBoss = (enemyBoss.transform.position - player.transform.position).normalized;
-                    float angleDifference = Vector2.Angle(currentAimDirection, directionToBoss);
-                    const float aimTolerance = 30f; 
-
-                    if (angleDifference < aimTolerance)
-                    {
-                        currentShotMode = SpecialShotMode.FlyingGeneral;
-                    }
-                }
-            }
-        }
     }
 
     void DrawAimConeAndHighlightEnemies(TurnManager turnMan, Vector2 mouseWorldPos)
