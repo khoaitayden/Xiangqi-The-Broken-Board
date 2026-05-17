@@ -10,13 +10,10 @@ public class GameplayHUD : MonoBehaviour
     [Header("Player & Game Info")]
     [SerializeField] private TextMeshProUGUI _weaponStatsText; 
     [SerializeField] private TextMeshProUGUI _enemyAndGameInfoText;
+    [SerializeField] private TextMeshProUGUI _playerArmorText;
+    [SerializeField] private TextMeshProUGUI _playerArrowText;
     [SerializeField] private Transform _armorLayoutGroup;
-    [SerializeField] private GameObject _armorIconPrefab;
     [SerializeField] private Transform _arrowLayoutGroup;
-    [SerializeField] private GameObject _arrowIconPrefab;
-
-    private List<GameObject> _armorIcons = new List<GameObject>();
-    private List<GameObject> _arrowIcons = new List<GameObject>();
 
     [Header("Button")]
     [SerializeField] private Button pauseButton;
@@ -50,7 +47,7 @@ public class GameplayHUD : MonoBehaviour
         if (_enemyAndGameInfoText != null && !UpdateEnemyHoverInfo())
         {
             float time = RunManager.Instance.TotalRunTime;
-            _enemyAndGameInfoText.text = $"Floor: {LevelManager.Instance.CurrentLevelIndex + 1}\nTurn: {TurnManager.Instance.CurrentTurnNumber}\n{string.Format("{0:00}:{1:00}", Mathf.FloorToInt(time / 60F), Mathf.FloorToInt(time % 60))}";
+            _enemyAndGameInfoText.text = $"Floor\n{LevelManager.Instance.CurrentLevelIndex + 1}\nTurn\n{TurnManager.Instance.CurrentTurnNumber}\n{string.Format("{0:00}:{1:00}", Mathf.FloorToInt(time / 60F), Mathf.FloorToInt(time % 60))}";
         }
     }
     private void OnPausedClicked()
@@ -64,7 +61,7 @@ public class GameplayHUD : MonoBehaviour
         if (player != null)
         {
             UpdateArrowIcons(player.LoadedAmmo);
-            _weaponStatsText.text = $"Firepower: {player.Firepower} \nFire Arc: {player.FireArc}°";
+            _weaponStatsText.text = $"Firepower\n{player.Firepower}\nFire Arc\n{player.FireArc}°";
             UpdateArmorIcons(player.CurrentArmor);
         }
         else
@@ -75,14 +72,12 @@ public class GameplayHUD : MonoBehaviour
 
     private void UpdateArmorIcons(int currentArmor)
     {
-        while (_armorIcons.Count < currentArmor) _armorIcons.Add(Instantiate(_armorIconPrefab, _armorLayoutGroup));
-        for (int i = 0; i < _armorIcons.Count; i++) _armorIcons[i].SetActive(i < currentArmor);
+        _playerArmorText.text = $"<sprite=\"Armor\" index=0> X {currentArmor}";
     }
 
     private void UpdateArrowIcons(int currentArrow)
     {
-        while (_arrowIcons.Count < currentArrow) _arrowIcons.Add(Instantiate(_arrowIconPrefab, _arrowLayoutGroup));
-        for (int i = 0; i < _arrowIcons.Count; i++) _arrowIcons[i].SetActive(i < currentArrow);
+        _playerArrowText.text = $"<sprite=\"arrow\" index=0> X {currentArrow}";
     }
 
     private bool UpdateEnemyHoverInfo()
@@ -131,7 +126,6 @@ public class GameplayHUD : MonoBehaviour
     private CardHoverHandler CreateSlot(GameObject prefab, Transform parent)
     {
         GameObject newSlot = Instantiate(prefab, parent);
-        //newSlot.transform.GetChild(0).GetComponent<Image>().color = new Color(1, 1, 1, 0);
         CardHoverHandler handler = newSlot.GetComponent<CardHoverHandler>();
         handler.assignedCard = null;
         return handler;
