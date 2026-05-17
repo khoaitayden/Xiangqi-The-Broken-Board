@@ -8,19 +8,11 @@ using System;
 public class PlayerRunData
 {
     public string playerName;
-    public string phoneNumber;
     public int floorsCleared;
     public int totalTurns;
     public float totalTimeSeconds;
     public string runResult; 
     public string datePlayed;
-}
-
-public enum ValidationResult
-{
-    Success,
-    NameTaken,
-    PhoneTaken
 }
 
 // A wrapper class so Unity can serialize a List to JSON
@@ -64,10 +56,10 @@ public class DataPersistenceManager : MonoBehaviour
         return new RunDatabase();
     }
 
-    public bool DoesPlayerExist(string name, string phone)
+    public bool DoesPlayerExist(string name)
     {
         RunDatabase db = LoadDatabase();
-        return db.records.Exists(r => r.playerName == name && r.phoneNumber == phone);
+        return db.records.Exists(r => r.playerName == name);
     }
 
     public void SaveRunData(string result)
@@ -76,14 +68,13 @@ public class DataPersistenceManager : MonoBehaviour
         RunDatabase db = LoadDatabase();
 
         string currentName = PlayerPrefs.GetString("PlayerName", "Unknown");
-        string currentPhone = PlayerPrefs.GetString("PlayerPhone", "Unknown");
 
-        // 2. Look for this exact player in the database
-        PlayerRunData existingRecord = db.records.Find(r => r.playerName == currentName && r.phoneNumber == currentPhone);
+        // 2. Look for this exact player name in the database
+        PlayerRunData existingRecord = db.records.Find(r => r.playerName == currentName);
 
         if (existingRecord != null)
         {
-            if(IsNewRunBetter(currentName, currentPhone, LevelManager.Instance.CurrentLevelIndex, TurnManager.Instance.CurrentTurnNumber, RunManager.Instance.TotalRunTime))
+            if(IsNewRunBetter(currentName, LevelManager.Instance.CurrentLevelIndex, TurnManager.Instance.CurrentTurnNumber, RunManager.Instance.TotalRunTime))
             {
                 existingRecord.floorsCleared = LevelManager.Instance.CurrentLevelIndex;
                 existingRecord.totalTurns = TurnManager.Instance.CurrentTurnNumber;
@@ -99,7 +90,6 @@ public class DataPersistenceManager : MonoBehaviour
             PlayerRunData newRecord = new PlayerRunData
             {
                 playerName = currentName,
-                phoneNumber = currentPhone,
                 floorsCleared = LevelManager.Instance.CurrentLevelIndex,
                 totalTurns = TurnManager.Instance.CurrentTurnNumber,
                 totalTimeSeconds = RunManager.Instance.TotalRunTime,
@@ -110,7 +100,7 @@ public class DataPersistenceManager : MonoBehaviour
             Debug.Log($"Created new record for {currentName}.");
         }
 
-        // 4. NEW: Sort the records before saving them to disk
+        // 4. Sort the records before saving them to disk
         SortRecords(db.records);
 
         // 5. Save the entire database back to the file
@@ -118,25 +108,11 @@ public class DataPersistenceManager : MonoBehaviour
         File.WriteAllText(_saveFilePath, newJson); 
     }
 
-    public bool IsPhoneStolen(string inputName, string inputPhone)
+    public bool IsNewRunBetter(string inputName, int newFloors, int newTurns, float newTime)
     {
         RunDatabase db = LoadDatabase();
 
-        PlayerRunData recordWithThisPhone = db.records.Find(r => r.phoneNumber == inputPhone);
-
-        if (recordWithThisPhone != null && recordWithThisPhone.playerName != inputName)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    public bool IsNewRunBetter(string inputName, string inputPhone, int newFloors, int newTurns, float newTime)
-    {
-        RunDatabase db = LoadDatabase();
-
-        PlayerRunData existingRecord = db.records.Find(r => r.playerName == inputName && r.phoneNumber == inputPhone);
+        PlayerRunData existingRecord = db.records.Find(r => r.playerName == inputName);
 
         if (existingRecord == null) return true;
 
@@ -157,7 +133,6 @@ public class DataPersistenceManager : MonoBehaviour
         return db.records;
     }
 
-    // NEW HELPER METHOD: Keeps your sorting logic in exactly one place
     private void SortRecords(List<PlayerRunData> recordsToSort)
     {
         recordsToSort.Sort((a, b) => 
@@ -173,27 +148,5 @@ public class DataPersistenceManager : MonoBehaviour
             // 3. Tie-breaker: Fastest Time (Ascending)
             return a.totalTimeSeconds.CompareTo(b.totalTimeSeconds);
         });
-    }
-
-    public ValidationResult ValidateLogin(string inputName, string inputPhone)
-    {
-        RunDatabase db = LoadDatabase();
-
-        // 1. Check if this name exists, but with a DIFFERENT phone number
-        PlayerRunData recordWithThisName = db.records.Find(r => r.playerName == inputName);
-        if (recordWithThisName != null && recordWithThisName.phoneNumber != inputPhone)
-        {
-            return ValidationResult.NameTaken;
-        }
-
-        // 2. Check if this phone number exists, but with a DIFFERENT name
-        PlayerRunData recordWithThisPhone = db.records.Find(r => r.phoneNumber == inputPhone);
-        if (recordWithThisPhone != null && recordWithThisPhone.playerName != inputName)
-        {
-            return ValidationResult.PhoneTaken;
-        }
-
-        // 3. If neither of the above are true, the login is valid!
-        return ValidationResult.Success;
     }
 }

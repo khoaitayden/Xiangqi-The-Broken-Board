@@ -21,8 +21,6 @@ public class PlayerActionController : MonoBehaviour
     private bool _isDraggingToAim = false;
     private bool _isPlayerSelectedForMove = false;
     private bool _startedClickOnUI = false; 
-    
-    // THE FIX: Track if the current drag is outside the cancel zone
     private bool _isValidAim = false; 
 
     public BoardNode SelectedEnemyNode { get; private set; } 

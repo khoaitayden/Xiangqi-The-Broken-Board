@@ -23,7 +23,6 @@ public class MenuUI : MonoBehaviour
 
     [Header("Inputs")]
     [SerializeField] private TMP_InputField _nameInputField;
-    [SerializeField] private TMP_InputField _phoneInputField;
     private RectTransform _canvasRect;
 
     private void Awake()
@@ -44,8 +43,7 @@ public class MenuUI : MonoBehaviour
         _inputNamePanel.interactable = false; _inputNamePanel.blocksRaycasts = false;
         UIManager.Instance.HidePanelInstant(_leaderboardPanel);
 
-        // NEW: Hide the warning tooltip if they click the input field to fix their mistake
-        _phoneInputField.onSelect.AddListener((string text) => { GameplayHUD.Instance.HideTooltip(); });
+        // Hide the warning tooltip if they click the input field to fix their mistake
         _nameInputField.onSelect.AddListener((string text) => { GameplayHUD.Instance.HideTooltip(); });
     }
 
@@ -69,42 +67,20 @@ public class MenuUI : MonoBehaviour
 
     private void OnPlayClicked()
     {
-        // string pName = _nameInputField.text.Trim();
-        // string pPhone = _phoneInputField.text.Trim();
+        string pName = _nameInputField.text.Trim();
 
-        // // 1. Basic empty check
-        // if (string.IsNullOrEmpty(pName) || string.IsNullOrEmpty(pPhone))
-        // {
-        //     if (string.IsNullOrEmpty(pName)) _nameInputField.transform.DOShakePosition(0.3f, new Vector3(10f, 0, 0), 20, 90f);
-        //     if (string.IsNullOrEmpty(pPhone)) _phoneInputField.transform.DOShakePosition(0.3f, new Vector3(10f, 0, 0), 20, 90f);
-        //     return;
-        // }
+        // 1. Basic empty check
+        if (string.IsNullOrEmpty(pName))
+        {
+            _nameInputField.transform.DOShakePosition(0.3f, new Vector3(10f, 0, 0), 20, 90f);
+            return;
+        }
 
-        // // 2. Strict Security Validation
-        // ValidationResult validationResult = DataPersistenceManager.Instance.ValidateLogin(pName, pPhone);
-        
-        // switch (validationResult)
-        // {
-        //     case ValidationResult.NameTaken:
-        //         _nameInputField.transform.DOShakePosition(0.3f, new Vector3(10f, 0, 0), 20, 90f);
-        //         GameplayHUD.Instance.ShowWarningTooltip("LOGIN FAILED", "This name is already registered with a different phone number.", _nameInputField.transform.position);
-        //         return; 
+        // 2. Success! Hide tooltip and save data.
+        GameplayHUD.Instance.HideTooltip();
 
-        //     case ValidationResult.PhoneTaken:
-        //         _phoneInputField.transform.DOShakePosition(0.3f, new Vector3(10f, 0, 0), 20, 90f);
-        //         GameplayHUD.Instance.ShowWarningTooltip("INVALID LOGIN", "This phone number is already registered to a different name.", _phoneInputField.transform.position);
-        //         return; 
-                
-        //     case ValidationResult.Success:
-        //         break; 
-        // }
-
-        // // 3. Success! Hide tooltip and save data.
-        // GameplayHUD.Instance.HideTooltip();
-
-        // PlayerPrefs.SetString("PlayerName", pName);
-        // PlayerPrefs.SetString("PlayerPhone", pPhone);
-        // PlayerPrefs.Save();
+        PlayerPrefs.SetString("PlayerName", pName);
+        PlayerPrefs.Save();
 
         _inputNamePanel.interactable = false; _inputNamePanel.blocksRaycasts = false;
         float screenWidth = _canvasRect.rect.width;

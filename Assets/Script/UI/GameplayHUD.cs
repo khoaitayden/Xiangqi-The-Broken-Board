@@ -61,7 +61,7 @@ public class GameplayHUD : MonoBehaviour
         if (player != null)
         {
             UpdateArrowIcons(player.LoadedAmmo);
-            _weaponStatsText.text = $"Firepower\n{player.Firepower}\nFire Arc\n{player.FireArc}°";
+            _weaponStatsText.text = $"Firepower: {player.Firepower}\nFire Arc\n{player.FireArc}°";
             UpdateArmorIcons(player.CurrentArmor);
         }
         else
