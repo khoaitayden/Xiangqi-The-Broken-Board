@@ -8,11 +8,10 @@ public class InputHandler : MonoBehaviour
     private PlayerControls controls;
     
     public Vector2 PointerWorldPosition { get; private set; }
-    
-    // Abstracted Input Triggers
-    public bool IsPointerDownThisFrame { get; private set; } // NEW: Detects initial touch/click
-    public bool IsPointerDown { get; private set; }          // Held down
-    public bool IsExecuteTriggered { get; private set; }     // Released
+
+    public bool IsPointerDownThisFrame { get; private set; } 
+    public bool IsPointerDown { get; private set; }          
+    public bool IsExecuteTriggered { get; private set; }    
     public bool IsPauseTriggered { get; private set; } 
 
     private void Awake()
@@ -36,9 +35,9 @@ public class InputHandler : MonoBehaviour
             PointerWorldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
         }
         
-        IsPointerDownThisFrame = controls.Board.Click.WasPressedThisFrame(); // Initial Touch
-        IsPointerDown = controls.Board.Click.IsPressed();                    // Dragging/Holding
-        IsExecuteTriggered = controls.Board.Click.WasReleasedThisFrame();    // Lifting finger
+        IsPointerDownThisFrame = controls.Board.Click.WasPressedThisFrame();
+        IsPointerDown = controls.Board.Click.IsPressed();                    
+        IsExecuteTriggered = controls.Board.Click.WasReleasedThisFrame();    
         IsPauseTriggered = controls.Board.Pause.triggered; 
     }
 }

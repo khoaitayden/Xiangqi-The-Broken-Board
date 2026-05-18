@@ -391,7 +391,7 @@ public abstract class Piece : MonoBehaviour
             }
             else 
             {
-                EnemyGeneral boss = Object.FindFirstObjectByType<EnemyGeneral>();
+                EnemyGeneral boss = Object.FindAnyObjectByType<EnemyGeneral>();
                 if (boss != null && boss.X == player.X) 
                 {
                     if (testNode.x == player.X && testNode.y > Mathf.Min(player.Y, boss.Y) && testNode.y < Mathf.Max(player.Y, boss.Y))

@@ -16,7 +16,6 @@ public class PlayerActionController : MonoBehaviour
     private Vector2 currentAimDirection;
     private bool isExecutingAction = false; 
 
-    // --- INPUT STATE TRACKING ---
     private Vector2 _pointerDownPos;
     private bool _isDraggingToAim = false;
     private bool _isPlayerSelectedForMove = false;
@@ -35,7 +34,6 @@ public class PlayerActionController : MonoBehaviour
         TurnManager turnMan = TurnManager.Instance;
         GridManager gridMan = GridManager.Instance;
 
-        // 1. EARLY EXIT & RESET
         if (turnMan.CurrentTurn != TurnManager.TurnState.PlayerTurn || isExecutingAction || turnMan.activePlayer == null || Time.timeScale == 0f)
         {
             _isDraggingToAim = false;
@@ -50,7 +48,6 @@ public class PlayerActionController : MonoBehaviour
         Vector2 pointerPos = InputHandler.Instance.PointerWorldPosition;
         BoardNode hoveredNode = gridMan.GetNodeAtPosition(pointerPos);
 
-        // 2. DETECT INITIAL TOUCH
         if (InputHandler.Instance.IsPointerDownThisFrame)
         {
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
@@ -70,7 +67,6 @@ public class PlayerActionController : MonoBehaviour
             return; 
         }
 
-        // 3. DETECT DRAGGING
         if (InputHandler.Instance.IsPointerDown)
         {
             if (!_isDraggingToAim && Vector2.Distance(_pointerDownPos, pointerPos) > dragThreshold)
@@ -80,21 +76,17 @@ public class PlayerActionController : MonoBehaviour
             }
         }
 
-        // 4. UPDATE VISUALS & CHECK CANCEL ZONE
         ClearVisuals(gridMan);
         if (_isDraggingToAim)
         {
-            // THE FIX: Check how close the pointer is to the player
             float distanceToPlayer = Vector2.Distance(pointerPos, turnMan.activePlayer.transform.position);
 
             if (distanceToPlayer < cancelAimThreshold)
             {
-                // We dragged back to the player! Hide visuals and mark aim as invalid.
                 _isValidAim = false; 
             }
             else
             {
-                // We are aiming normally.
                 _isValidAim = true;
                 UpdateAimPreview(pointerPos, turnMan, gridMan);
             }
@@ -106,18 +98,15 @@ public class PlayerActionController : MonoBehaviour
         
         if (SelectedEnemyNode != null) gridMan.UpdateHoverHighlight(SelectedEnemyNode);
 
-        // 5. DETECT RELEASE (EXECUTE)
         if (InputHandler.Instance.IsExecuteTriggered)
         {
             if (_isDraggingToAim)
             {
-                // THE FIX: Only shoot if we didn't drag back to cancel!
                 if (_isValidAim) 
                 {
                     TryExecuteShoot(turnMan);
                 }
 
-                // Reset drag states regardless of whether we shot or cancelled
                 _isDraggingToAim = false;
                 _isValidAim = false;
             }
@@ -184,11 +173,13 @@ public class PlayerActionController : MonoBehaviour
             player.WeaponPivot.rotation = Quaternion.Euler(0, 0, angle);
         }
 
-        DetermineSpecialShots(player, gridMan);
+        // THE FIX: Pass pointerPos into this method so we know how far they dragged
+        DetermineSpecialShots(player, gridMan, pointerPos); 
+        
         DrawAimConeAndHighlightEnemies(turnMan, pointerPos);
     }
 
-    private void DetermineSpecialShots(PlayerGeneral player, GridManager gridMan)
+    private void DetermineSpecialShots(PlayerGeneral player, GridManager gridMan, Vector2 pointerPos) 
     {
         EnemyGeneral enemyBoss = Object.FindAnyObjectByType<EnemyGeneral>();
         if (enemyBoss != null && player.X == enemyBoss.X) 
@@ -206,13 +197,30 @@ public class PlayerActionController : MonoBehaviour
             }
         }
 
-        if (RunManager.Instance.CrouchingTigerEnabled && currentShotMode == SpecialShotMode.None)
+        float dragDistance = Vector2.Distance(player.transform.position, pointerPos);
+        float crouchingTigerDragLimit = 1.5f; 
+
+        if (RunManager.Instance.CrouchingTigerEnabled && currentShotMode == SpecialShotMode.None && dragDistance <= crouchingTigerDragLimit)
         {
-            RaycastHit2D hit = Physics2D.Raycast(player.transform.position, currentAimDirection, 1.5f);
-            if (hit.collider != null)
+            RaycastHit2D[] hits = Physics2D.RaycastAll(player.transform.position, currentAimDirection, 1.5f);
+            
+            foreach (var hit in hits)
             {
                 Piece hitPiece = hit.collider.GetComponent<Piece>();
-                if (hitPiece != null && !hitPiece.IsPlayer) currentShotMode = SpecialShotMode.CrouchingTiger;
+                Corpse hitCorpse = hit.collider.GetComponent<Corpse>(); // THE FIX: Look for corpses too!
+                
+                if (hitPiece != null)
+                {
+                    if (hitPiece.IsPlayer) continue; 
+                    
+                    currentShotMode = SpecialShotMode.CrouchingTiger;
+                    break; 
+                }
+                else if (hitCorpse != null)
+                {
+                    currentShotMode = SpecialShotMode.CrouchingTiger;
+                    break;
+                }
             }
         }
     }
@@ -364,7 +372,7 @@ public class PlayerActionController : MonoBehaviour
                 p.rangeY = player.RangeY;
             }
 
-            yield return new WaitUntil(() => FindObjectsByType<Projectile>(FindObjectsSortMode.None).Length == 0);
+            yield return new WaitUntil(() => FindObjectsByType<Projectile>().Length == 0);
             if (enemyBoss != null) enemyBoss.EndDamageBatch();
         }
 
