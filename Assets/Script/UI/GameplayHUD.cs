@@ -47,7 +47,7 @@ public class GameplayHUD : MonoBehaviour
         if (_enemyAndGameInfoText != null && !UpdateEnemyHoverInfo())
         {
             float time = RunManager.Instance.TotalRunTime;
-            _enemyAndGameInfoText.text = $"Floor\n{LevelManager.Instance.CurrentLevelIndex + 1}\nTurn\n{TurnManager.Instance.CurrentTurnNumber}\n{string.Format("{0:00}:{1:00}", Mathf.FloorToInt(time / 60F), Mathf.FloorToInt(time % 60))}";
+            _enemyAndGameInfoText.text = $"Floor: {LevelManager.Instance.CurrentLevelIndex + 1}\nTurn: {TurnManager.Instance.CurrentTurnNumber}\n{string.Format("{0:00}:{1:00}", Mathf.FloorToInt(time / 60F), Mathf.FloorToInt(time % 60))}";
         }
     }
     private void OnPausedClicked()
