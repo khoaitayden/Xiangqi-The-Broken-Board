@@ -26,7 +26,7 @@ public class PlayerGeneral : Piece
         set 
         { 
             _loadedAmmo = value; 
-            UpdateWeaponVisuals(); // Instantly change the sprite when ammo changes!
+            UpdateWeaponVisuals();
         } 
     }
 
@@ -46,7 +46,6 @@ public class PlayerGeneral : Piece
 
         if (distanceX <= 1 && distanceY <= 1 && !(distanceX == 0 && distanceY == 0))
         {
-            // CLOUD STEP: Allow moving onto corpses!
             bool cloudStep = RunManager.Instance != null && RunManager.Instance.CloudStepEnabled;
             
             if (targetNode.IsEmpty()) return true;
@@ -71,7 +70,6 @@ public class PlayerGeneral : Piece
 
     public override Coroutine MoveTo(BoardNode targetNode)
     {
-        // CLOUD STEP: Destroy the corpse if we step on it!
         if (RunManager.Instance != null && RunManager.Instance.CloudStepEnabled && targetNode.currentCorpse != null)
         {
             TurnManager.Instance.activeCorpses.Remove(targetNode.currentCorpse);
@@ -79,7 +77,6 @@ public class PlayerGeneral : Piece
             targetNode.currentCorpse = null;
         }
 
-        // Now, call the base method and RETURN its Coroutine object.
         return base.MoveTo(targetNode);
     }
 

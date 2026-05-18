@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Drought
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
   cardName: Drought
-  description: "(H\u1EA1n H\xE1n)\nThe Chu-Han River dries up. Enemy Elephants (T\u01B0\u1EE3ng)
-    can now cross the River and chase the player into their half of the board."
+  description: "The Chu-Han River dries up. Enemy Elephants (T\u01B0\u1EE3ng) can
+    now cross the River and chase the player into their half of the board."
   alignment: 0
   effectID: 5
   weight: -3

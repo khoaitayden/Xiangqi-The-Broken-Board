@@ -1,160 +1,255 @@
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
+using UnityEngine.EventSystems; 
 
 public class PlayerActionController : MonoBehaviour
 {
+    public static PlayerActionController Instance { get; private set; }
+
     [Header("Aiming & Shooting")]
     public GameObject projectilePrefab; 
     public AimVisualizer aimVisualizer;
+    public float dragThreshold = 0.5f; 
     
-    private bool isAimingMode = false;
+    public float cancelAimThreshold = 1.0f; 
+    
     private Vector2 currentAimDirection;
     private bool isExecutingAction = false; 
 
+    private Vector2 _pointerDownPos;
+    private bool _isDraggingToAim = false;
+    private bool _isPlayerSelectedForMove = false;
+    private bool _startedClickOnUI = false; 
+    private bool _isValidAim = false; 
+
+    public BoardNode SelectedEnemyNode { get; private set; } 
+
     private enum SpecialShotMode { None, CrouchingTiger, FlyingGeneral }
     private SpecialShotMode currentShotMode = SpecialShotMode.None;
+
+    private void Awake() { Instance = this; }
 
     void Update()
     {
         TurnManager turnMan = TurnManager.Instance;
         GridManager gridMan = GridManager.Instance;
 
-        if (turnMan.CurrentTurn != TurnManager.TurnState.PlayerTurn || isExecutingAction || turnMan.activePlayer == null)
+        if (turnMan.CurrentTurn != TurnManager.TurnState.PlayerTurn || isExecutingAction || turnMan.activePlayer == null || Time.timeScale == 0f)
         {
-            if (aimVisualizer != null) aimVisualizer.Hide();
-            gridMan.ClearAllHighlights(); 
+            _isDraggingToAim = false;
+            _isPlayerSelectedForMove = false;
+            _startedClickOnUI = false;
+            _isValidAim = false; // Reset aim validity
+            
+            ClearVisuals(gridMan);
             return;
         }
 
-        Vector2 worldPosition = InputHandler.Instance.MouseWorldPosition;
-        BoardNode hoveredNode = gridMan.GetNodeAtPosition(worldPosition);
+        Vector2 pointerPos = InputHandler.Instance.PointerWorldPosition;
+        BoardNode hoveredNode = gridMan.GetNodeAtPosition(pointerPos);
 
-        if (hoveredNode == null)
+        if (InputHandler.Instance.IsPointerDownThisFrame)
         {
-            if (aimVisualizer != null) aimVisualizer.Hide();
-            gridMan.ClearAllHighlights();
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                _startedClickOnUI = true; 
+            }
+            else
+            {
+                _startedClickOnUI = false;
+                _pointerDownPos = pointerPos;
+            }
+        }
+
+        if (_startedClickOnUI)
+        {
+            if (InputHandler.Instance.IsExecuteTriggered) _startedClickOnUI = false;
             return; 
         }
 
-        // --- DETERMINE CONTEXT ---
-        DetermineInputContext(worldPosition, hoveredNode, turnMan.activePlayer, gridMan);
-
-        // --- HANDLE VISUALS BASED ON CONTEXT ---
-        if (isAimingMode)
+        if (InputHandler.Instance.IsPointerDown)
         {
-            DrawAimConeAndHighlightEnemies(turnMan, worldPosition);
-            gridMan.UpdateHoverHighlight(hoveredNode);
-        }
-        else
-        {
-            if (aimVisualizer != null) aimVisualizer.Hide();
-            gridMan.UpdatePlayerMoveHighlight(turnMan.activePlayer); 
-        }
-
-        // --- HANDLE CLICKS ---
-        if (InputHandler.Instance.IsClickTriggered) 
-        {
-            bool hasAmmo = turnMan.activePlayer.LoadedAmmo > 0;
-            bool artOfWarReady = RunManager.Instance.ArtOfWarEnabled && !RunManager.Instance.ArtOfWarUsedThisFloor;
-            bool canShoot = hasAmmo || artOfWarReady;
-
-            // THE FIX: Add a final check to make sure the move is valid before executing it!
-            if (!isAimingMode && hoveredNode != null && turnMan.activePlayer.IsValidMove(hoveredNode, gridMan.grid))
+            if (!_isDraggingToAim && Vector2.Distance(_pointerDownPos, pointerPos) > dragThreshold)
             {
-                ExecuteMove(hoveredNode, turnMan);
+                _isDraggingToAim = true;
+                _isPlayerSelectedForMove = false; 
             }
-            else if (isAimingMode && canShoot)
+        }
+
+        ClearVisuals(gridMan);
+        if (_isDraggingToAim)
+        {
+            float distanceToPlayer = Vector2.Distance(pointerPos, turnMan.activePlayer.transform.position);
+
+            if (distanceToPlayer < cancelAimThreshold)
             {
-                if (!hasAmmo && artOfWarReady)
+                _isValidAim = false; 
+            }
+            else
+            {
+                _isValidAim = true;
+                UpdateAimPreview(pointerPos, turnMan, gridMan);
+            }
+        }
+        else if (_isPlayerSelectedForMove)
+        {
+            gridMan.UpdatePlayerMoveHighlight(turnMan.activePlayer);
+        }
+        
+        if (SelectedEnemyNode != null) gridMan.UpdateHoverHighlight(SelectedEnemyNode);
+
+        if (InputHandler.Instance.IsExecuteTriggered)
+        {
+            if (_isDraggingToAim)
+            {
+                if (_isValidAim) 
                 {
-                    RunManager.Instance.ArtOfWarUsedThisFloor = true;
-                    Debug.Log("Art of War used! Fired with 0 Ammo!");
-                }
-                else
-                {
-                    turnMan.activePlayer.LoadedAmmo--; 
+                    TryExecuteShoot(turnMan);
                 }
 
-                StartCoroutine(ExecuteShootCoroutine(turnMan));
+                _isDraggingToAim = false;
+                _isValidAim = false;
+            }
+            else
+            {
+                HandleQuickClick(hoveredNode, turnMan, gridMan);
             }
         }
     }
 
-    void DetermineInputContext(Vector2 mouseWorldPos, BoardNode hoveredNode, PlayerGeneral player, GridManager gridMan)
+    private void HandleQuickClick(BoardNode clickedNode, TurnManager turnMan, GridManager gridMan)
     {
-        currentShotMode = SpecialShotMode.None; // Reset
+        if (clickedNode == null) 
+        {
+            _isPlayerSelectedForMove = false;
+            SelectedEnemyNode = null;
+            return;
+        }
 
-        // ALWAYS make the weapon follow the mouse
-        currentAimDirection = (mouseWorldPos - (Vector2)player.transform.position).normalized;
+        if (_isPlayerSelectedForMove && turnMan.activePlayer.IsValidMove(clickedNode, gridMan.grid))
+        {
+            ExecuteMove(clickedNode, turnMan);
+            _isPlayerSelectedForMove = false;
+            SelectedEnemyNode = null;
+            return;
+        }
+
+        if (clickedNode.currentPiece != null)
+        {
+            if (clickedNode.currentPiece.IsPlayer)
+            {
+                _isPlayerSelectedForMove = true;
+                SelectedEnemyNode = null; 
+            }
+            else
+            {
+                _isPlayerSelectedForMove = false;
+                SelectedEnemyNode = clickedNode; 
+            }
+        }
+        else if (clickedNode.currentCorpse != null)
+        {
+            _isPlayerSelectedForMove = false;
+            SelectedEnemyNode = clickedNode; 
+        }
+        else
+        {
+            _isPlayerSelectedForMove = false;
+            SelectedEnemyNode = null;
+        }
+    }
+
+    private void UpdateAimPreview(Vector2 pointerPos, TurnManager turnMan, GridManager gridMan)
+    {
+        PlayerGeneral player = turnMan.activePlayer;
+        currentShotMode = SpecialShotMode.None;
+
+        currentAimDirection = (pointerPos - (Vector2)player.transform.position).normalized;
         if (currentAimDirection == Vector2.zero) currentAimDirection = Vector2.up; 
+        
         if (player.WeaponPivot != null)
         {
             float angle = Mathf.Atan2(currentAimDirection.y, currentAimDirection.x) * Mathf.Rad2Deg;
             player.WeaponPivot.rotation = Quaternion.Euler(0, 0, angle);
         }
 
-        // --- THE FIX: Check for the INVALID ADJACENT CORPSE case first ---
-        int distX = Mathf.Abs(hoveredNode.x - player.X);
-        int distY = Mathf.Abs(hoveredNode.y - player.Y);
-        bool isAdjacent = distX <= 1 && distY <= 1 && (distX > 0 || distY > 0);
-        bool hasCorpse = hoveredNode.currentCorpse != null;
-        bool canStepOnCorpse = RunManager.Instance.CloudStepEnabled;
+        // THE FIX: Pass pointerPos into this method so we know how far they dragged
+        DetermineSpecialShots(player, gridMan, pointerPos); 
+        
+        DrawAimConeAndHighlightEnemies(turnMan, pointerPos);
+    }
 
-        if (isAdjacent && hasCorpse && !canStepOnCorpse)
+    private void DetermineSpecialShots(PlayerGeneral player, GridManager gridMan, Vector2 pointerPos) 
+    {
+        EnemyGeneral enemyBoss = Object.FindAnyObjectByType<EnemyGeneral>();
+        if (enemyBoss != null && player.X == enemyBoss.X) 
         {
-            // This is an invalid tile! We can't move or shoot.
-            isAimingMode = false;
-            foreach (Piece enemy in TurnManager.Instance.enemyPieces) { if(enemy != null) enemy.SetTargeted(false); }
-            return; // Exit the function early so we don't do any other logic.
-        }
-
-        // --- Now, determine if we are moving or aiming ---
-        if (hoveredNode != null && player.IsValidMove(hoveredNode, gridMan.grid))
-        {
-            isAimingMode = false;
-            foreach (Piece enemy in TurnManager.Instance.enemyPieces) { if(enemy != null) enemy.SetTargeted(false); }
-        }
-        else
-        {
-            isAimingMode = true;
+            int minY = Mathf.Min(player.Y, enemyBoss.Y);
+            int maxY = Mathf.Max(player.Y, enemyBoss.Y);
+            int blockers = 0;
+            for (int y = minY + 1; y < maxY; y++) if (!gridMan.grid[player.X, y].IsEmpty()) blockers++;
+            int allowedBlockers = RunManager.Instance.MandateOfHeavenEnabled ? 1 : 0;
             
-            // Check for Crouching Tiger
-            if (hoveredNode != null && RunManager.Instance.CrouchingTigerEnabled)
+            if (blockers <= allowedBlockers)
             {
-                // Note: We already checked for adjacent corpses above, so this will only trigger on adjacent enemies.
-                if (isAdjacent && hoveredNode.currentPiece != null)
+                Vector2 directionToBoss = (enemyBoss.transform.position - player.transform.position).normalized;
+                if (Vector2.Angle(currentAimDirection, directionToBoss) < 30f) currentShotMode = SpecialShotMode.FlyingGeneral;
+            }
+        }
+
+        float dragDistance = Vector2.Distance(player.transform.position, pointerPos);
+        float crouchingTigerDragLimit = 1.5f; 
+
+        if (RunManager.Instance.CrouchingTigerEnabled && currentShotMode == SpecialShotMode.None && dragDistance <= crouchingTigerDragLimit)
+        {
+            RaycastHit2D[] hits = Physics2D.RaycastAll(player.transform.position, currentAimDirection, 1.5f);
+            
+            foreach (var hit in hits)
+            {
+                Piece hitPiece = hit.collider.GetComponent<Piece>();
+                Corpse hitCorpse = hit.collider.GetComponent<Corpse>(); // THE FIX: Look for corpses too!
+                
+                if (hitPiece != null)
+                {
+                    if (hitPiece.IsPlayer) continue; 
+                    
+                    currentShotMode = SpecialShotMode.CrouchingTiger;
+                    break; 
+                }
+                else if (hitCorpse != null)
                 {
                     currentShotMode = SpecialShotMode.CrouchingTiger;
-                }
-            }
-
-            // Check for Flying General
-            EnemyGeneral enemyBoss = Object.FindFirstObjectByType<EnemyGeneral>();
-            if (enemyBoss != null && player.X == enemyBoss.X) 
-            {
-                int minY = Mathf.Min(player.Y, enemyBoss.Y);
-                int maxY = Mathf.Max(player.Y, enemyBoss.Y);
-                int blockers = 0;
-                for (int y = minY + 1; y < maxY; y++)
-                {
-                    if (!gridMan.grid[player.X, y].IsEmpty()) blockers++;
-                }
-                int allowedBlockers = RunManager.Instance.MandateOfHeavenEnabled ? 1 : 0;
-                
-                if (blockers <= allowedBlockers)
-                {
-                    Vector2 directionToBoss = (enemyBoss.transform.position - player.transform.position).normalized;
-                    float angleDifference = Vector2.Angle(currentAimDirection, directionToBoss);
-                    const float aimTolerance = 30f; 
-
-                    if (angleDifference < aimTolerance)
-                    {
-                        currentShotMode = SpecialShotMode.FlyingGeneral;
-                    }
+                    break;
                 }
             }
         }
+    }
+
+    private void TryExecuteShoot(TurnManager turnMan)
+    {
+        PlayerGeneral player = turnMan.activePlayer;
+        bool hasAmmo = player.LoadedAmmo > 0;
+        bool artOfWarReady = RunManager.Instance.ArtOfWarEnabled && !RunManager.Instance.ArtOfWarUsedThisFloor;
+
+        if (hasAmmo || artOfWarReady)
+        {
+            if (!hasAmmo && artOfWarReady)
+            {
+                RunManager.Instance.ArtOfWarUsedThisFloor = true;
+                Debug.Log("Art of War used! Fired with 0 Ammo!");
+            }
+            else
+            {
+                player.LoadedAmmo--; 
+            }
+            StartCoroutine(ExecuteShootCoroutine(turnMan));
+        }
+    }
+
+    private void ClearVisuals(GridManager gridMan)
+    {
+        if (aimVisualizer != null) aimVisualizer.Hide();
+        gridMan.ClearAllHighlights(); 
     }
 
     void DrawAimConeAndHighlightEnemies(TurnManager turnMan, Vector2 mouseWorldPos)
@@ -166,7 +261,7 @@ public class PlayerActionController : MonoBehaviour
 
         if (currentShotMode == SpecialShotMode.FlyingGeneral)
         {
-            EnemyGeneral enemyBoss = Object.FindFirstObjectByType<EnemyGeneral>();
+            EnemyGeneral enemyBoss = Object.FindAnyObjectByType<EnemyGeneral>();
             if (enemyBoss != null && aimVisualizer != null)
             {
                 Vector2 directionToBoss = (enemyBoss.transform.position - playerPos).normalized;
@@ -233,7 +328,7 @@ public class PlayerActionController : MonoBehaviour
         if (currentShotMode == SpecialShotMode.FlyingGeneral)
         {
             Debug.Log("FLYING GENERAL EXECUTION!");
-            EnemyGeneral enemyBoss = Object.FindFirstObjectByType<EnemyGeneral>();
+            EnemyGeneral enemyBoss = Object.FindAnyObjectByType<EnemyGeneral>();
             if (enemyBoss != null) enemyBoss.TakeDamage(999);
             yield return new WaitForSeconds(0.5f);
         }
@@ -261,7 +356,7 @@ public class PlayerActionController : MonoBehaviour
         }
         else
         {
-            EnemyGeneral enemyBoss = Object.FindFirstObjectByType<EnemyGeneral>();
+            EnemyGeneral enemyBoss = Object.FindAnyObjectByType<EnemyGeneral>();
             if (enemyBoss != null) enemyBoss.BeginDamageBatch();
 
             float aimAngle = Mathf.Atan2(currentAimDirection.y, currentAimDirection.x) * Mathf.Rad2Deg;
@@ -277,7 +372,7 @@ public class PlayerActionController : MonoBehaviour
                 p.rangeY = player.RangeY;
             }
 
-            yield return new WaitUntil(() => FindObjectsByType<Projectile>(FindObjectsSortMode.None).Length == 0);
+            yield return new WaitUntil(() => FindObjectsByType<Projectile>().Length == 0);
             if (enemyBoss != null) enemyBoss.EndDamageBatch();
         }
 

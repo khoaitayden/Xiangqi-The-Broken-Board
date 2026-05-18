@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: GunpowderGourd
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
   cardName: GunpowderGourd
-  description: "(B\u1EA7u \u0110\u1EA1n Thu\u1ED1c S\xFAng)\n+1 Max Ammo. You start
-    each floor fully loaded.\n"
+  description: '+1 Max Ammo. You start each floor fully loaded.
+
+'
   alignment: 1
   effectID: 8
   weight: 2

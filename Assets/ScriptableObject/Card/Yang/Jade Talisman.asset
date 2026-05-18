@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Jade Talisman
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
   cardName: Jade Talisman
-  description: "(Ng\u1ECDc B\u1ED9i)\nGain 1 Armor at the start of every floor. Armor
-    absorbs exactly 1 lethal capture before breaking."
+  description: Gain 1 Armor at the start of every floor. Armor absorbs exactly 1
+    lethal capture before breaking.
   alignment: 1
   effectID: 13
   weight: 4

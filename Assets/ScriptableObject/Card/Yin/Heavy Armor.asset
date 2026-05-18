@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Heavy Armor
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
   cardName: Heavy Armor
-  description: "(Gi\xE1p Tr\u1EE5)\nAll Elephants (T\u01B0\u1EE3ng) gain +2 Max HP."
+  description: All Elephants gain +2 Max HP.
   alignment: 0
   effectID: 7
   weight: -4

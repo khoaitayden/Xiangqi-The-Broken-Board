@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: Artillery Backup
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
   cardName: Artillery Backup
-  description: "(Ph\xE1o Vi\u1EC7n)\n +1 Cannon (Ph\xE1o) spawns at the start of
-    every floor."
+  description: "+1 Cannon (Ph\xE1o) spawns at the start of every floor."
   alignment: 0
   effectID: 3
   weight: -3

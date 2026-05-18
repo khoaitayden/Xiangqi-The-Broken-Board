@@ -13,9 +13,11 @@ MonoBehaviour:
   m_Name: The Crounching Tiger
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
   cardName: The Crounching Tiger
-  description: "(Ng\u1ECDa H\u1ED5 T\xE0ng Long)\nIf you fire through an adjacent
-    piece (Corpse or living), your shot acts like a Cannon: Infinite range, dealing
-    3 Damage to the first target hit on that line.\n"
+  description: 'If you fire through an adjacent piece (Corpse or living), your shot
+    acts like a Cannon: Infinite range, dealing 3 Damage to the first target hit
+    on that line.
+
+'
   alignment: 1
   effectID: 12
   weight: 5

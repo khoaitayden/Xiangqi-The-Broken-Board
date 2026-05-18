@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Imperial Mandate
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
   cardName: Imperial Mandate
-  description: "(S\u1EAFc L\u1EC7nh)\n Passive: Advisors now grant the General -1
-    damage intake as long as they are alive."
+  description: 'Passive: Advisors now grant the General -1 damage intake as long
+    as they are alive.'
   alignment: 0
   effectID: 4
   weight: -5

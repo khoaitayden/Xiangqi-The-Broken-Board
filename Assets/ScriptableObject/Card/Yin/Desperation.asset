@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: Desperation
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
   cardName: Desperation
-  description: "(Ph\xE1 Cung)\nThe Enemy Boss (T\u01B0\u1EDBng) and Advisors (S\u0129)
-    are no longer restricted to the 3x3 Palace. They can move anywhere on their half
-    of the board."
+  description: The Enemy Boss and Advisors are no longer restricted to the 3x3 Palace.
+    They can move anywhere on their half of the board.
   alignment: 0
   effectID: 1
   weight: -4

@@ -2,27 +2,21 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections.Generic;
-
+using System.Text.RegularExpressions;
 public class GameplayHUD : MonoBehaviour
 {
     public static GameplayHUD Instance { get; private set; }
 
     [Header("Player & Game Info")]
     [SerializeField] private TextMeshProUGUI _weaponStatsText; 
-    [SerializeField] private TextMeshProUGUI _levelText;
-    [SerializeField] private TextMeshProUGUI _turnText;
-    [SerializeField] private TextMeshProUGUI _timerText;
+    [SerializeField] private TextMeshProUGUI _enemyAndGameInfoText;
+    [SerializeField] private TextMeshProUGUI _playerArmorText;
+    [SerializeField] private TextMeshProUGUI _playerArrowText;
     [SerializeField] private Transform _armorLayoutGroup;
-    [SerializeField] private GameObject _armorIconPrefab;
     [SerializeField] private Transform _arrowLayoutGroup;
-    [SerializeField] private GameObject _arrowIconPrefab;
 
-    private List<GameObject> _armorIcons = new List<GameObject>();
-    private List<GameObject> _arrowIcons = new List<GameObject>();
-
-    [Header("Enemy Hover")]
-    [SerializeField] private GameObject _enemyPanel;
-    [SerializeField] private TextMeshProUGUI _enemyNameText, _enemyHPText, _enemyCooldownText;
+    [Header("Button")]
+    [SerializeField] private Button pauseButton;
 
     [Header("Build Layout & Tooltip")]
     [SerializeField] private Transform _yangLayoutGroup;
@@ -35,6 +29,10 @@ public class GameplayHUD : MonoBehaviour
     private List<CardHoverHandler> _yinCardSlots = new List<CardHoverHandler>();
 
     private void Awake() { Instance = this; }
+    private void Start()
+    {
+        pauseButton.onClick.AddListener(OnPausedClicked);
+    }
 
     private void Update()
     {
@@ -46,13 +44,15 @@ public class GameplayHUD : MonoBehaviour
 
     private void UpdateGameInfo()
     {
-        if (LevelManager.Instance != null) _levelText.text = $"Floor {LevelManager.Instance.CurrentLevelIndex + 1}";
-        if (TurnManager.Instance != null) _turnText.text = $"Turn: {TurnManager.Instance.CurrentTurnNumber}";
-        if (RunManager.Instance != null)
+        if (_enemyAndGameInfoText != null && !UpdateEnemyHoverInfo())
         {
             float time = RunManager.Instance.TotalRunTime;
-            _timerText.text = string.Format("{0:00}:{1:00}", Mathf.FloorToInt(time / 60F), Mathf.FloorToInt(time % 60));
+            _enemyAndGameInfoText.text = $"Floor: {LevelManager.Instance.CurrentLevelIndex + 1}\nTurn: {TurnManager.Instance.CurrentTurnNumber}\n{string.Format("{0:00}:{1:00}", Mathf.FloorToInt(time / 60F), Mathf.FloorToInt(time % 60))}";
         }
+    }
+    private void OnPausedClicked()
+    {
+        SystemUI.Instance.TogglePauseMenu();
     }
 
     private void UpdatePlayerStats()
@@ -61,7 +61,7 @@ public class GameplayHUD : MonoBehaviour
         if (player != null)
         {
             UpdateArrowIcons(player.LoadedAmmo);
-            _weaponStatsText.text = $"Firepower: {player.Firepower} Pellets\nSpread Arc: {player.FireArc}°";
+            _weaponStatsText.text = $"Firepower: {player.Firepower}\nFire Arc\n{player.FireArc}°";
             UpdateArmorIcons(player.CurrentArmor);
         }
         else
@@ -72,39 +72,39 @@ public class GameplayHUD : MonoBehaviour
 
     private void UpdateArmorIcons(int currentArmor)
     {
-        while (_armorIcons.Count < currentArmor) _armorIcons.Add(Instantiate(_armorIconPrefab, _armorLayoutGroup));
-        for (int i = 0; i < _armorIcons.Count; i++) _armorIcons[i].SetActive(i < currentArmor);
+        _playerArmorText.text = $"<sprite=\"Armor\" index=0> X {currentArmor}";
     }
 
     private void UpdateArrowIcons(int currentArrow)
     {
-        while (_arrowIcons.Count < currentArrow) _arrowIcons.Add(Instantiate(_arrowIconPrefab, _arrowLayoutGroup));
-        for (int i = 0; i < _arrowIcons.Count; i++) _arrowIcons[i].SetActive(i < currentArrow);
+        _playerArrowText.text = $"<sprite=\"arrow\" index=0> X {currentArrow}";
     }
 
-    private void UpdateEnemyHoverInfo()
+    private bool UpdateEnemyHoverInfo()
     {
-        if (TurnManager.Instance.CurrentTurn != TurnManager.TurnState.PlayerTurn) { _enemyPanel.SetActive(false); return; }
+        if (TurnManager.Instance.CurrentTurn != TurnManager.TurnState.PlayerTurn) { return false; }
         
-        BoardNode hoveredNode = GridManager.Instance.GetNodeAtPosition(InputHandler.Instance.MouseWorldPosition);
-        if (hoveredNode == null) { _enemyPanel.SetActive(false); return; }
+        if (PlayerActionController.Instance == null) return false;
+        
+        BoardNode selectedNode = PlayerActionController.Instance.SelectedEnemyNode;
+        
+        if (selectedNode == null) { return false; }
 
-        if (hoveredNode.currentPiece != null && !hoveredNode.currentPiece.IsPlayer)
+        if (selectedNode.currentPiece != null && !selectedNode.currentPiece.IsPlayer)
         {
-            Piece enemy = hoveredNode.currentPiece;
-            _enemyNameText.text = enemy.gameObject.name.Replace("Enemy", "").Replace("(Clone)", "").ToUpper();
-            _enemyHPText.text = $"HP: {enemy.CurrentHp} / {enemy.MaxHp}";
-            _enemyCooldownText.text = $"Cooldown: {enemy.CurrentCooldown}";
-            _enemyPanel.SetActive(true);
+            Piece enemy = selectedNode.currentPiece;
+            string rawName = enemy.gameObject.name.Replace("Enemy", "").Replace("(Clone)", ""); 
+            string formattedName = Regex.Replace(rawName, @"\s*\(.*?\)", "").Trim();
+            _enemyAndGameInfoText.text = $"{formattedName}\n{enemy.CurrentHp} / {enemy.MaxHp}\n Cooldown: {enemy.CurrentCooldown}";
+            return true;
         }
-        else if (hoveredNode.currentCorpse != null)
+        else if (selectedNode.currentCorpse != null)
         {
-            _enemyNameText.text = "CORPSE";
-            _enemyHPText.text = $"Fades in: {hoveredNode.currentCorpse.turnsRemaining} turns";
-            _enemyCooldownText.text = ""; 
-            _enemyPanel.SetActive(true);
+            _enemyAndGameInfoText.text = $"CORPSE\nFades in: {selectedNode.currentCorpse.turnsRemaining} turns";
+            return true;
         }
-        else _enemyPanel.SetActive(false);
+        
+        return false;
     }
 
     public void InitializeBuildLayout()
@@ -130,7 +130,6 @@ public class GameplayHUD : MonoBehaviour
     private CardHoverHandler CreateSlot(GameObject prefab, Transform parent)
     {
         GameObject newSlot = Instantiate(prefab, parent);
-        newSlot.transform.GetChild(0).GetComponent<Image>().color = new Color(1, 1, 1, 0);
         CardHoverHandler handler = newSlot.GetComponent<CardHoverHandler>();
         handler.assignedCard = null;
         return handler;
@@ -154,12 +153,16 @@ public class GameplayHUD : MonoBehaviour
     }
 
     public void ShowCardTooltip(CardSO card, Vector3 pos)
-    {
-        if (_tooltipPanel == null) return;
-        _tooltipTitleText.text = card.cardName; _tooltipDescText.text = card.description;
-        _tooltipPanel.transform.position = pos + new Vector3(card.alignment == CardAlignment.Yin ? -300 : 300, 0, 0);
-        _tooltipPanel.SetActive(true);
-    }
+        {
+            if (_tooltipPanel == null) return;
+            
+            _tooltipTitleText.text = card.cardName; 
+            _tooltipDescText.text = card.description;
+            
+            _tooltipPanel.transform.position = new Vector3(Screen.width / 2f, Screen.height / 2f, 0f);
+            
+            _tooltipPanel.SetActive(true);
+        }
 
     public void HideCardTooltip() { if (_tooltipPanel != null) _tooltipPanel.SetActive(false); }
 

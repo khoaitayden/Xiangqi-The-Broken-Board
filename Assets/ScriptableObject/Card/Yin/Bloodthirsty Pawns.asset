@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: Bloodthirsty Pawns
   m_EditorClassIdentifier: Assembly-CSharp::CardSO
   cardName: Bloodthirsty Pawns
-  description: "(Binh Cu\u1ED3ng)\nPawns (T\u1ED1t) can now move 1 step diagonally
-    forward to capture the player."
+  description: Pawns can now move 1 step diagonally forward to capture the player.
   alignment: 0
   effectID: 6
   weight: -3

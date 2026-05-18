@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -5.63, y: -0.62, z: 0}
-  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
+  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1785200759665622648}
@@ -117,6 +117,7 @@ MonoBehaviour:
   _moveDuration: 0.25
   _outlinePrefab: {fileID: 7353200581788912115}
   _outlineColor: {r: 0, g: 0.54901963, b: 0.09019608, a: 1}
+  _threatColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   _pulseSpeed: 6
   _minPulseScale: 1.1
   _maxPulseScale: 1.2
