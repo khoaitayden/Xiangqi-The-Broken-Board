@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: 9f17c92450481477dab14fec0b9753b4
+AssetOrigin:
+  serializedVersion: 1
+  productId: 365318
+  packageName: GamePeek - Mobile Remote Display
+  packageVersion: 2.3
+  assetPath: Assets/Plugins/GamePeek/Editor/TouchGizmoOverlay.cs
+  uploadId: 953496

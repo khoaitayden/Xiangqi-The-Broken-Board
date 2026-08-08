@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 21c075cbd9754b71ab018524ff30d0f0
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 365318
+  packageName: GamePeek - Mobile Remote Display
+  packageVersion: 2.3
+  assetPath: Assets/Plugins/GamePeek/Runtime/GamePeekAudioCapture.cs
+  uploadId: 953496

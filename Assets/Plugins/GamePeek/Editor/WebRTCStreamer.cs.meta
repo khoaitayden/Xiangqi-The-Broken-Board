@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: f477b9cf0c6bac64085760b9dcc901d0
+AssetOrigin:
+  serializedVersion: 1
+  productId: 365318
+  packageName: GamePeek - Mobile Remote Display
+  packageVersion: 2.3
+  assetPath: Assets/Plugins/GamePeek/Editor/WebRTCStreamer.cs
+  uploadId: 953496

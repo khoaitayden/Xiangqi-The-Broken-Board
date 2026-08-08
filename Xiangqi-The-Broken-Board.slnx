@@ -1,4 +1,6 @@
 ﻿<Solution>
+  <Project Path="GamePeek.Editor.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Assembly-CSharp-firstpass.csproj" />
+  <Project Path="GamePeek.Runtime.csproj" />
 </Solution>
