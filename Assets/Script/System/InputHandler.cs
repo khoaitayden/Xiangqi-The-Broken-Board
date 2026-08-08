@@ -30,7 +30,9 @@ public class InputHandler : MonoBehaviour
         if (controls == null) return;
         
         Vector2 screenPosition = controls.Board.PointerPosition.ReadValue<Vector2>();
-        if (screenPosition != Vector2.zero) 
+        if (!float.IsNaN(screenPosition.x) && !float.IsInfinity(screenPosition.x) &&
+            !float.IsNaN(screenPosition.y) && !float.IsInfinity(screenPosition.y) &&
+            Camera.main != null)
         {
             PointerWorldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
         }

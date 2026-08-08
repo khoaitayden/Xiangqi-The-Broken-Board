@@ -134,10 +134,13 @@ MonoBehaviour:
         m_TextClipping: 0
         m_ImagePosition: 0
         m_ContentOffset: {x: 0, y: 0}
+        m_ContentSpacing: 1
         m_FixedWidth: 0
         m_FixedHeight: 0
+        m_ImageIsTopAligned: 0
         m_StretchWidth: 1
         m_StretchHeight: 0
+        m_IsSDF: 0
       capturedGroups: []
     - prefix: '-'
       noSpaceAfterPrefix: 0
@@ -216,10 +219,13 @@ MonoBehaviour:
         m_TextClipping: 0
         m_ImagePosition: 0
         m_ContentOffset: {x: 0, y: 0}
+        m_ContentSpacing: 1
         m_FixedWidth: 0
         m_FixedHeight: 0
+        m_ImageIsTopAligned: 0
         m_StretchWidth: 1
         m_StretchHeight: 0
+        m_IsSDF: 0
       capturedGroups: []
     - prefix: +
       noSpaceAfterPrefix: 0
@@ -298,10 +304,13 @@ MonoBehaviour:
         m_TextClipping: 0
         m_ImagePosition: 0
         m_ContentOffset: {x: 0, y: 0}
+        m_ContentSpacing: 1
         m_FixedWidth: 0
         m_FixedHeight: 0
+        m_ImageIsTopAligned: 0
         m_StretchWidth: 1
         m_StretchHeight: 0
+        m_IsSDF: 0
       capturedGroups: []
     twoToneBackground: 1
     lightMode:
@@ -326,6 +335,19 @@ MonoBehaviour:
       - displayName: AdaptivePerformanceManager
         name: UnityEngine.AdaptivePerformance.AdaptivePerformanceManager, UnityEngine.AdaptivePerformanceModule,
           Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        content:
+          m_Text: 
+          m_Image: {fileID: 0}
+          m_Tooltip: 
+          m_TextWithWhitespace: 
+        shown: 0
+        excluded: 0
+        isBuiltIn: 1
+        script: {fileID: 0}
+        hasToggle: 1
+      - displayName: AppUIManagerBehaviour
+        name: Unity.AppUI.Core.AppUIManagerBehaviour, Unity.AppUI, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
         content:
           m_Text: 
           m_Image: {fileID: 0}
@@ -1311,409 +1333,6 @@ MonoBehaviour:
         isBuiltIn: 1
         script: {fileID: 0}
         hasToggle: 1
-      - displayName: DebugUIHandlerBitField
-        name: UnityEngine.Rendering.UI.DebugUIHandlerBitField, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerButton
-        name: UnityEngine.Rendering.UI.DebugUIHandlerButton, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerColor
-        name: UnityEngine.Rendering.UI.DebugUIHandlerColor, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerContainer
-        name: UnityEngine.Rendering.UI.DebugUIHandlerContainer, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerEnumField
-        name: UnityEngine.Rendering.UI.DebugUIHandlerEnumField, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerEnumHistory
-        name: UnityEngine.Rendering.UI.DebugUIHandlerEnumHistory, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerFloatField
-        name: UnityEngine.Rendering.UI.DebugUIHandlerFloatField, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerFoldout
-        name: UnityEngine.Rendering.UI.DebugUIHandlerFoldout, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerGroup
-        name: UnityEngine.Rendering.UI.DebugUIHandlerGroup, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerHBox
-        name: UnityEngine.Rendering.UI.DebugUIHandlerHBox, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerIndirectFloatField
-        name: UnityEngine.Rendering.UI.DebugUIHandlerIndirectFloatField, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerIndirectToggle
-        name: UnityEngine.Rendering.UI.DebugUIHandlerIndirectToggle, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerIntField
-        name: UnityEngine.Rendering.UI.DebugUIHandlerIntField, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerMessageBox
-        name: UnityEngine.Rendering.UI.DebugUIHandlerMessageBox, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerObject
-        name: UnityEngine.Rendering.UI.DebugUIHandlerObject, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerObjectList
-        name: UnityEngine.Rendering.UI.DebugUIHandlerObjectList, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerObjectPopupField
-        name: UnityEngine.Rendering.UI.DebugUIHandlerObjectPopupField, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerPanel
-        name: UnityEngine.Rendering.UI.DebugUIHandlerPanel, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerProgressBar
-        name: UnityEngine.Rendering.UI.DebugUIHandlerProgressBar, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerRenderingLayerField
-        name: UnityEngine.Rendering.UI.DebugUIHandlerRenderingLayerField, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerRow
-        name: UnityEngine.Rendering.UI.DebugUIHandlerRow, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerToggle
-        name: UnityEngine.Rendering.UI.DebugUIHandlerToggle, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerToggleHistory
-        name: UnityEngine.Rendering.UI.DebugUIHandlerToggleHistory, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerUIntField
-        name: UnityEngine.Rendering.UI.DebugUIHandlerUIntField, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerValue
-        name: UnityEngine.Rendering.UI.DebugUIHandlerValue, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerValueTuple
-        name: UnityEngine.Rendering.UI.DebugUIHandlerValueTuple, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerVBox
-        name: UnityEngine.Rendering.UI.DebugUIHandlerVBox, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerVector2
-        name: UnityEngine.Rendering.UI.DebugUIHandlerVector2, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerVector3
-        name: UnityEngine.Rendering.UI.DebugUIHandlerVector3, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerVector4
-        name: UnityEngine.Rendering.UI.DebugUIHandlerVector4, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerWidget
-        name: UnityEngine.Rendering.UI.DebugUIHandlerWidget, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
       - displayName: DebugUpdater
         name: UnityEngine.Rendering.DebugUpdater, Unity.RenderPipelines.Core.Runtime,
           Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
@@ -1807,7 +1426,7 @@ MonoBehaviour:
         hasToggle: 1
       - displayName: FrameTimeMeasurement
         name: Unity.PerformanceTesting.Measurements.FrameTimeMeasurement, Unity.PerformanceTesting,
-          Version=3.4.0.0, Culture=neutral, PublicKeyToken=null
+          Version=3.5.0.0, Culture=neutral, PublicKeyToken=null
         content:
           m_Text: 
           m_Image: {fileID: 0}
@@ -2145,7 +1764,7 @@ MonoBehaviour:
         hasToggle: 1
       - displayName: PerformanceTestHelper
         name: Unity.PerformanceTesting.PerformanceTestHelper, Unity.PerformanceTesting,
-          Version=3.4.0.0, Culture=neutral, PublicKeyToken=null
+          Version=3.5.0.0, Culture=neutral, PublicKeyToken=null
         content:
           m_Text: 
           m_Image: {fileID: 0}
@@ -2314,7 +1933,7 @@ MonoBehaviour:
         hasToggle: 1
       - displayName: ProfilerMeasurementBehaviour
         name: Unity.PerformanceTesting.Measurements.ProfilerMeasurementBehaviour,
-          Unity.PerformanceTesting, Version=3.4.0.0, Culture=neutral, PublicKeyToken=null
+          Unity.PerformanceTesting, Version=3.5.0.0, Culture=neutral, PublicKeyToken=null
         content:
           m_Text: 
           m_Image: {fileID: 0}
@@ -2367,6 +1986,32 @@ MonoBehaviour:
       - displayName: RemoteTestResultSender
         name: UnityEngine.TestTools.TestRunner.Callbacks.RemoteTestResultSender,
           UnityEngine.TestRunner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+        content:
+          m_Text: 
+          m_Image: {fileID: 0}
+          m_Tooltip: 
+          m_TextWithWhitespace: 
+        shown: 0
+        excluded: 0
+        isBuiltIn: 1
+        script: {fileID: 0}
+        hasToggle: 1
+      - displayName: RuntimeDebugWindow
+        name: UnityEngine.Rendering.RuntimeDebugWindow, Unity.RenderPipelines.Core.Runtime,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        content:
+          m_Text: 
+          m_Image: {fileID: 0}
+          m_Tooltip: 
+          m_TextWithWhitespace: 
+        shown: 0
+        excluded: 0
+        isBuiltIn: 1
+        script: {fileID: 0}
+        hasToggle: 1
+      - displayName: RuntimePersistentDebugUI
+        name: UnityEngine.Rendering.RuntimePersistentDebugUI, Unity.RenderPipelines.Core.Runtime,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         content:
           m_Text: 
           m_Image: {fileID: 0}
@@ -2639,6 +2284,19 @@ MonoBehaviour:
         hasToggle: 0
       - displayName: UIDocument
         name: UnityEngine.UIElements.UIDocument, UnityEngine.UIElementsModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        content:
+          m_Text: 
+          m_Image: {fileID: 0}
+          m_Tooltip: 
+          m_TextWithWhitespace: 
+        shown: 0
+        excluded: 0
+        isBuiltIn: 1
+        script: {fileID: 0}
+        hasToggle: 1
+      - displayName: UIToolkitAppBuilder`1
+        name: Unity.AppUI.MVVM.UIToolkitAppBuilder`1, Unity.AppUI.MVVM, Version=0.0.0.0,
           Culture=neutral, PublicKeyToken=null
         content:
           m_Text: 
@@ -3313,6 +2971,19 @@ MonoBehaviour:
         isBuiltIn: 1
         script: {fileID: 0}
         hasToggle: 0
+      - displayName: WorldSpaceUIDocument
+        name: Unity.AppUI.Core.WorldSpaceUIDocument, Unity.AppUI, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        content:
+          m_Text: 
+          m_Image: {fileID: 0}
+          m_Tooltip: 
+          m_TextWithWhitespace: 
+        shown: 0
+        excluded: 0
+        isBuiltIn: 1
+        script: {fileID: 0}
+        hasToggle: 1
     - name: Animation
       components:
       - displayName: AimConstraint
@@ -3356,6 +3027,19 @@ MonoBehaviour:
         hasToggle: 1
       - displayName: AnimatorMessageListener
         name: Unity.VisualScripting.AnimatorMessageListener, Unity.VisualScripting.Core,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        content:
+          m_Text: 
+          m_Image: {fileID: 0}
+          m_Tooltip: 
+          m_TextWithWhitespace: 
+        shown: 0
+        excluded: 0
+        isBuiltIn: 1
+        script: {fileID: 0}
+        hasToggle: 1
+      - displayName: ArmatureMapping
+        name: Unity.AI.Animate.Motion.ArmatureMapping, Unity.AI.Animate.Motion.Runtime,
           Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         content:
           m_Text: 
@@ -3553,6 +3237,19 @@ MonoBehaviour:
         hasToggle: 1
       - displayName: CinemachineConfiner2D
         name: Unity.Cinemachine.CinemachineConfiner2D, Unity.Cinemachine, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        content:
+          m_Text: 
+          m_Image: {fileID: 0}
+          m_Tooltip: 
+          m_TextWithWhitespace: 
+        shown: 0
+        excluded: 0
+        isBuiltIn: 1
+        script: {fileID: 0}
+        hasToggle: 1
+      - displayName: CinemachinePixelPerfect
+        name: UnityEngine.U2D.CinemachinePixelPerfect, Unity.2D.PixelPerfect, Version=0.0.0.0,
           Culture=neutral, PublicKeyToken=null
         content:
           m_Text: 
@@ -3827,6 +3524,19 @@ MonoBehaviour:
       - displayName: PhysicsUpdateBehaviour2D
         name: UnityEngine.PhysicsUpdateBehaviour2D, UnityEngine.Physics2DModule,
           Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        content:
+          m_Text: 
+          m_Image: {fileID: 0}
+          m_Tooltip: 
+          m_TextWithWhitespace: 
+        shown: 0
+        excluded: 0
+        isBuiltIn: 1
+        script: {fileID: 0}
+        hasToggle: 1
+      - displayName: PixelPerfectCamera
+        name: UnityEngine.U2D.PixelPerfectCamera, Unity.2D.PixelPerfect, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
         content:
           m_Text: 
           m_Image: {fileID: 0}
@@ -4307,32 +4017,6 @@ MonoBehaviour:
         isBuiltIn: 1
         script: {fileID: 0}
         hasToggle: 1
-      - displayName: DebugUIHandlerCanvas
-        name: UnityEngine.Rendering.UI.DebugUIHandlerCanvas, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: DebugUIHandlerPersistentCanvas
-        name: UnityEngine.Rendering.UI.DebugUIHandlerPersistentCanvas, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
       - displayName: Dropdown
         name: UnityEngine.UI.Dropdown, UnityEngine.UI, Version=1.0.0.0, Culture=neutral,
           PublicKeyToken=null
@@ -4567,6 +4251,19 @@ MonoBehaviour:
         isBuiltIn: 1
         script: {fileID: 0}
         hasToggle: 1
+      - displayName: RaycastReceiver
+        name: UnityEngine.UI.RaycastReceiver, UnityEngine.UI, Version=1.0.0.0, Culture=neutral,
+          PublicKeyToken=null
+        content:
+          m_Text: 
+          m_Image: {fileID: 0}
+          m_Tooltip: 
+          m_TextWithWhitespace: 
+        shown: 0
+        excluded: 0
+        isBuiltIn: 1
+        script: {fileID: 0}
+        hasToggle: 1
       - displayName: Scrollbar
         name: UnityEngine.UI.Scrollbar, UnityEngine.UI, Version=1.0.0.0, Culture=neutral,
           PublicKeyToken=null
@@ -4752,19 +4449,6 @@ MonoBehaviour:
       - displayName: TrackedDeviceRaycaster
         name: UnityEngine.InputSystem.UI.TrackedDeviceRaycaster, Unity.InputSystem,
           Version=1.19.0.0, Culture=neutral, PublicKeyToken=null
-        content:
-          m_Text: 
-          m_Image: {fileID: 0}
-          m_Tooltip: 
-          m_TextWithWhitespace: 
-        shown: 0
-        excluded: 0
-        isBuiltIn: 1
-        script: {fileID: 0}
-        hasToggle: 1
-      - displayName: UIFoldout
-        name: UnityEngine.Rendering.UI.UIFoldout, Unity.RenderPipelines.Core.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         content:
           m_Text: 
           m_Image: {fileID: 0}
@@ -5055,6 +4739,19 @@ MonoBehaviour:
       - displayName: OffMeshLink
         name: UnityEngine.AI.OffMeshLink, UnityEngine.AIModule, Version=0.0.0.0,
           Culture=neutral, PublicKeyToken=null
+        content:
+          m_Text: 
+          m_Image: {fileID: 0}
+          m_Tooltip: 
+          m_TextWithWhitespace: 
+        shown: 0
+        excluded: 0
+        isBuiltIn: 1
+        script: {fileID: 0}
+        hasToggle: 1
+      - displayName: PanelRenderer
+        name: UnityEngine.UIElements.PanelRenderer, UnityEngine.UIElementsModule,
+          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         content:
           m_Text: 
           m_Image: {fileID: 0}
@@ -5461,5 +5158,5 @@ MonoBehaviour:
     allCustomComponents:
       name: All
       components: []
-    unityVersion: 6000.4.6f1
-    unityCount: 394
+    unityVersion: 6000.5.4f1
+    unityCount: 370
